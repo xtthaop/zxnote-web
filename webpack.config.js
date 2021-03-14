@@ -24,5 +24,10 @@ module.exports = {
     new webpack.ProvidePlugin({
       process: 'process/browser',
     })
-  ]
+  ],
+  module: {
+    rules: [
+      { test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader' }
+    ]
+  }
 }
