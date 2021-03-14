@@ -14,7 +14,8 @@ module.exports = {
   },
   devtool: 'inline-source-map',
   devServer: {
-    contentBase: './dist',
+    contentBase: path.join(__dirname, 'dist'),
+    historyApiFallback: true,
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -23,6 +24,7 @@ module.exports = {
     }),
     new webpack.ProvidePlugin({
       process: 'process/browser',
+      React: "react",
     })
   ],
   module: {

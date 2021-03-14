@@ -1,7 +1,7 @@
 # zxnote-web
 
 ### yarn build
-build the code
+build the code for production
 
 ### yarn serve
-server for development
+serve for development
