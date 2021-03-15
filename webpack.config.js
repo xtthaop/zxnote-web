@@ -17,6 +17,11 @@ module.exports = {
     contentBase: path.join(__dirname, 'dist'),
     historyApiFallback: true,
   },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src')
+    }
+  },
   plugins: [
     new HtmlWebpackPlugin({
       filename: 'index.html',
@@ -24,7 +29,6 @@ module.exports = {
     }),
     new webpack.ProvidePlugin({
       process: 'process/browser',
-      React: "react",
     })
   ],
   module: {

@@ -1,7 +1,14 @@
+import React from 'react'
+import {
+  SidebarWrapper
+} from './style'
+
 class Notebook extends React.Component {
   render(){
     return (
-      <h1>hi</h1>
+      <div>
+        <SidebarWrapper>hi</SidebarWrapper>
+      </div>
     )
   }
 }
