@@ -1,7 +1,6 @@
 import styled from 'styled-components'
 
-export const SidebarWrapper = styled.div`
-  width: 210px;
-  height: 100%;
-  background: #eee;
+export const NotebookWrapper = styled.div`
+  display: flex;
+  height: 100vh;
 `
