@@ -4,6 +4,7 @@ import {
   Header,
   CreateButton,
   Categories,
+  Foot,
 } from './style'
 
 class Sidebar extends React.Component {
@@ -11,11 +12,19 @@ class Sidebar extends React.Component {
     super(props)
     this.state = {
       categories: [],
+      activeId: 1,
     }
+    this.handleCateItemClick = this.handleCateItemClick.bind(this)
+  }
+
+  handleCateItemClick(id) {
+    this.setState({
+      activeId: id
+    })
   }
 
   render(){
-    const { categories } = this.state
+    const { categories, activeId } = this.state
     return (
       <SidebarWrapper>
         <Header>Title</Header>
@@ -26,11 +35,25 @@ class Sidebar extends React.Component {
           {
             categories.map(item => {
               return (
-                <li key={item.id}>{ item.title }</li>
+                <li 
+                  key={item.id} 
+                  className={activeId === item.id ? 'active' : ''}
+                  onClick={this.handleCateItemClick.bind(this, item.id)}
+                >
+                  <span>{item.title}</span>
+                  <span className="handle-btn">
+                    <span>edit</span>
+                    <span>del</span>
+                  </span>
+                </li>
               )
             })
           }
         </Categories>
+        <Foot>
+          <div className="icon">U</div>
+          <span className="username">user</span>
+        </Foot>
       </SidebarWrapper>
     )
   }
