@@ -5,6 +5,7 @@ const sidebarWidth = '230px'
 export const SidebarWrapper = styled.div`
   position: relative;
   width: ${sidebarWidth};
+  min-width: ${sidebarWidth};
   height: 100%;
   background: #555;
   overflow-y: auto;
@@ -52,16 +53,23 @@ export const Categories = styled.ul`
 
       .handle-btn{
         display: inline;
-        font-size: 12px;
-
-        span{
-          margin-left: 10px;
-        }
       }
+    }
+
+    .title{
+      display: inline-block;
+      width: 85%;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     .handle-btn{
       display: none;
+      width: 15%;
+      font-size: 14px;
+      color: #fff;
+      text-align: right;
     }
   }
 `

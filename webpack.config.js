@@ -14,6 +14,7 @@ module.exports = {
   },
   devtool: 'inline-source-map',
   devServer: {
+    port: 10990,
     contentBase: path.join(__dirname, 'dist'),
     historyApiFallback: true,
   },
@@ -33,7 +34,15 @@ module.exports = {
   ],
   module: {
     rules: [
-      { test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader' }
+      { test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader' },
+      {
+        test: /\.svg$/,
+        loader: 'svg-sprite-loader',
+        include: [path.resolve(__dirname, 'src/icons')],
+        options: {
+          symbolId: 'icon-[name]'
+        }
+      }
     ]
   }
 }

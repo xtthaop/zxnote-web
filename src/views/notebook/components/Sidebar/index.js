@@ -1,4 +1,5 @@
 import React from 'react'
+import SvgIcon from '@/components/SvgIcon'
 import {
   SidebarWrapper,
   Header,
@@ -40,11 +41,10 @@ class Sidebar extends React.Component {
                   className={activeId === item.id ? 'active' : ''}
                   onClick={this.handleCateItemClick.bind(this, item.id)}
                 >
-                  <span>{item.title}</span>
-                  <span className="handle-btn">
-                    <span>edit</span>
-                    <span>del</span>
-                  </span>
+                  <div className="title">{item.title}</div>
+                  <div className="handle-btn">
+                    <SvgIcon iconClass="setting"></SvgIcon>
+                  </div>
                 </li>
               )
             })
@@ -62,7 +62,7 @@ class Sidebar extends React.Component {
     const categories = [
       {
         id: 1,
-        title: 'cate1',
+        title: 'cate9',
       },
       {
         id: 2,

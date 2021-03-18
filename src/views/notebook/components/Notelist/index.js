@@ -1,4 +1,5 @@
 import React from 'react'
+import SvgIcon from '@/components/SvgIcon'
 import {
   NotelistWrapper,
   UpCreateBtn,
@@ -10,11 +11,19 @@ class Notelist extends React.Component {
     super(props)
     this.state = {
       noteList: [],
+      activeId: 1,
     }
+    this.handleNoteItemClick = this.handleNoteItemClick.bind(this)
+  }
+
+  handleNoteItemClick(id) {
+    this.setState({
+      activeId: id
+    })
   }
 
   render(){
-    const { noteList } = this.state
+    const { noteList, activeId } = this.state
     return (
       <NotelistWrapper>
         <UpCreateBtn>+ new</UpCreateBtn>
@@ -22,9 +31,18 @@ class Notelist extends React.Component {
           {
             noteList.map(item => {
               return (
-                <li key={item.id}>
-                  <div className="title">{item.title}</div>
-                  <div className="update-time">{item.update_time}</div>
+                <li 
+                  key={item.id} 
+                  className={activeId === item.id ? 'active' : ''}
+                  onClick={this.handleNoteItemClick.bind(this, item.id)}
+                >
+                  <div className="noteinfo">
+                    <div className="title">{item.title}</div>
+                    <div className="update-time">{item.update_time}</div>
+                  </div>
+                  <div className="handle-btn">
+                    <SvgIcon iconClass="setting"></SvgIcon>
+                  </div>
                 </li>
               )
             })
@@ -38,7 +56,7 @@ class Notelist extends React.Component {
     const noteList = [
       {
         id: 1,
-        title: 'note1',
+        title: 'note13',
         update_time: '2020/08/01',
       },
       {
