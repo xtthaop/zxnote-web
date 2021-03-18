@@ -2,9 +2,11 @@ import styled from 'styled-components'
 
 const borderColor = '#eee'
 
+export const notelistWidth = '25%'
+
 export const NotelistWrapper = styled.div`
-  width: 300px;
-  min-width: 300px;
+  width: ${notelistWidth};
+  min-width: ${notelistWidth};
   height: 100%;
   overflow-y: scroll;
   background: #fff;
@@ -14,9 +16,7 @@ export const NotelistWrapper = styled.div`
 
 export const UpCreateBtn = styled.div`
   width: 100%;
-  height: 50px;
-  line-height: 50px;
-  padding: 0 20px;
+  padding: 16px 25px;
   border-bottom: 1px solid ${borderColor};
   box-sizing: border-box;
   cursor: pointer;

@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 
-const sidebarWidth = '230px'
+export const sidebarWidth = '15%'
 
 export const SidebarWrapper = styled.div`
   position: relative;
@@ -24,9 +24,7 @@ export const Header = styled.div`
 
 export const CreateButton = styled.div`
   width: 100%;
-  height: 50px;
-  line-height: 50px;
-  padding: 0 20px;
+  padding: 16px 20px;
   color: #fff;
   box-sizing: border-box;
   cursor: pointer;
