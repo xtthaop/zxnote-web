@@ -4,6 +4,7 @@ import {
   EditorWrapper,
   TitleWrapper,
   ToolBar,
+  ContentWrapper,
 } from './style'
 
 class Editor extends React.Component {
@@ -22,6 +23,7 @@ class Editor extends React.Component {
           <li className="tool"><SvgIcon iconClass="pic"></SvgIcon></li>
           <li className="tool right"><SvgIcon iconClass="save"></SvgIcon></li>
         </ToolBar>
+        <ContentWrapper defaultValue="content..."></ContentWrapper>
       </EditorWrapper>
     )
   }
