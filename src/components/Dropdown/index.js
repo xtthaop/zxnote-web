@@ -15,7 +15,7 @@ class Dropdown extends React.Component {
   }
 
   handleToggle(e){
-    e.stopPropagation()
+    this.selector = e.target
     const show = this.state.show ? false : true
     this.setState({
       show
@@ -23,9 +23,11 @@ class Dropdown extends React.Component {
   }
 
   handleHide(e){
-    this.setState({
-      show: false
-    })
+    if(e.target !== this.selector && this.state.show){
+      this.setState({
+        show: false
+      })
+    }
   }
 
   render(){

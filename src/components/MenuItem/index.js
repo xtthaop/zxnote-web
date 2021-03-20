@@ -6,7 +6,7 @@ import {
 class MenuItem extends React.Component {
   render(){
     return (
-      <MenuItemWrapper className="menu-item">
+      <MenuItemWrapper>
         { this.props.children }
       </MenuItemWrapper>
     )

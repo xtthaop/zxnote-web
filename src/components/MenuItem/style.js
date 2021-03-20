@@ -2,6 +2,7 @@ import styled from 'styled-components'
 
 export const MenuItemWrapper = styled.li`
   width: 100%;
+  line-height: 30px;
   padding: 5px 10px;
   box-sizing: border-box;
   color: #333;
@@ -9,8 +10,7 @@ export const MenuItemWrapper = styled.li`
   border-bottom: 1px solid #ddd;
 
   &:hover{
-    background: #5f5f5f;
-    color: #fff;
+    background: #1e90ff12;
   }
 
   &:first-child{

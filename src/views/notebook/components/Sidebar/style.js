@@ -43,6 +43,7 @@ export const Categories = styled.ul`
     line-height: 30px;
     padding: 5px 20px;
     border-left: 3px solid transparent;
+    user-select: none;
     cursor: pointer;
 
     &.active{

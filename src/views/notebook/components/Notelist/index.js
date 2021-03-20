@@ -1,5 +1,7 @@
 import React from 'react'
 import SvgIcon from '@/components/SvgIcon'
+import Dropdown from '@/components/Dropdown'
+import Menu from '@/components/Menu'
 import {
   NotelistWrapper,
   UpCreateBtn,
@@ -24,6 +26,15 @@ class Notelist extends React.Component {
 
   render(){
     const { noteList, activeId } = this.state
+
+    const menu = (
+      <Menu>
+        <Menu.Item>move</Menu.Item>
+        <Menu.Item>history</Menu.Item>
+        <Menu.Item>del</Menu.Item>
+      </Menu>
+    )
+
     return (
       <NotelistWrapper>
         <UpCreateBtn>+ new</UpCreateBtn>
@@ -41,7 +52,9 @@ class Notelist extends React.Component {
                     <div className="update-time">{item.update_time}</div>
                   </div>
                   <div className="handle-btn">
-                    <SvgIcon iconClass="setting"></SvgIcon>
+                    <Dropdown overlay={menu}>
+                      <SvgIcon iconClass="setting"></SvgIcon>
+                    </Dropdown>
                   </div>
                 </li>
               )

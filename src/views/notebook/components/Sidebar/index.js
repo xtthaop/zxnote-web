@@ -31,8 +31,8 @@ class Sidebar extends React.Component {
 
     const menu = (
       <Menu>
-        <Menu.Item>menu1</Menu.Item>
-        <Menu.Item>menu2</Menu.Item>
+        <Menu.Item>edit</Menu.Item>
+        <Menu.Item>del</Menu.Item>
       </Menu>
     )
 

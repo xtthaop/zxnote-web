@@ -15,5 +15,6 @@ export const DropdownFrame = styled.div`
   margin-top: 5px;
   width: 130px;
   background: #fff;
+  border: 1px solid #ddd;
   border-radius: 6px;
 `

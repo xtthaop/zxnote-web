@@ -25,7 +25,7 @@ export const UpCreateBtn = styled.div`
 export const Notes = styled.ul`
   width: 100%;
 
-  li{
+  & > li{
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -36,6 +36,7 @@ export const Notes = styled.ul`
     padding: 5px 20px;
     border-left: 5px solid transparent;
     cursor: pointer;
+    user-select: none;
 
     &.active{
       background: #eee;
@@ -71,6 +72,7 @@ export const Notes = styled.ul`
       font-size: 14px;
       color: #aaa;
       text-align: right;
+      line-height: 30px;
     }
   }
 `
