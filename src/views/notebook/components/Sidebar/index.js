@@ -2,6 +2,7 @@ import React from 'react'
 import SvgIcon from '@/components/SvgIcon'
 import Dropdown from '@/components/Dropdown'
 import Menu from '@/components/Menu'
+import Dialog from '@/components/Dialog'
 import {
   SidebarWrapper,
   Header,
@@ -16,8 +17,11 @@ class Sidebar extends React.Component {
     this.state = {
       categories: [],
       activeId: 1,
+      dialogVisible: false,
     }
     this.handleCateItemClick = this.handleCateItemClick.bind(this)
+    this.handleClose = this.handleClose.bind(this)
+    this.handleOpen = this.handleOpen.bind(this)
   }
 
   handleCateItemClick(id) {
@@ -26,8 +30,20 @@ class Sidebar extends React.Component {
     })
   }
 
+  handleClose(){
+    this.setState({
+      dialogVisible: false,
+    })
+  }
+
+  handleOpen(){
+    this.setState({
+      dialogVisible: true,
+    })
+  }
+
   render(){
-    const { categories, activeId } = this.state
+    const { dialogVisible, categories, activeId } = this.state
 
     const menu = (
       <Menu>
@@ -36,11 +52,18 @@ class Sidebar extends React.Component {
       </Menu>
     )
 
+    const dialogFooter = (
+      <div onClick={this.handleClose}>取 消</div>
+    )
+
     return (
       <SidebarWrapper>
-        <Header>Title</Header>
-        <CreateButton>
-          <span>+ new</span>
+        <Header>知行笔记</Header>
+        <CreateButton onClick={this.handleOpen}>
+          <span>
+            <SvgIcon iconClass="plus"></SvgIcon>
+            <span>新建分类</span>
+          </span>
         </CreateButton>
         <Categories>
           {
@@ -66,6 +89,10 @@ class Sidebar extends React.Component {
           <div className="icon">U</div>
           <span className="username">user</span>
         </Foot>
+
+        <Dialog visible={dialogVisible} title="新建分类" footer={dialogFooter}>
+          <span>新建分类</span>
+        </Dialog>
       </SidebarWrapper>
     )
   }

@@ -13,7 +13,6 @@ export const SidebarWrapper = styled.div`
 
 export const Header = styled.div`
   width: 100%;
-  height: 30px;
   line-height: 30px;
   padding: 20px 0;
   font-size: 20px;
@@ -26,8 +25,13 @@ export const CreateButton = styled.div`
   width: 100%;
   padding: 16px 20px;
   color: #fff;
+  font-size: 14px;
   box-sizing: border-box;
   cursor: pointer;
+
+  .svg-icon{
+    margin-right: 5px;
+  }
 `
 
 export const Categories = styled.ul`
