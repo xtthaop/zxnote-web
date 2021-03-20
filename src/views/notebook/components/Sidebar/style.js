@@ -35,7 +35,7 @@ export const Categories = styled.ul`
   color: #fff;
   box-sizing: border-box;
 
-  li{
+  & > li{
     display: flex;
     align-items: center;
     justify-content: space-between;

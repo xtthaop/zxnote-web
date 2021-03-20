@@ -1,5 +1,7 @@
 import React from 'react'
 import SvgIcon from '@/components/SvgIcon'
+import Dropdown from '@/components/Dropdown'
+import Menu from '@/components/Menu'
 import {
   SidebarWrapper,
   Header,
@@ -26,6 +28,14 @@ class Sidebar extends React.Component {
 
   render(){
     const { categories, activeId } = this.state
+
+    const menu = (
+      <Menu>
+        <Menu.Item>menu1</Menu.Item>
+        <Menu.Item>menu2</Menu.Item>
+      </Menu>
+    )
+
     return (
       <SidebarWrapper>
         <Header>Title</Header>
@@ -43,7 +53,9 @@ class Sidebar extends React.Component {
                 >
                   <div className="title">{item.title}</div>
                   <div className="handle-btn">
-                    <SvgIcon iconClass="setting"></SvgIcon>
+                    <Dropdown overlay={menu}>
+                      <SvgIcon iconClass="setting"></SvgIcon>
+                    </Dropdown>
                   </div>
                 </li>
               )
