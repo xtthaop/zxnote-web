@@ -17,6 +17,12 @@ module.exports = {
     port: 10990,
     contentBase: path.join(__dirname, 'dist'),
     historyApiFallback: true,
+    proxy: {
+      '/restful': {
+        target: 'https://zxctb.top:10600',
+        changeOrigin: true,
+      },
+    }
   },
   resolve: {
     alias: {

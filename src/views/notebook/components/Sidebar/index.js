@@ -3,6 +3,9 @@ import SvgIcon from '@/components/SvgIcon'
 import Dropdown from '@/components/Dropdown'
 import Menu from '@/components/Menu'
 import Dialog from '@/components/Dialog'
+import Button from '@/components/Button'
+import Input from '@/components/Input'
+import { getCategoryList } from '@/api/notebook/category'
 import {
   SidebarWrapper,
   Header,
@@ -18,10 +21,13 @@ class Sidebar extends React.Component {
       categories: [],
       activeId: 1,
       dialogVisible: false,
+      categoryName: '',
     }
     this.handleCateItemClick = this.handleCateItemClick.bind(this)
     this.handleClose = this.handleClose.bind(this)
     this.handleOpen = this.handleOpen.bind(this)
+    this.handleValueChange = this.handleValueChange.bind(this)
+    this.handleCreateCategory = this.handleCreateCategory.bind(this)
   }
 
   handleCateItemClick(id) {
@@ -42,8 +48,31 @@ class Sidebar extends React.Component {
     })
   }
 
+  handleValueChange(val){
+    this.setState({
+      categoryName: val
+    })
+  }
+
+  handleCreateCategory(){
+    const { categoryName } = this.state
+
+    if(!categoryName){
+      this.handleClose()
+      return
+    }
+
+    const data = {
+      category_name: categoryName
+    }
+
+    getCategoryList(data).then(res => {
+      this.handleClose()
+    })
+  }
+
   render(){
-    const { dialogVisible, categories, activeId } = this.state
+    const { dialogVisible, categories, activeId, categoryName } = this.state
 
     const menu = (
       <Menu>
@@ -53,7 +82,10 @@ class Sidebar extends React.Component {
     )
 
     const dialogFooter = (
-      <div onClick={this.handleClose}>取 消</div>
+      <div>
+        <Button onClick={this.handleClose} style={{ marginRight: '10px' }}>取 消</Button>
+        <Button type="success" onClick={this.handleCreateCategory}>确 定</Button>
+      </div>
     )
 
     return (
@@ -91,7 +123,7 @@ class Sidebar extends React.Component {
         </Foot>
 
         <Dialog visible={dialogVisible} title="新建分类" footer={dialogFooter}>
-          <span>新建分类</span>
+          <Input onChange={this.handleValueChange} value={categoryName} placeholder="请输入新分类名"></Input>
         </Dialog>
       </SidebarWrapper>
     )

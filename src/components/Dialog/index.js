@@ -17,7 +17,7 @@ class Dialog extends React.Component {
             <DialogContent>
               <div className="dialog-head-wrapper"><div>{title}</div></div>
               <div className="dialog-content-wrapper"><div>{children}</div></div>
-              <div className="dialog-footer-wrapper">{footer}</div>
+              <div className="dialog-footer-wrapper"><div>{footer}</div></div>
             </DialogContent>
           </DialogContentWrapper>
         </DialogWrapper>

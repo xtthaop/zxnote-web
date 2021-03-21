@@ -55,10 +55,10 @@ export const DialogContent = styled.div`
 
   .dialog-footer-wrapper{
     width: 100%;
+    text-align: right;
 
     & > div{
-      text-align: right;
-      padding: 20px 20px;
+      padding: 0px 20px 20px 20px;
     }
   }
 `
