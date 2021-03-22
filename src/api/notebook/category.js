@@ -14,3 +14,11 @@ export function getCategoryList(){
     method: 'get',
   })
 }
+
+export function deleteCategory(data){
+  return request({
+    url: '/category',
+    method: 'delete',
+    data
+  })
+}

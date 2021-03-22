@@ -13,7 +13,7 @@ function SvgIcon(props){
   }
 
   return (
-    <SvgWrapper className={svgClass} aria-hidden="true">
+    <SvgWrapper {...props} className={svgClass} aria-hidden="true">
       <use href={iconName}></use>
     </SvgWrapper>
   )

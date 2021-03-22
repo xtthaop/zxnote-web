@@ -5,7 +5,8 @@ import Menu from '@/components/Menu'
 import Dialog from '@/components/Dialog'
 import Button from '@/components/Button'
 import Input from '@/components/Input'
-import { createCategory, getCategoryList } from '@/api/notebook/category'
+import { message } from '@/components/message'
+import { createCategory, getCategoryList, deleteCategory } from '@/api/notebook/category'
 import {
   SidebarWrapper,
   Header,
@@ -28,6 +29,7 @@ class Sidebar extends React.Component {
     this.handleOpen = this.handleOpen.bind(this)
     this.handleValueChange = this.handleValueChange.bind(this)
     this.handleCreateCategory = this.handleCreateCategory.bind(this)
+    this.handleDelete = this.handleDelete.bind(this)
   }
 
   handleCateItemClick(id) {
@@ -73,11 +75,22 @@ class Sidebar extends React.Component {
   }
 
   handleGetCategoryList(){
-    getCategoryList().then(res => {
+    return getCategoryList().then(res => {
       const categories = res.data.category_list
       this.setState({
         categories
       })
+    })
+  }
+
+  handleDelete(){
+    const data = { category_id: this.state.activeId }
+    deleteCategory(data).then(() => {
+      this.handleGetCategoryList().then(() => {
+        const activeId = this.state.categories[0].category_id
+        this.setState({ activeId })
+      })
+      message.success('删除成功！')
     })
   }
 
@@ -87,7 +100,10 @@ class Sidebar extends React.Component {
     const menu = (
       <Menu>
         <Menu.Item>edit</Menu.Item>
-        <Menu.Item>del</Menu.Item>
+        <Menu.Item onClick={this.handleDelete}>
+          <SvgIcon iconClass="delete" style={{ marginRight: '5px' }}></SvgIcon>
+          <span>删除分类</span>
+        </Menu.Item>
       </Menu>
     )
 
@@ -140,7 +156,10 @@ class Sidebar extends React.Component {
   }
 
   componentDidMount(){
-    this.handleGetCategoryList()
+    this.handleGetCategoryList().then(() => {
+      const activeId = this.state.categories[0].category_id
+      this.setState({ activeId })
+    })
   }
 }
 
