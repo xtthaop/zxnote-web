@@ -6,7 +6,7 @@ import Dialog from '@/components/Dialog'
 import Button from '@/components/Button'
 import Input from '@/components/Input'
 import { message } from '@/components/message'
-import { createCategory, getCategoryList, deleteCategory } from '@/api/notebook/category'
+import { createCategory, getCategoryList, deleteCategory, updateCategory } from '@/api/notebook/category'
 import {
   SidebarWrapper,
   Header,
@@ -22,17 +22,22 @@ class Sidebar extends React.Component {
       categories: [],
       activeId: 1,
       dialogVisible: false,
-      categoryName: '',
+      categoryForm: {
+        category_name: '',
+        category_id: undefined,
+      },
+      dialogTitle: 'create',
     }
-    this.handleCateItemClick = this.handleCateItemClick.bind(this)
+    this.handleItemClick = this.handleItemClick.bind(this)
     this.handleClose = this.handleClose.bind(this)
-    this.handleOpen = this.handleOpen.bind(this)
     this.handleValueChange = this.handleValueChange.bind(this)
     this.handleCreateCategory = this.handleCreateCategory.bind(this)
     this.handleDelete = this.handleDelete.bind(this)
+    this.reset = this.reset.bind(this)
+    this.handleSubmitForm = this.handleSubmitForm.bind(this)
   }
 
-  handleCateItemClick(id) {
+  handleItemClick(id) {
     this.setState({
       activeId: id
     })
@@ -44,42 +49,33 @@ class Sidebar extends React.Component {
     })
   }
 
-  handleOpen(){
+  handleValueChange(val){
     this.setState({
-      dialogVisible: true,
+      categoryForm: Object.assign({}, this.state.categoryForm, { category_name: val })
     })
   }
 
-  handleValueChange(val){
+  reset(){
     this.setState({
-      categoryName: val
+      categoryForm: {
+        category_name: '',
+        category_id: undefined,
+      }
     })
   }
 
   handleCreateCategory(){
-    const { categoryName } = this.state
-
-    if(!categoryName){
-      this.handleClose()
-      return
-    }
-
-    const data = {
-      category_name: categoryName
-    }
-
-    createCategory(data).then(() => {
-      this.handleGetCategoryList()
-      this.handleClose()
+    this.reset()
+    this.setState({
+      dialogVisible: true,
+      dialogTitle: '新建分类',
     })
   }
 
   handleGetCategoryList(){
     return getCategoryList().then(res => {
       const categories = res.data.category_list
-      this.setState({
-        categories
-      })
+      this.setState({ categories })
     })
   }
 
@@ -87,37 +83,78 @@ class Sidebar extends React.Component {
     const data = { category_id: this.state.activeId }
     deleteCategory(data).then(() => {
       this.handleGetCategoryList().then(() => {
-        const activeId = this.state.categories[0].category_id
+        const activeId = this.state.categories[0] && this.state.categories[0].category_id
         this.setState({ activeId })
       })
       message.success('删除成功！')
     })
   }
 
-  render(){
-    const { dialogVisible, categories, activeId, categoryName } = this.state
+  handleUpdateCategory(item){
+    this.reset()
+    this.setState({
+      categoryForm: {
+        category_id: item.category_id,
+        category_name: item.category_name,
+      },
+      dialogVisible: true,
+      dialogTitle: '编辑分类',
+    })
+  }
 
-    const menu = (
-      <Menu>
-        <Menu.Item>edit</Menu.Item>
-        <Menu.Item onClick={this.handleDelete}>
-          <SvgIcon iconClass="delete" style={{ marginRight: '5px' }}></SvgIcon>
-          <span>删除分类</span>
-        </Menu.Item>
-      </Menu>
-    )
+  handleSubmitForm(){
+    const { category_name, category_id } = this.state.categoryForm
+
+    if(!category_name){
+      this.handleClose()
+      return
+    }
+
+    if(category_id){
+      updateCategory(this.state.categoryForm).then(() => {
+        this.handleGetCategoryList()
+        this.handleClose()
+      })
+    }else{
+      createCategory(this.state.categoryForm).then(res => {
+        const activeId = res.data.category_id
+        this.handleGetCategoryList().then(() => {
+          this.setState({ activeId })
+        })
+        this.handleClose()
+      })
+    }
+  }
+
+  render(){
+    const { dialogVisible, categories, activeId, categoryForm, dialogTitle } = this.state
+
+    const menu = (item) => {
+      return (
+        <Menu>
+          <Menu.Item onClick={() => this.handleUpdateCategory(item)}>
+            <SvgIcon iconClass="edit" style={{ marginRight: '5px' }}></SvgIcon>
+            <span>编辑分类</span>
+          </Menu.Item>
+          <Menu.Item onClick={this.handleDelete}>
+            <SvgIcon iconClass="delete" style={{ marginRight: '5px' }}></SvgIcon>
+            <span>删除分类</span>
+          </Menu.Item>
+        </Menu>
+      )
+    }
 
     const dialogFooter = (
       <div>
         <Button onClick={this.handleClose} style={{ marginRight: '10px' }}>取 消</Button>
-        <Button type="success" onClick={this.handleCreateCategory}>确 定</Button>
+        <Button type="success" onClick={this.handleSubmitForm}>确 定</Button>
       </div>
     )
 
     return (
       <SidebarWrapper>
         <Header>知行笔记</Header>
-        <CreateButton onClick={this.handleOpen}>
+        <CreateButton onClick={this.handleCreateCategory}>
           <span>
             <SvgIcon iconClass="plus"></SvgIcon>
             <span>新建分类</span>
@@ -130,11 +167,11 @@ class Sidebar extends React.Component {
                 <li 
                   key={item.category_id} 
                   className={activeId === item.category_id ? 'active' : ''}
-                  onClick={() => this.handleCateItemClick(item.category_id)}
+                  onClick={() => this.handleItemClick(item.category_id)}
                 >
                   <div className="title">{item.category_name}</div>
                   <div className="handle-btn">
-                    <Dropdown overlay={menu}>
+                    <Dropdown overlay={menu(item)}>
                       <SvgIcon iconClass="setting"></SvgIcon>
                     </Dropdown>
                   </div>
@@ -148,8 +185,8 @@ class Sidebar extends React.Component {
           <span className="username">user</span>
         </Foot>
 
-        <Dialog visible={dialogVisible} title="新建分类" footer={dialogFooter}>
-          <Input onChange={this.handleValueChange} value={categoryName} placeholder="请输入新分类名"></Input>
+        <Dialog visible={dialogVisible} title={dialogTitle} footer={dialogFooter}>
+          <Input onChange={this.handleValueChange} value={categoryForm.category_name} placeholder="请输入新分类名"></Input>
         </Dialog>
       </SidebarWrapper>
     )

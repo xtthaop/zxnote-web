@@ -22,3 +22,11 @@ export function deleteCategory(data){
     data
   })
 }
+
+export function updateCategory(data){
+  return request({
+    url: '/category',
+    method: 'put',
+    data
+  })
+}
