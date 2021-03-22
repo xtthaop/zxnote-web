@@ -2,6 +2,47 @@ import styled from 'styled-components'
 
 export const DialogWrapper = styled.div`
   width: 100%;
+
+  .mask-enter{
+    opacity: 0;
+  }
+
+  .mask-enter-active{
+    opacity: 0.6;
+    transition: opacity 200ms;
+  }
+
+  .mask-exit{
+    opacity: 0.6;
+    transition: opacity 200ms;
+  }
+
+  .mask-exit-active{
+    opacity: 0;
+    transition: opacity 200ms;
+  }
+
+  .content-enter{
+    opacity: 0;
+    transform: translate(0, -10px);
+  }
+
+  .content-enter-active{
+    opacity: 1;
+    transform: translate(0, 0);
+    transition: all 300ms;
+  }
+
+  .content-exit{
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+
+  .content-exit-active{
+    opacity: 0;
+    transform: translate(0, -10px);
+    transition: opacity 50ms;
+  }
 `
 
 export const DialogMask = styled.div`

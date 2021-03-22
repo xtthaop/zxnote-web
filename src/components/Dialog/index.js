@@ -1,4 +1,5 @@
 import React from 'react'
+import { CSSTransition } from 'react-transition-group'
 import {
   DialogWrapper,
   DialogMask,
@@ -10,9 +11,12 @@ class Dialog extends React.Component {
   render(){
     const { visible, title, children, footer } = this.props
     return (
-      visible ? (
-        <DialogWrapper>
+      <DialogWrapper>
+        { !visible && null }
+        <CSSTransition in={visible} unmountOnExit timeout={200} classNames="mask">
           <DialogMask></DialogMask>
+        </CSSTransition>
+        <CSSTransition in={visible} unmountOnExit timeout={200} classNames="content">
           <DialogContentWrapper>
             <DialogContent>
               <div className="dialog-head-wrapper"><div>{title}</div></div>
@@ -20,8 +24,8 @@ class Dialog extends React.Component {
               <div className="dialog-footer-wrapper"><div>{footer}</div></div>
             </DialogContent>
           </DialogContentWrapper>
-        </DialogWrapper>
-      ) : null
+        </CSSTransition>
+      </DialogWrapper>
     )
   }
 }
