@@ -18,7 +18,7 @@ class Editor extends React.Component {
         <ToolBar>
           <li className="tool right">
             <SvgIcon iconClass="release"></SvgIcon>
-            <span className="release">发布笔记</span>
+            <span className="release-text">发布笔记</span>
           </li>
           <li className="tool"><SvgIcon iconClass="pic"></SvgIcon></li>
           <li className="tool right"><SvgIcon iconClass="save"></SvgIcon></li>

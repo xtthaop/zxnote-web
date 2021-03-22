@@ -67,12 +67,10 @@ export const ToolBar = styled.ul`
       float: right;
     }
 
-    .release{
+    .release-text{
       display: inline-block;
-      height: 16px;
-      line-height: 16px;
-      vertical-align: 0.05em;
       font-size: 13px;
+      vertical-align: 0.05em;
       margin-left: 5px;
     }
   }
