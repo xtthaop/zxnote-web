@@ -5,7 +5,7 @@ import Menu from '@/components/Menu'
 import Dialog from '@/components/Dialog'
 import Button from '@/components/Button'
 import Input from '@/components/Input'
-import { getCategoryList } from '@/api/notebook/category'
+import { createCategory, getCategoryList } from '@/api/notebook/category'
 import {
   SidebarWrapper,
   Header,
@@ -66,8 +66,18 @@ class Sidebar extends React.Component {
       category_name: categoryName
     }
 
-    getCategoryList(data).then(res => {
+    createCategory(data).then(() => {
+      this.handleGetCategoryList()
       this.handleClose()
+    })
+  }
+
+  handleGetCategoryList(){
+    getCategoryList().then(res => {
+      const categories = res.data.category_list
+      this.setState({
+        categories
+      })
     })
   }
 
@@ -102,11 +112,11 @@ class Sidebar extends React.Component {
             categories.map(item => {
               return (
                 <li 
-                  key={item.id} 
-                  className={activeId === item.id ? 'active' : ''}
-                  onClick={this.handleCateItemClick.bind(this, item.id)}
+                  key={item.category_id} 
+                  className={activeId === item.category_id ? 'active' : ''}
+                  onClick={() => this.handleCateItemClick(item.category_id)}
                 >
-                  <div className="title">{item.title}</div>
+                  <div className="title">{item.category_name}</div>
                   <div className="handle-btn">
                     <Dropdown overlay={menu}>
                       <SvgIcon iconClass="setting"></SvgIcon>
@@ -130,23 +140,7 @@ class Sidebar extends React.Component {
   }
 
   componentDidMount(){
-    const categories = [
-      {
-        id: 1,
-        title: 'cate9',
-      },
-      {
-        id: 2,
-        title: 'cate2',
-      },
-      {
-        id: 3,
-        title: 'cate3',
-      },
-    ]
-    this.setState({
-      categories
-    })
+    this.handleGetCategoryList()
   }
 }
 

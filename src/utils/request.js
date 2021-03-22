@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { message } from '@/components/message.js'
 
 // create an axios instance
 const service = axios.create({
@@ -23,14 +24,14 @@ service.interceptors.response.use(
 
     // if the custom code is not 0, it is judged as an error.
     if(res.code !== 0){
-      alert(res.message || 'Error')
+      message.error(res.message || 'Error')
       return Promise.reject(new Error(res.message || 'Error'))
     }else{
       return res
     }
   },
   error => {
-    alert(error.message)
+    message.error(error.message)
     return Promise.reject(error)
   }
 )
