@@ -31,6 +31,7 @@ class Sidebar extends React.Component {
       dialogTitle: '',
       confirmLoading: false,
       listLoading: false,
+      activeIndex: '',
     }
     this.handleItemClick = this.handleItemClick.bind(this)
     this.handleClose = this.handleClose.bind(this)
@@ -64,7 +65,8 @@ class Sidebar extends React.Component {
       categoryForm: {
         category_name: '',
         category_id: undefined,
-      }
+      },
+      activeIndex: '',
     })
   }
 
@@ -86,7 +88,7 @@ class Sidebar extends React.Component {
   }
 
   handleDelete(index){
-    messagebox.warning('提示', '即将删除分类及分类下所有笔记，是否继续？').then(() => {
+    messagebox.warning('提示', '此操作将删除分类及分类下所有笔记，是否继续？').then(() => {
       const data = { category_id: this.state.activeId }
       deleteCategory(data).then(() => {
         let categories = this.state.categories
@@ -98,7 +100,7 @@ class Sidebar extends React.Component {
     }).catch(() => {})
   }
 
-  handleUpdateCategory(item){
+  handleUpdateCategory(item, index){
     this.reset()
     this.setState({
       categoryForm: {
@@ -107,6 +109,7 @@ class Sidebar extends React.Component {
       },
       dialogVisible: true,
       dialogTitle: '编辑分类',
+      activeIndex: index,
     })
   }
 
@@ -122,7 +125,9 @@ class Sidebar extends React.Component {
 
     if(category_id){
       updateCategory(this.state.categoryForm).then(() => {
-        this.handleGetCategoryList()
+        const categories = this.state.categories
+        categories[this.state.activeIndex].category_name = category_name
+        this.setState({ categories, confirmLoading: false })
         this.handleClose()
       })
     }else{
@@ -142,7 +147,7 @@ class Sidebar extends React.Component {
     const menu = (item, index) => {
       return (
         <Menu>
-          <Menu.Item onClick={() => this.handleUpdateCategory(item)}>
+          <Menu.Item onClick={() => this.handleUpdateCategory(item, index)}>
             <SvgIcon iconClass="edit" style={{ marginRight: '5px' }}></SvgIcon>
             <span>编辑分类</span>
           </Menu.Item>
