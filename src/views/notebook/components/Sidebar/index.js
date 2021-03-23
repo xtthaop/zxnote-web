@@ -5,7 +5,9 @@ import Menu from '@/components/Menu'
 import Dialog from '@/components/Dialog'
 import Button from '@/components/Button'
 import Input from '@/components/Input'
+import Loading from '@/components/Loading'
 import { message } from '@/components/message'
+import { messagebox } from '@/components/messagebox'
 import { createCategory, getCategoryList, deleteCategory, updateCategory } from '@/api/notebook/category'
 import {
   SidebarWrapper,
@@ -26,7 +28,9 @@ class Sidebar extends React.Component {
         category_name: '',
         category_id: undefined,
       },
-      dialogTitle: 'create',
+      dialogTitle: '',
+      confirmLoading: false,
+      listLoading: false,
     }
     this.handleItemClick = this.handleItemClick.bind(this)
     this.handleClose = this.handleClose.bind(this)
@@ -73,21 +77,25 @@ class Sidebar extends React.Component {
   }
 
   handleGetCategoryList(){
+    this.setState({ listLoading: true })
     return getCategoryList().then(res => {
+      this.setState({ listLoading: false })
       const categories = res.data.category_list
       this.setState({ categories })
     })
   }
 
-  handleDelete(){
-    const data = { category_id: this.state.activeId }
-    deleteCategory(data).then(() => {
-      this.handleGetCategoryList().then(() => {
-        const activeId = this.state.categories[0] && this.state.categories[0].category_id
-        this.setState({ activeId })
+  handleDelete(index){
+    messagebox.warning('提示', '即将删除分类及分类下所有笔记，是否继续？').then(() => {
+      const data = { category_id: this.state.activeId }
+      deleteCategory(data).then(() => {
+        let categories = this.state.categories
+        categories.splice(index, 1)
+        const activeId = categories[0] && categories[0].category_id
+        this.setState({ categories, activeId })
+        message.success('删除成功！')
       })
-      message.success('删除成功！')
-    })
+    }).catch(() => {})
   }
 
   handleUpdateCategory(item){
@@ -110,6 +118,8 @@ class Sidebar extends React.Component {
       return
     }
 
+    this.setState({ confirmLoading: true })
+
     if(category_id){
       updateCategory(this.state.categoryForm).then(() => {
         this.handleGetCategoryList()
@@ -118,25 +128,25 @@ class Sidebar extends React.Component {
     }else{
       createCategory(this.state.categoryForm).then(res => {
         const activeId = res.data.category_id
-        this.handleGetCategoryList().then(() => {
-          this.setState({ activeId })
-        })
+        const categories = this.state.categories
+        categories.push({ category_id: activeId, category_name: category_name })
+        this.setState({ activeId, categories, confirmLoading: false })
         this.handleClose()
       })
     }
   }
 
   render(){
-    const { dialogVisible, categories, activeId, categoryForm, dialogTitle } = this.state
+    const { dialogVisible, categories, activeId, categoryForm, dialogTitle, confirmLoading, listLoading } = this.state
 
-    const menu = (item) => {
+    const menu = (item, index) => {
       return (
         <Menu>
           <Menu.Item onClick={() => this.handleUpdateCategory(item)}>
             <SvgIcon iconClass="edit" style={{ marginRight: '5px' }}></SvgIcon>
             <span>编辑分类</span>
           </Menu.Item>
-          <Menu.Item onClick={this.handleDelete}>
+          <Menu.Item onClick={() => this.handleDelete(index)}>
             <SvgIcon iconClass="delete" style={{ marginRight: '5px' }}></SvgIcon>
             <span>删除分类</span>
           </Menu.Item>
@@ -147,7 +157,7 @@ class Sidebar extends React.Component {
     const dialogFooter = (
       <div>
         <Button onClick={this.handleClose} style={{ marginRight: '10px' }}>取 消</Button>
-        <Button type="success" onClick={this.handleSubmitForm}>确 定</Button>
+        <Button type="success" onClick={this.handleSubmitForm} data-loading={confirmLoading}>确 定</Button>
       </div>
     )
 
@@ -161,8 +171,9 @@ class Sidebar extends React.Component {
           </span>
         </CreateButton>
         <Categories>
+          <Loading data-loading={listLoading}></Loading>
           {
-            categories.map(item => {
+            categories.map((item, index) => {
               return (
                 <li 
                   key={item.category_id} 
@@ -171,7 +182,7 @@ class Sidebar extends React.Component {
                 >
                   <div className="title">{item.category_name}</div>
                   <div className="handle-btn">
-                    <Dropdown overlay={menu(item)}>
+                    <Dropdown overlay={menu(item, index)}>
                       <SvgIcon iconClass="setting"></SvgIcon>
                     </Dropdown>
                   </div>
@@ -194,7 +205,7 @@ class Sidebar extends React.Component {
 
   componentDidMount(){
     this.handleGetCategoryList().then(() => {
-      const activeId = this.state.categories[0].category_id
+      const activeId = this.state.categories[0] && this.state.categories[0].category_id
       this.setState({ activeId })
     })
   }

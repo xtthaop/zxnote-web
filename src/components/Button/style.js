@@ -1,13 +1,25 @@
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 
 function switchColor(type){
   switch(type){
     case 'success':
       return '#42c02e'
+    case 'primary':
+      return '#409EFF'
     default:
       return '#999'
   }
 }
+
+const loading = keyframes`
+  from{
+    transform: rotate(0deg);
+  }
+
+  to{
+    transform: rotate(360deg);
+  }
+`
 
 export const ButtonWrapper = styled.button`
   display: inline-block;
@@ -27,4 +39,10 @@ export const ButtonWrapper = styled.button`
   background: #fff;
   color: ${props => switchColor(props.type)};
   outline: none;
+
+  .loading{
+    display: ${props => props['data-loading'] ? 'inline-block' : 'none'};
+    margin-right: 6px;
+    animation: ${loading} 1s linear infinite;
+  }
 `

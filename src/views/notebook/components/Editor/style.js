@@ -83,6 +83,7 @@ export const ContentWrapper = styled.textarea`
   border: none;
   outline: none;
   padding: 30px;
+  background: #fffff9;
   resize: none;
   font-size: 16px;
 `

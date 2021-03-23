@@ -1,18 +1,17 @@
 import React from 'react'
 import SvgIcon from '@/components/SvgIcon'
 import {
-  ButtonWrapper,
+  LoadingWrapper,
 } from './style'
 
-class Button extends React.Component {
+class Loading extends React.Component {
   render(){
     return (
-      <ButtonWrapper {...this.props}>
+      <LoadingWrapper {...this.props}>
         <span className="loading"><SvgIcon iconClass="loading"></SvgIcon></span>
-        {this.props.children}
-      </ButtonWrapper>
+      </LoadingWrapper>
     )
   }
 }
 
-export default Button
+export default Loading
