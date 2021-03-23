@@ -106,6 +106,7 @@ export const MessageBoxContent = styled.div`
 
     & > div{
       padding: 25px 20px;
+      line-height: 25px;
     }
   }
 

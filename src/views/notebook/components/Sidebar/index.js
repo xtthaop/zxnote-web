@@ -88,7 +88,7 @@ class Sidebar extends React.Component {
   }
 
   handleDelete(index){
-    messagebox.warning('提示', '此操作将删除分类及分类下所有笔记，是否继续？').then(() => {
+    messagebox.warning('提示', '确认删除分类及分类下所有笔记？').then(() => {
       const data = { category_id: this.state.activeId }
       deleteCategory(data).then(() => {
         let categories = this.state.categories
