@@ -8,7 +8,7 @@ class Loading extends React.Component {
   render(){
     return (
       <LoadingWrapper {...this.props}>
-        <span className="loading"><SvgIcon iconClass="loading"></SvgIcon></span>
+        <div className="loading"><SvgIcon iconClass="loading"></SvgIcon></div>
       </LoadingWrapper>
     )
   }

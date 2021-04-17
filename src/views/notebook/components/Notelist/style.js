@@ -18,8 +18,14 @@ export const UpCreateBtn = styled.div`
   width: 100%;
   padding: 16px 25px;
   border-bottom: 1px solid ${borderColor};
+  font-size: 15px;
   box-sizing: border-box;
   cursor: pointer;
+  user-select: none;
+
+  .svg-icon{
+    margin-right: 5px;
+  }
 `
 
 export const Notes = styled.ul`

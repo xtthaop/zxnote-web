@@ -42,10 +42,11 @@ class Sidebar extends React.Component {
     this.handleSubmitForm = this.handleSubmitForm.bind(this)
   }
 
-  handleItemClick(id) {
+  handleItemClick(id){
     this.setState({
       activeId: id
     })
+    this.props.active(id)
   }
 
   handleClose(){
@@ -84,6 +85,8 @@ class Sidebar extends React.Component {
       this.setState({ listLoading: false })
       const categories = res.data.category_list
       this.setState({ categories })
+    }).catch(() => {
+      this.setState({ listLoading: false })
     })
   }
 
@@ -95,6 +98,7 @@ class Sidebar extends React.Component {
         categories.splice(index, 1)
         const activeId = categories[0] && categories[0].category_id
         this.setState({ categories, activeId })
+        this.props.active(activeId)
         message.success('删除成功！')
       })
     }).catch(() => {})
@@ -136,9 +140,18 @@ class Sidebar extends React.Component {
         const categories = this.state.categories
         categories.push({ category_id: activeId, category_name: category_name })
         this.setState({ activeId, categories, confirmLoading: false })
+        this.props.active(activeId)
         this.handleClose()
       })
     }
+  }
+
+  componentDidMount(){
+    this.handleGetCategoryList().then(() => {
+      const activeId = this.state.categories[0] && this.state.categories[0].category_id
+      this.setState({ activeId })
+      this.props.active(activeId)
+    })
   }
 
   render(){
@@ -206,13 +219,6 @@ class Sidebar extends React.Component {
         </Dialog>
       </SidebarWrapper>
     )
-  }
-
-  componentDidMount(){
-    this.handleGetCategoryList().then(() => {
-      const activeId = this.state.categories[0] && this.state.categories[0].category_id
-      this.setState({ activeId })
-    })
   }
 }
 

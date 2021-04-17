@@ -115,7 +115,7 @@ export const MessageBoxContent = styled.div`
     text-align: right;
 
     & > div{
-      padding: 10px 20px 20px 20px;
+      padding: 0px 20px 20px 20px;
     }
   }
 `
