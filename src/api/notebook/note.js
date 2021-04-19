@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function createNote(data){
   return request({
-    url: '/note',
+    url: '/note/create_note',
     method: 'post',
     data
   })
@@ -20,6 +20,14 @@ export function deleteNote(data){
   return request({
     url: '/note',
     method: 'delete',
+    data
+  })
+}
+
+export function moveNote(data){
+  return request({
+    url: '/note/move_note',
+    method: 'post',
     data
   })
 }

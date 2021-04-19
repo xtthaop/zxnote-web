@@ -1,6 +1,6 @@
 import React from 'react'
 import moment from 'moment'
-import { createNote, getCategoryNote, deleteNote } from '@/api/notebook/note'
+import { createNote, getCategoryNote, deleteNote, moveNote } from '@/api/notebook/note'
 import SvgIcon from '@/components/SvgIcon'
 import Dropdown from '@/components/Dropdown'
 import Menu from '@/components/Menu'
@@ -112,9 +112,9 @@ class Notelist extends React.Component {
   }
 
   handleSubmitForm(){
-    const { moveCategoryId, activeId } = this.state
+    const { moveCategoryId, activeId, activeIndex } = this.state
 
-    if(!moveCategoryId){
+    if(!moveCategoryId || moveCategoryId === this.props.activeCategoryId){
       this.handleClose()
       return
     }
@@ -125,7 +125,19 @@ class Notelist extends React.Component {
     }
 
     this.setState({ confirmLoading: true })
-    console.log(data)
+    moveNote(data).then(() => {
+      let noteList = this.state.noteList
+      noteList.splice(activeIndex, 1)
+      const activeId = noteList[0] && noteList[0].note_id
+      this.setState({ 
+        confirmLoading: false,
+        dialogVisible: false,
+        noteList,
+        activeId,
+      })
+    }).catch(() => {
+      this.setState({ confirmLoading: false })
+    })
   }
 
   handleSelectChange(val){
