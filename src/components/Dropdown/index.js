@@ -30,6 +30,14 @@ class Dropdown extends React.Component {
     }
   }
 
+  componentDidMount(){
+    window.addEventListener('click', this.handleHide)
+  }
+
+  componentWillUnmount(){
+    window.removeEventListener('click', this.handleHide)
+  }
+
   render(){
     const { show } = this.state
     return (
@@ -42,14 +50,6 @@ class Dropdown extends React.Component {
         </DropdownFrame>
       </DropdownWrapper>
     )
-  }
-
-  componentDidMount(){
-    window.addEventListener('click', this.handleHide)
-  }
-
-  componentWillUnmount(){
-    window.removeEventListener('click', this.handleHide)
   }
 }
 
