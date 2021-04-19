@@ -16,12 +16,18 @@ class Notebook extends React.Component {
       categoryList: [],
     }
     this.changeActiveCategory = this.changeActiveCategory.bind(this)
+    this.changeCategoryList = this.changeCategoryList.bind(this)
   }
 
-  changeActiveCategory(val, list){
+  changeActiveCategory(val){
     this.setState({
       activeCategoryId: val,
-      categoryList: list
+    })
+  }
+
+  changeCategoryList(val){
+    this.setState({
+      categoryList: val,
     })
   }
 
@@ -29,7 +35,7 @@ class Notebook extends React.Component {
     const { categoryList, activeCategoryId } = this.state
     return (
       <NotebookWrapper>
-        <Sidebar active={this.changeActiveCategory}></Sidebar>
+        <Sidebar active={this.changeActiveCategory} sendList={this.changeCategoryList}></Sidebar>
         <Notelist activeCategoryId={activeCategoryId} categoryList={categoryList}></Notelist>
         <Editor></Editor>
       </NotebookWrapper>

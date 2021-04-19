@@ -7,7 +7,7 @@ import {
 class Button extends React.Component {
   render(){
     return (
-      <ButtonWrapper {...this.props}>
+      <ButtonWrapper {...this.props} disabled={this.props['data-loading']}>
         <span className="loading"><SvgIcon iconClass="loading"></SvgIcon></span>
         {this.props.children}
       </ButtonWrapper>

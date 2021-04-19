@@ -150,7 +150,8 @@ class Sidebar extends React.Component {
     this.handleGetCategoryList().then(() => {
       const activeId = this.state.categories[0] && this.state.categories[0].category_id
       this.setState({ activeId })
-      this.props.active(activeId, this.state.categories)
+      this.props.active(activeId)
+      this.props.sendList(this.state.categories)
     })
   }
 
