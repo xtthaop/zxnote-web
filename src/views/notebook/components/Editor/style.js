@@ -87,3 +87,9 @@ export const ContentWrapper = styled.textarea`
   resize: none;
   font-size: 16px;
 `
+
+export const EmptyArea = styled.div`
+  flex: 1;
+  width: 100%;
+  background: #efefef;
+`

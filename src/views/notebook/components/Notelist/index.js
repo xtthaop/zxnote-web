@@ -45,6 +45,9 @@ class Notelist extends React.Component {
       activeId: id,
       activeIndex: index,
     })
+    const activeId = id
+    const activeTitle = this.state.noteList[index].note_title
+    this.props.active(activeId, activeTitle)
   }
 
   handleCreateNote(){
@@ -65,6 +68,9 @@ class Notelist extends React.Component {
         notelist: noteData,
         activeId: res.data.note_id,
       })
+      const activeId = res.data.note_id
+      const activeTitle = currentDate
+      this.props.active(activeId, activeTitle, true)
     })
   }
 
@@ -91,7 +97,9 @@ class Notelist extends React.Component {
         let noteList = this.state.noteList
         noteList.splice(index, 1)
         const activeId = noteList[0] && noteList[0].note_id
+        const activeTitle = noteList[0] && noteList[0].note_title
         this.setState({ noteList, activeId })
+        this.props.active(activeId, activeTitle)
         message.success('删除成功！')
       })
     }).catch(() => {})
@@ -129,6 +137,8 @@ class Notelist extends React.Component {
       let noteList = this.state.noteList
       noteList.splice(activeIndex, 1)
       const activeId = noteList[0] && noteList[0].note_id
+      const activeTitle = noteList[0] && noteList[0].note_title
+      this.props.active(activeId, activeTitle)
       this.setState({ 
         confirmLoading: false,
         dialogVisible: false,
@@ -155,7 +165,9 @@ class Notelist extends React.Component {
 
       this.handleGetCategoryNote().then(() => {
         const activeId = this.state.noteList[0] && this.state.noteList[0].note_id
+        const activeTitle = this.state.noteList[0] && this.state.noteList[0].note_title
         this.setState({ activeId })
+        this.props.active(activeId, activeTitle)
       })
     }
 
