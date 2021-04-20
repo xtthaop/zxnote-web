@@ -70,13 +70,13 @@ class Editor extends React.Component {
   componentDidUpdate(prevProp){
     if(prevProp.activeNoteId !== this.props.activeNoteId){
       if(!this.props.activeNoteId){
-        this.setState({ title: '', content: '', showEditor: false  })
+        this.setState({ title: '', content: '', showEditor: false })
         return
       }
 
       this.setState({ title: this.props.activeNoteTitle, showEditor: true })
 
-      if(this.props.titleFocus){
+      if(this.state.showEditor && this.props.titleFocus){
         this.titleRef.current.select()
       }
 

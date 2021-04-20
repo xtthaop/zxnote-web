@@ -29,7 +29,6 @@ class Notelist extends React.Component {
       dialogVisible: false,
       moveCategoryId: undefined,
       confirmLoading: false,
-      categoryList: [],
     }
     this.handleNoteItemClick = this.handleNoteItemClick.bind(this)
     this.handleCreateNote = this.handleCreateNote.bind(this)
@@ -182,14 +181,10 @@ class Notelist extends React.Component {
         this.props.active(activeId, activeTitle)
       })
     }
-
-    if(prevProp.categoryList.length !== this.props.categoryList.length){
-      this.setState({ categoryList: this.props.categoryList })
-    }
   }
 
   render(){
-    const { noteList, activeId, listLoading, dialogVisible, moveCategoryId, confirmLoading, categoryList } = this.state
+    const { noteList, activeId, listLoading, dialogVisible, moveCategoryId, confirmLoading } = this.state
 
     const menu = (item, index) => (
       <Menu>
@@ -247,7 +242,7 @@ class Notelist extends React.Component {
         <Dialog visible={dialogVisible} title="移动文章" footer={dialogFooter}>
           <Select placeholder="请选择分类" value={moveCategoryId} change={this.handleSelectChange}>
             {
-              categoryList.map(item => (
+              this.props.categoryList.map(item => (
                 <Option key={item.category_id} value={item.category_id}>{item.category_name}</Option>
               ))
             }

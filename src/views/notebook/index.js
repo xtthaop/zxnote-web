@@ -51,7 +51,7 @@ class Notebook extends React.Component {
   }
 
   render(){
-    const { categoryList, activeCategoryId, activeNoteId, activeNoteTitle, titleFocus, syncTitle } = this.state
+    const { categoryList, activeCategoryId, activeNoteId, activeNoteTitle, titleFocus } = this.state
     return (
       <NotebookWrapper>
         <Sidebar active={this.changeActiveCategory} sendList={this.changeCategoryList}></Sidebar>
