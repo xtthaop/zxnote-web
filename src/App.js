@@ -1,8 +1,9 @@
 import React from 'react'
-import { BrowserRouter as Router, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import GlobalStyle from '@/style'
 
 import Notebook from '@/views/notebook'
+import Page404 from '@/views/errorpage/404'
 
 class App extends React.Component {
   render() {
@@ -10,7 +11,11 @@ class App extends React.Component {
       <div>
         <GlobalStyle></GlobalStyle>
         <Router>
-          <Route path="/notebook"><Notebook></Notebook></Route>
+          <Switch>
+            <Route path="/notebook" exact><Notebook></Notebook></Route>
+            <Route path="/404" exact><Page404></Page404></Route>
+            <Route path="*"><Page404></Page404></Route>
+          </Switch>
         </Router>
       </div>
     )

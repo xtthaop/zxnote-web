@@ -40,6 +40,7 @@ class Sidebar extends React.Component {
     this.handleDelete = this.handleDelete.bind(this)
     this.reset = this.reset.bind(this)
     this.handleSubmitForm = this.handleSubmitForm.bind(this)
+    this.handleHashChange = this.handleHashChange.bind(this)
   }
 
   handleItemClick(id){
@@ -146,13 +147,41 @@ class Sidebar extends React.Component {
     }
   }
 
+  getHashCategoryId(){
+    const hash = location.hash
+    const hashArr = hash.split('/')
+    return hashArr[2] ? Number(hashArr[2]) : undefined
+  }
+
+  handleHashChange(){
+    const hashCategoryId = this.getHashCategoryId()
+    if(hashCategoryId !== this.state.activeId){
+      this.setState({ activeId: hashCategoryId })
+      this.props.active(hashCategoryId)
+    }
+  }
+
   componentDidMount(){
     this.handleGetCategoryList().then(() => {
-      const activeId = this.state.categories[0] && this.state.categories[0].category_id
+      const hashCategoryId = this.getHashCategoryId()
+      let activeId
+
+      if(hashCategoryId){
+        activeId = hashCategoryId
+      }else{
+        activeId = this.state.categories[0] && this.state.categories[0].category_id
+      }
+
       this.setState({ activeId })
       this.props.active(activeId)
       this.props.sendList(this.state.categories)
     })
+
+    window.addEventListener('hashchange', this.handleHashChange)
+  }
+
+  componentWillUnmount(){
+    window.removeEventListener('hashchange', this.handleHashChange)
   }
 
   render(){

@@ -11,6 +11,7 @@ module.exports = {
     filename: '[name].[contenthash].js',
     path: path.join(__dirname, 'dist'),
     clean: true,
+    publicPath: '/',
   },
   devtool: 'inline-source-map',
   devServer: {

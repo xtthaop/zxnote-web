@@ -44,6 +44,13 @@ class Notebook extends React.Component {
       activeNoteTitle: activeTitle,
       titleFocus,
     })
+    if(activeId){
+      location.hash = `/category/${this.state.activeCategoryId}/note/${activeId}`
+    }else if(this.state.activeCategoryId){
+      location.hash = `/category/${this.state.activeCategoryId}`
+    }else{
+      location.hash = ''
+    }
   }
 
   handleSyncTitle(title){

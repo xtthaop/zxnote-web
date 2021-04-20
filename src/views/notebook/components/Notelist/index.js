@@ -37,6 +37,8 @@ class Notelist extends React.Component {
     this.handleClose = this.handleClose.bind(this)
     this.handleSubmitForm = this.handleSubmitForm.bind(this)
     this.handleMoveNote = this.handleMoveNote.bind(this)
+    this.handleHashChange = this.handleHashChange.bind(this)
+    this.getActiveNoteIndex = this.getActiveNoteIndex.bind(this)
   }
 
   handleNoteItemClick(id, index) {
@@ -80,7 +82,7 @@ class Notelist extends React.Component {
       category_id: this.props.activeCategoryId
     }
 
-    this.setState({ listLoading: true })
+    this.setState({ listLoading: true, noteList: [] })
     return getCategoryNote(data).then(res => {
       this.setState({
         noteList: res.data.category_note_list,
@@ -166,21 +168,71 @@ class Notelist extends React.Component {
     })
   }
 
+  getActiveNoteIndex(id){
+    const { noteList } = this.state
+
+    if(noteList.length){
+      for(let i = 0; i < noteList.length; i++){
+        if(id === noteList[i].note_id){
+          return i
+        }
+      }
+    }
+
+    return undefined
+  }
+
+  getHashNoteId(){
+    const hash = location.hash
+    const hashArr = hash.split('/')
+    return hashArr[4] ? Number(hashArr[4]) : undefined
+  }
+
+  handleHashChange(){
+    const hashNoteId = this.getHashNoteId()
+    if(hashNoteId !== this.state.activeId){
+      const activeIndex = this.getActiveNoteIndex(hashNoteId)
+      this.setState({ activeId: hashNoteId, activeIndex })
+      const activeTitle = this.state.noteList[activeIndex] && this.state.noteList[activeIndex].note_title
+      this.props.active(hashNoteId, activeTitle)
+    }
+  }
+
   componentDidUpdate(prevProp){
     if(prevProp.activeCategoryId !== this.props.activeCategoryId){
       if(!this.props.activeCategoryId){
-        this.setState({ noteList: [] })
+        this.setState({ noteList: [], activeId: undefined, activeIndex: undefined }) 
+        this.props.active(undefined, '')
         return
       }
 
       this.handleGetCategoryNote().then(() => {
-        const activeIndex = 0
-        const activeId = this.state.noteList[activeIndex] && this.state.noteList[activeIndex].note_id
-        const activeTitle = this.state.noteList[activeIndex] && this.state.noteList[activeIndex].note_title
+        const { noteList } = this.state
+        const hashNoteId = this.getHashNoteId()
+        const hashNoteIndex = this.getActiveNoteIndex(hashNoteId)
+        let activeId, activeIndex
+        
+        if(hashNoteIndex !== undefined){
+          activeId = hashNoteId
+          activeIndex = hashNoteIndex
+        }else{
+          activeIndex = 0
+          activeId = this.state.noteList[activeIndex] && this.state.noteList[activeIndex].note_id
+        }
+
+        const activeTitle = noteList[activeIndex] && noteList[activeIndex].note_title
         this.setState({ activeId, activeIndex })
         this.props.active(activeId, activeTitle)
       })
     }
+  }
+
+  componentDidMount(){
+    window.addEventListener('hashchange', this.handleHashChange)
+  }
+
+  componentWillUnmount(){
+    window.removeEventListener('hashchange', this.handleHashChange)
   }
 
   render(){
