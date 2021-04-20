@@ -74,11 +74,14 @@ class Editor extends React.Component {
         return
       }
 
-      this.setState({ title: this.props.activeNoteTitle, showEditor: true })
-
-      if(this.state.showEditor && this.props.titleFocus){
-        this.titleRef.current.select()
-      }
+      this.setState({ 
+        title: this.props.activeNoteTitle, 
+        showEditor: true 
+      }, () => {
+        if(this.props.titleFocus){
+          this.titleRef.current.select()
+        }
+      })
 
       getNoteContent({ note_id: this.props.activeNoteId }).then(res => {
         const noteContent = res.data.note_content
