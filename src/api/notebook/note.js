@@ -31,3 +31,19 @@ export function moveNote(data){
     data
   })
 }
+
+export function getNoteContent(params){
+  return request({
+    url: '/note/get_note_content',
+    method: 'get',
+    params
+  })
+}
+
+export function saveNote(data){
+  return request({
+    url: '/note/save_note',
+    method: 'post',
+    data
+  })
+}
