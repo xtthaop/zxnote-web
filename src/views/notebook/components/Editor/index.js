@@ -17,6 +17,7 @@ class Editor extends React.Component {
       content: '',
       showEditor: false,
       savedStatus: true,
+      timeoutId: undefined,
     }
     this.titleRef = React.createRef()
     this.changeTitle = this.changeTitle.bind(this)
@@ -25,17 +26,31 @@ class Editor extends React.Component {
   }
 
   changeTitle(e){
+    clearTimeout(this.state.timeoutId)
+
     let value = e.target.value
     this.setState({
       title: value
     })
+
+    const timeoutId = setTimeout(() => {
+      this.handleSaveNote()
+    }, 1000)
+    this.setState({ timeoutId })
   }
 
   changeContent(e){
+    clearTimeout(this.state.timeoutId)
+
     let value = e.target.value
     this.setState({
       content: value
     })
+
+    const timeoutId = setTimeout(() => {
+      this.handleSaveNote()
+    }, 1000)
+    this.setState({ timeoutId })
   }
 
   handleSaveNote(){
@@ -47,6 +62,7 @@ class Editor extends React.Component {
 
     this.setState({ savedStatus: false })
     saveNote(data).then(() => {
+      this.props.handleSyncTitle(this.state.title)
       this.setState({ savedStatus: true })
     })
   }

@@ -64,9 +64,11 @@ class Notelist extends React.Component {
         note_title: currentDate,
         create_time: currentDate,
       })
+      const activeIndex = 0
       this.setState({ 
         notelist: noteData,
         activeId: res.data.note_id,
+        activeIndex
       })
       const activeId = res.data.note_id
       const activeTitle = currentDate
@@ -96,9 +98,10 @@ class Notelist extends React.Component {
       deleteNote(data).then(() => {
         let noteList = this.state.noteList
         noteList.splice(index, 1)
-        const activeId = noteList[0] && noteList[0].note_id
-        const activeTitle = noteList[0] && noteList[0].note_title
-        this.setState({ noteList, activeId })
+        const activeIndex = 0
+        const activeId = noteList[activeIndex] && noteList[activeIndex].note_id
+        const activeTitle = noteList[activeIndex] && noteList[activeIndex].note_title
+        this.setState({ noteList, activeId, activeIndex })
         this.props.active(activeId, activeTitle)
         message.success('删除成功！')
       })
@@ -119,8 +122,14 @@ class Notelist extends React.Component {
     })
   }
 
+  changeActiveNoteTitle(title){
+    const data = this.state.noteList
+    data[this.state.activeIndex].note_title = title
+    this.setState({ noteList: data })
+  }
+
   handleSubmitForm(){
-    const { moveCategoryId, activeId, activeIndex } = this.state
+    const { moveCategoryId, activeId } = this.state
 
     if(!moveCategoryId || moveCategoryId === this.props.activeCategoryId){
       this.handleClose()
@@ -136,14 +145,16 @@ class Notelist extends React.Component {
     moveNote(data).then(() => {
       let noteList = this.state.noteList
       noteList.splice(activeIndex, 1)
-      const activeId = noteList[0] && noteList[0].note_id
-      const activeTitle = noteList[0] && noteList[0].note_title
+      const activeIndex = 0
+      const activeId = noteList[activeIndex] && noteList[activeIndex].note_id
+      const activeTitle = noteList[activeIndex] && noteList[activeIndex].note_title
       this.props.active(activeId, activeTitle)
       this.setState({ 
         confirmLoading: false,
         dialogVisible: false,
         noteList,
         activeId,
+        activeIndex,
       })
     }).catch(() => {
       this.setState({ confirmLoading: false })
@@ -164,9 +175,10 @@ class Notelist extends React.Component {
       }
 
       this.handleGetCategoryNote().then(() => {
-        const activeId = this.state.noteList[0] && this.state.noteList[0].note_id
-        const activeTitle = this.state.noteList[0] && this.state.noteList[0].note_title
-        this.setState({ activeId })
+        const activeIndex = 0
+        const activeId = this.state.noteList[activeIndex] && this.state.noteList[activeIndex].note_id
+        const activeTitle = this.state.noteList[activeIndex] && this.state.noteList[activeIndex].note_title
+        this.setState({ activeId, activeIndex })
         this.props.active(activeId, activeTitle)
       })
     }

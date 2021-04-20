@@ -62,6 +62,7 @@ export const Notes = styled.ul`
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+        height: 30px;
         line-height: 30px;
         font-weight: 500;
       }
