@@ -89,6 +89,7 @@ class Notelist extends React.Component {
         noteList: res.data.category_note_list,
         listLoading: false,
       })
+      this.props.changeNoteList(res.data.category_note_list)
     }).catch(() => {
       this.setState({ listLoading: false })
     })
@@ -203,7 +204,7 @@ class Notelist extends React.Component {
   componentDidUpdate(prevProp){
     if(prevProp.activeCategoryId !== this.props.activeCategoryId){
       if(!this.props.activeCategoryId){
-        this.setState({ noteList: [], activeId: undefined, activeIndex: undefined }) 
+        this.setState({ noteList: [], activeId: undefined, activeIndex: undefined })
         this.props.active(undefined, '')
         return
       }

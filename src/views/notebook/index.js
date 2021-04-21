@@ -15,6 +15,7 @@ class Notebook extends React.Component {
     this.state = {
       activeCategoryId: undefined,
       categoryList: [],
+      noteList: [],
       activeNoteId: undefined,
       activeNoteIndex: undefined,
       activeNoteTitle: '',
@@ -27,6 +28,7 @@ class Notebook extends React.Component {
     this.changeActiveNote = this.changeActiveNote.bind(this)
     this.handleSyncTitle = this.handleSyncTitle.bind(this)
     this.handleHashChange = this.handleHashChange.bind(this)
+    this.changeNoteList = this.changeNoteList.bind(this)
   }
 
   changeActiveCategory(val){
@@ -38,6 +40,12 @@ class Notebook extends React.Component {
   changeCategoryList(val){
     this.setState({
       categoryList: val,
+    })
+  }
+
+  changeNoteList(val){
+    this.setState({
+      noteList: val,
     })
   }
 
@@ -70,12 +78,17 @@ class Notebook extends React.Component {
     const hash = this.getHash()
     const regExp = /^\d+$/
     let pageNoteFound = false
-    if(hash[1] !== 'category' || !regExp.test(hash[2]) || hash[3] !== 'note' || !regExp.test(hash[4])){
-      pageNoteFound = true
-    }else{
-      pageNoteFound = false
+    if(this.state.noteList.length && this.state.categoryList.length){
+      if(hash[1] !== 'category' || !regExp.test(hash[2]) || hash[3] !== 'note' || !regExp.test(hash[4])){
+        pageNoteFound = true
+        this.setState({ pageNoteFound }, () => {
+          this.setState({ activeCategoryId: undefined, activeNoteId: undefined })
+        })
+      }else{
+        pageNoteFound = false
+        this.setState({ pageNoteFound })
+      }
     }
-    this.setState({ pageNoteFound, activeCategoryId: undefined, activeNoteId: undefined })
   }
 
   componentDidMount(){
@@ -97,6 +110,7 @@ class Notebook extends React.Component {
             <Notelist 
               wrappedComponentRef={this.noteListRef}
               active={this.changeActiveNote}
+              changeNoteList={this.changeNoteList}
               activeCategoryId={activeCategoryId} 
               categoryList={categoryList}
             ></Notelist>
