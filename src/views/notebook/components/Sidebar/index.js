@@ -47,7 +47,7 @@ class Sidebar extends React.Component {
     this.setState({
       activeId: id
     })
-    this.props.active(id)
+    this.props.active(id, true)
   }
 
   handleClose(){
@@ -88,7 +88,7 @@ class Sidebar extends React.Component {
         categories.splice(index, 1)
         const activeId = categories[0] && categories[0].category_id
         this.setState({ categories, activeId })
-        this.props.active(activeId)
+        this.props.active(activeId, true)
         message.success('删除成功！')
       })
     }).catch(() => {})
@@ -175,8 +175,24 @@ class Sidebar extends React.Component {
     })
   }
 
+  getHash(){
+    const hash = location.hash
+    const hashArr = hash.split('/')
+    return hashArr
+  }
+
   componentDidMount(){
-    this.handleGetCategoryList()
+    const hash = this.getHash()
+    const regExp = /^\d+$/
+    if(hash.length > 2){
+      if(hash[1] === 'category' && regExp.test(hash[2]) && hash[3] === 'note' && regExp.test(hash[4])){
+        this.handleGetCategoryList()
+      }else{
+        this.props.handlePageNotefound()
+      }
+    }else{
+      this.handleGetCategoryList()
+    }
     window.addEventListener('hashchange', this.handleHashChange)
   }
 

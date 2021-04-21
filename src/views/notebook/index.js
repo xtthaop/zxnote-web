@@ -28,20 +28,35 @@ class Notebook extends React.Component {
     this.handleSyncTitle = this.handleSyncTitle.bind(this)
     this.handleHashChange = this.handleHashChange.bind(this)
     this.changeNoteList = this.changeNoteList.bind(this)
+    this.handlePageNotefound = this.handlePageNotefound.bind(this)
   }
 
-  changeActiveCategory(val){
+  changeActiveCategory(val, refresh){
     if(val !== this.state.activeCategoryId){
-      this.setState({
-        activeCategoryId: val,
-        activeNoteId: undefined,
-        noteList: []
-      })
-  
-      if(val){
-        location.hash = `/category/${val}`
+      if(refresh){
+        if(val){
+          location.hash = `/category/${val}`
+        }else{
+          location.hash = ''
+        }
+
+        this.setState({
+          activeCategoryId: val,
+          activeNoteId: undefined,
+          noteList: []
+        })
       }else{
-        location.hash = ''
+        this.setState({
+          activeCategoryId: val,
+          activeNoteId: undefined,
+          noteList: []
+        })
+
+        if(val){
+          location.hash = `/category/${val}`
+        }else{
+          location.hash = ''
+        }
       }
     }
   }
@@ -79,6 +94,10 @@ class Notebook extends React.Component {
     this.noteListRef.current.changeActiveNoteTitle(title)
   }
 
+  handlePageNotefound(){
+    this.setState({ pageNoteFound: true })
+  }
+
   getHash(){
     const hash = location.hash
     const hashArr = hash.split('/')
@@ -89,13 +108,15 @@ class Notebook extends React.Component {
     const hash = this.getHash()
     const regExp = /^\d+$/
     let pageNoteFound = false
-    if(this.state.noteList.length && this.state.categoryList.length){
+    if(this.state.activeCategoryId && this.state.activeNoteId){
       if(hash[1] !== 'category' || !regExp.test(hash[2]) || hash[3] !== 'note' || !regExp.test(hash[4])){
         pageNoteFound = true
         this.setState({ pageNoteFound }, () => {
           this.setState({ activeCategoryId: undefined, activeNoteId: undefined })
         })
-      }else{
+      }
+    }else{
+      if(hash[1] === 'category' && regExp.test(hash[2]) && hash[3] === 'note' && regExp.test(hash[4])){
         pageNoteFound = false
         this.setState({ pageNoteFound })
       }
@@ -117,7 +138,12 @@ class Notebook extends React.Component {
         {
           pageNoteFound ? <Page404></Page404> :
           <NotebookWrapper>
-            <Sidebar active={this.changeActiveCategory} changeCategoryList={this.changeCategoryList}></Sidebar>
+            <Sidebar 
+              active={this.changeActiveCategory} 
+              changeCategoryList={this.changeCategoryList}
+              handlePageNotefound={this.handlePageNotefound}
+            >
+            </Sidebar>
             <Notelist 
               wrappedComponentRef={this.noteListRef}
               active={this.changeActiveNote}
