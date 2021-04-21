@@ -78,23 +78,6 @@ class Notelist extends React.Component {
     })
   }
 
-  handleGetCategoryNote(){
-    const data = {
-      category_id: this.props.activeCategoryId
-    }
-
-    this.setState({ listLoading: true, noteList: [] })
-    return getCategoryNote(data).then(res => {
-      this.setState({
-        noteList: res.data.category_note_list,
-        listLoading: false,
-      })
-      this.props.changeNoteList(res.data.category_note_list)
-    }).catch(() => {
-      this.setState({ listLoading: false })
-    })
-  }
-
   handleDelete(index){
     messagebox.warning('提示', '确认删除笔记？').then(() => {
       const data = { note_id: this.state.activeId }
@@ -170,9 +153,7 @@ class Notelist extends React.Component {
     })
   }
 
-  getActiveNoteIndex(id){
-    const { noteList } = this.state
-
+  getActiveNoteIndex(noteList, id){
     if(noteList.length){
       for(let i = 0; i < noteList.length; i++){
         if(id === noteList[i].note_id){
@@ -194,45 +175,53 @@ class Notelist extends React.Component {
     const hashNoteId = this.getHashNoteId()
     if(hashNoteId === undefined) return
     if(hashNoteId !== this.state.activeId){
-      const activeIndex = this.getActiveNoteIndex(hashNoteId)
+      const activeIndex = this.getActiveNoteIndex(this.state.noteList, hashNoteId)
       this.setState({ activeId: hashNoteId, activeIndex })
       const activeTitle = this.state.noteList[activeIndex] && this.state.noteList[activeIndex].note_title
       this.props.active(hashNoteId, activeTitle)
     }
   }
 
-  componentDidUpdate(prevProp){
-    if(prevProp.activeCategoryId !== this.props.activeCategoryId){
+  handleGetCategoryNote(){
+    const data = { category_id: this.props.activeCategoryId }
+    const hashNoteId = this.getHashNoteId()
+    let activeId, activeIndex
+
+    this.setState({ listLoading: true, noteList: [] })
+
+    getCategoryNote(data).then(res => {
+      const noteList = res.data.category_note_list
       
-      if(!this.props.activeCategoryId){
-        this.setState({ noteList: [], activeId: undefined, activeIndex: undefined })
-        this.props.active(undefined, undefined)
-        return
+      if(hashNoteId){
+        activeId = hashNoteId
+        activeIndex = this.getActiveNoteIndex(noteList, hashNoteId)
+      }else{
+        activeIndex = 0
+        activeId = noteList[activeIndex] && noteList[activeIndex].note_id
       }
 
-      const hashNoteId = this.getHashNoteId()
-      let activeId, activeIndex
+      const activeTitle = noteList[activeIndex] && noteList[activeIndex].note_title
+      this.setState({ noteList, listLoading: false, activeId, activeIndex })
+      this.props.active(activeId, activeTitle)
+      this.props.changeNoteList(noteList)
+    }).catch(() => {
+      activeId = hashNoteId
+      activeIndex = undefined
+      this.setState({ listLoading: false, activeId, activeIndex })
+      this.props.active(activeId, undefined)
+      this.props.changeNoteList([])
+    })
+  }
 
-      this.handleGetCategoryNote().then(() => {
-        const { noteList } = this.state
-
-        if(hashNoteId){
-          activeId = hashNoteId
-          activeIndex = this.getActiveNoteIndex(hashNoteId)
-        }else{
-          activeIndex = 0
-          activeId = this.state.noteList[activeIndex] && this.state.noteList[activeIndex].note_id
-        }
-
-        const activeTitle = noteList[activeIndex] && noteList[activeIndex].note_title
-        this.setState({ activeId, activeIndex })
-        this.props.active(activeId, activeTitle)
-      }).catch(() => {
-        activeId = hashNoteId
-        activeIndex = undefined
-        this.setState({ noteList: [], activeId, activeIndex })
-        this.props.active(activeId, undefined)
-      })
+  componentDidUpdate(prevProp){
+    if(prevProp.activeCategoryId !== this.props.activeCategoryId){
+      if(!this.props.activeCategoryId){
+        this.setState({ noteList: [], listLoading: false, activeId: undefined, activeIndex: undefined })
+        this.props.active(undefined, undefined)
+        this.props.changeNoteList([])
+      }else{
+        this.handleGetCategoryNote()
+      }
     }
   }
 

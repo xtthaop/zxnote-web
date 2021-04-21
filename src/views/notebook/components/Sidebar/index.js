@@ -80,17 +80,6 @@ class Sidebar extends React.Component {
     })
   }
 
-  handleGetCategoryList(){
-    this.setState({ listLoading: true })
-    return getCategoryList().then(res => {
-      this.setState({ listLoading: false })
-      const categories = res.data.category_list
-      this.setState({ categories })
-    }).catch(() => {
-      this.setState({ listLoading: false })
-    })
-  }
-
   handleDelete(index){
     messagebox.warning('提示', '确认删除分类及分类下所有笔记？').then(() => {
       const data = { category_id: this.state.activeId }
@@ -162,22 +151,32 @@ class Sidebar extends React.Component {
     }
   }
 
-  componentDidMount(){
-    this.handleGetCategoryList().then(() => {
-      const hashCategoryId = this.getHashCategoryId()
-      let activeId
+  handleGetCategoryList(){
+    const hashCategoryId = this.getHashCategoryId()
+    let activeId
+
+    this.setState({ listLoading: true, categories: [] })
+    getCategoryList().then(res => {
+      const categories = res.data.category_list
 
       if(hashCategoryId){
         activeId = hashCategoryId
       }else{
-        activeId = this.state.categories[0] && this.state.categories[0].category_id
+        activeId = categories[0] && categories[0].category_id
       }
 
-      this.setState({ activeId })
+      this.setState({ categories, listLoading: false, activeId })
       this.props.active(activeId)
-      this.props.changeCategoryList(this.state.categories)
+      this.props.changeCategoryList(categories)
+    }).catch(() => {
+      activeId = hashCategoryId
+      this.setState({ categories: [], listLoading: false, activeId })
+      this.props.active(activeId)
     })
+  }
 
+  componentDidMount(){
+    this.handleGetCategoryList()
     window.addEventListener('hashchange', this.handleHashChange)
   }
 

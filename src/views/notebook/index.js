@@ -17,7 +17,6 @@ class Notebook extends React.Component {
       categoryList: [],
       noteList: [],
       activeNoteId: undefined,
-      activeNoteIndex: undefined,
       activeNoteTitle: '',
       titleFocus: false,
       pageNoteFound: false,
@@ -32,15 +31,18 @@ class Notebook extends React.Component {
   }
 
   changeActiveCategory(val){
-    this.setState({
-      activeCategoryId: val,
-      activeNoteId: undefined,
-      noteList: []
-    })
-    if(val){
-      location.hash = `/category/${val}`
-    }else{
-      location.hash = ''
+    if(val !== this.state.activeCategoryId){
+      this.setState({
+        activeCategoryId: val,
+        activeNoteId: undefined,
+        noteList: []
+      })
+  
+      if(val){
+        location.hash = `/category/${val}`
+      }else{
+        location.hash = ''
+      }
     }
   }
 
@@ -57,15 +59,19 @@ class Notebook extends React.Component {
   }
 
   changeActiveNote(activeId, activeTitle, titleFocus){
-    this.setState({
-      activeNoteId: activeId,
-      activeNoteTitle: activeTitle,
-      titleFocus,
-    })
-    if(activeId){
-      location.hash = `/category/${this.state.activeCategoryId}/note/${activeId}`
-    }else{
-      location.hash = `/category/${this.state.activeCategoryId}`
+    if(activeId !== this.state.activeNoteId){
+      this.setState({
+        activeNoteId: activeId,
+        activeNoteTitle: activeTitle,
+        titleFocus,
+      })
+      if(activeId){
+        location.hash = `/category/${this.state.activeCategoryId}/note/${activeId}`
+      }else if(this.state.activeCategoryId){
+        location.hash = `/category/${this.state.activeCategoryId}`
+      }else{
+        location.hash = ''
+      }
     }
   }
 

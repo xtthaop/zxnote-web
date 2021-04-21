@@ -24,6 +24,7 @@ class Editor extends React.Component {
     this.changeTitle = this.changeTitle.bind(this)
     this.changeContent = this.changeContent.bind(this)
     this.handleSaveNote = this.handleSaveNote.bind(this)
+    this.handleGetNoteContent = this.handleGetNoteContent.bind(this)
   }
 
   changeTitle(e){
