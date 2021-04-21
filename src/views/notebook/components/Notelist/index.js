@@ -203,21 +203,22 @@ class Notelist extends React.Component {
 
   componentDidUpdate(prevProp){
     if(prevProp.activeCategoryId !== this.props.activeCategoryId){
+      
       if(!this.props.activeCategoryId){
         this.setState({ noteList: [], activeId: undefined, activeIndex: undefined })
-        this.props.active(undefined, '')
+        this.props.active(undefined, undefined)
         return
       }
 
+      const hashNoteId = this.getHashNoteId()
+      let activeId, activeIndex
+
       this.handleGetCategoryNote().then(() => {
         const { noteList } = this.state
-        const hashNoteId = this.getHashNoteId()
-        const hashNoteIndex = this.getActiveNoteIndex(hashNoteId)
-        let activeId, activeIndex
-        
-        if(hashNoteIndex !== undefined){
+
+        if(hashNoteId){
           activeId = hashNoteId
-          activeIndex = hashNoteIndex
+          activeIndex = this.getActiveNoteIndex(hashNoteId)
         }else{
           activeIndex = 0
           activeId = this.state.noteList[activeIndex] && this.state.noteList[activeIndex].note_id
@@ -226,6 +227,11 @@ class Notelist extends React.Component {
         const activeTitle = noteList[activeIndex] && noteList[activeIndex].note_title
         this.setState({ activeId, activeIndex })
         this.props.active(activeId, activeTitle)
+      }).catch(() => {
+        activeId = hashNoteId
+        activeIndex = undefined
+        this.setState({ noteList: [], activeId, activeIndex })
+        this.props.active(activeId, undefined)
       })
     }
   }

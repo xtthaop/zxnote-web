@@ -34,7 +34,14 @@ class Notebook extends React.Component {
   changeActiveCategory(val){
     this.setState({
       activeCategoryId: val,
+      activeNoteId: undefined,
+      noteList: []
     })
+    if(val){
+      location.hash = `/category/${val}`
+    }else{
+      location.hash = ''
+    }
   }
 
   changeCategoryList(val){
@@ -57,10 +64,8 @@ class Notebook extends React.Component {
     })
     if(activeId){
       location.hash = `/category/${this.state.activeCategoryId}/note/${activeId}`
-    }else if(this.state.activeCategoryId){
-      location.hash = `/category/${this.state.activeCategoryId}`
     }else{
-      location.hash = ''
+      location.hash = `/category/${this.state.activeCategoryId}`
     }
   }
 
@@ -106,7 +111,7 @@ class Notebook extends React.Component {
         {
           pageNoteFound ? <Page404></Page404> :
           <NotebookWrapper>
-            <Sidebar active={this.changeActiveCategory} sendList={this.changeCategoryList}></Sidebar>
+            <Sidebar active={this.changeActiveCategory} changeCategoryList={this.changeCategoryList}></Sidebar>
             <Notelist 
               wrappedComponentRef={this.noteListRef}
               active={this.changeActiveNote}
@@ -115,6 +120,7 @@ class Notebook extends React.Component {
               categoryList={categoryList}
             ></Notelist>
             <Editor 
+              activeCategoryId={activeCategoryId}
               activeNoteId={activeNoteId} 
               activeNoteTitle={activeNoteTitle} 
               titleFocus={titleFocus}

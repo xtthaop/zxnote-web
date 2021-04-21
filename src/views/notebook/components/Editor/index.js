@@ -1,6 +1,7 @@
 import React from 'react'
 import SvgIcon from '@/components/SvgIcon'
 import { getNoteContent, saveNote } from '@/api/notebook/note'
+import { message } from '@/components/message.js'
 import {
   EditorWrapper,
   TitleWrapper,
@@ -67,26 +68,33 @@ class Editor extends React.Component {
     })
   }
 
-  componentDidUpdate(prevProp){
-    if(prevProp.activeNoteId !== this.props.activeNoteId){
-      if(!this.props.activeNoteId){
-        this.setState({ title: '', content: '', showEditor: false })
-        return
-      }
-
+  handleGetNoteContent(){
+    getNoteContent({ note_id: this.props.activeNoteId }).then(res => {
+      const noteContent = res.data.note_content
       this.setState({ 
-        title: this.props.activeNoteTitle, 
-        showEditor: true 
+        content: noteContent === null ? '' : noteContent, 
+        showEditor: this.props.activeNoteTitle === undefined ? false : true,
       }, () => {
         if(this.props.titleFocus){
           this.titleRef.current.select()
         }
       })
+    }).catch(() => {
+      this.setState({ showEditor: false, content: '', title: '' })
+    })
+  }
 
-      getNoteContent({ note_id: this.props.activeNoteId }).then(res => {
-        const noteContent = res.data.note_content
-        this.setState({ content: noteContent === null ? '' : noteContent })
+  componentDidUpdate(prevProp){
+    if(prevProp.activeNoteId !== this.props.activeNoteId){
+      this.setState({ 
+        title: this.props.activeNoteTitle === undefined ? '' : this.props.activeNoteTitle,
       })
+
+      if(this.props.activeNoteId){
+        this.handleGetNoteContent()
+      }else{
+        this.setState({ title: '', content: '', showEditor: false })
+      }
     }
   }
 

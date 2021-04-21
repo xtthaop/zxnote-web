@@ -175,7 +175,7 @@ class Sidebar extends React.Component {
 
       this.setState({ activeId })
       this.props.active(activeId)
-      this.props.sendList(this.state.categories)
+      this.props.changeCategoryList(this.state.categories)
     })
 
     window.addEventListener('hashchange', this.handleHashChange)
