@@ -1,4 +1,5 @@
 import React from 'react'
+import { withRouter } from 'react-router-dom'
 import moment from 'moment'
 import { createNote, getCategoryNote, deleteNote, moveNote } from '@/api/notebook/note'
 import SvgIcon from '@/components/SvgIcon'
@@ -185,11 +186,12 @@ class Notelist extends React.Component {
   getHashNoteId(){
     const hash = location.hash
     const hashArr = hash.split('/')
-    return hashArr[4] ? Number(hashArr[4]) : undefined
+    return Number(hashArr[4]) ? Number(hashArr[4]) : undefined
   }
 
   handleHashChange(){
     const hashNoteId = this.getHashNoteId()
+    if(hashNoteId === undefined) return
     if(hashNoteId !== this.state.activeId){
       const activeIndex = this.getActiveNoteIndex(hashNoteId)
       this.setState({ activeId: hashNoteId, activeIndex })
@@ -305,4 +307,4 @@ class Notelist extends React.Component {
   }
 }
 
-export default Notelist
+export default withRouter(Notelist)

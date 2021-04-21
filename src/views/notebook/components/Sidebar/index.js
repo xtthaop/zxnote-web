@@ -150,11 +150,12 @@ class Sidebar extends React.Component {
   getHashCategoryId(){
     const hash = location.hash
     const hashArr = hash.split('/')
-    return hashArr[2] ? Number(hashArr[2]) : undefined
+    return Number(hashArr[2]) ? Number(hashArr[2]) : undefined
   }
 
   handleHashChange(){
     const hashCategoryId = this.getHashCategoryId()
+    if(hashCategoryId === undefined) return
     if(hashCategoryId !== this.state.activeId){
       this.setState({ activeId: hashCategoryId })
       this.props.active(hashCategoryId)
