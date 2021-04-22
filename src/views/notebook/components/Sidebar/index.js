@@ -184,14 +184,14 @@ class Sidebar extends React.Component {
   componentDidMount(){
     const hash = this.getHash()
     const regExp = /^\d+$/
-    if(hash.length > 2){
-      if(hash[1] === 'category' && regExp.test(hash[2]) && hash[3] === 'note' && regExp.test(hash[4])){
+    if(location.hash === '' || location.hash === '#/'){
+      this.handleGetCategoryList()
+    }else{
+      if(hash[1] === 'category' && regExp.test(hash[2])){
         this.handleGetCategoryList()
       }else{
         this.props.handlePageNotefound()
       }
-    }else{
-      this.handleGetCategoryList()
     }
     window.addEventListener('hashchange', this.handleHashChange)
   }

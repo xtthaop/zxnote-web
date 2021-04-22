@@ -1,4 +1,5 @@
 import React from 'react'
+import { withRouter } from 'react-router-dom'
 import Page404 from '@/views/errorpage/404'
 import {
   Sidebar,
@@ -109,17 +110,32 @@ class Notebook extends React.Component {
     const regExp = /^\d+$/
     let pageNoteFound = false
     if(this.state.activeCategoryId && this.state.activeNoteId){
+      if(location.hash === '' || location.hash === '#/'){
+        location.hash = `/category/${this.state.activeCategoryId}/note/${this.state.activeNoteId}`
+        return
+      }
+
       if(hash[1] !== 'category' || !regExp.test(hash[2]) || hash[3] !== 'note' || !regExp.test(hash[4])){
         pageNoteFound = true
         this.setState({ pageNoteFound }, () => {
           this.setState({ activeCategoryId: undefined, activeNoteId: undefined })
         })
       }
-    }else{
-      if(hash[1] === 'category' && regExp.test(hash[2]) && hash[3] === 'note' && regExp.test(hash[4])){
-        pageNoteFound = false
-        this.setState({ pageNoteFound })
+    }else if(this.state.activeCategoryId && !this.state.activeNoteId){
+      if(location.hash === '' || location.hash === '#/'){
+        location.hash = `/category/${this.state.activeCategoryId}`
+        return
       }
+
+      if(hash[1] !== 'category' || !regExp.test(hash[2])){
+        pageNoteFound = true
+        this.setState({ pageNoteFound }, () => {
+          this.setState({ activeCategoryId: undefined })
+        })
+      }
+    }else{
+      pageNoteFound = false
+      this.setState({ pageNoteFound })
     }
   }
 
@@ -165,4 +181,4 @@ class Notebook extends React.Component {
   }
 }
 
-export default Notebook
+export default withRouter(Notebook)
