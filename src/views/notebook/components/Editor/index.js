@@ -1,7 +1,7 @@
 import React from 'react'
 import SvgIcon from '@/components/SvgIcon'
+import Loading from '@/components/Loading'
 import { getNoteContent, saveNote } from '@/api/notebook/note'
-import { message } from '@/components/message.js'
 import {
   EditorWrapper,
   TitleWrapper,
@@ -19,6 +19,7 @@ class Editor extends React.Component {
       showEditor: false,
       savedStatus: true,
       timeoutId: undefined,
+      contentLoading: false,
     }
     this.titleRef = React.createRef()
     this.changeTitle = this.changeTitle.bind(this)
@@ -70,18 +71,20 @@ class Editor extends React.Component {
   }
 
   handleGetNoteContent(){
+    this.setState({ contentLoading: true })
     getNoteContent({ note_id: this.props.activeNoteId }).then(res => {
       const noteContent = res.data.note_content
       this.setState({ 
         content: noteContent === null ? '' : noteContent, 
         showEditor: this.props.activeNoteTitle === undefined ? false : true,
+        contentLoading: false,
       }, () => {
         if(this.props.titleFocus){
           this.titleRef.current.select()
         }
       })
     }).catch(() => {
-      this.setState({ showEditor: false, content: '', title: '' })
+      this.setState({ showEditor: false, content: '', title: '', contentLoading: false })
     })
   }
 
@@ -100,7 +103,7 @@ class Editor extends React.Component {
   }
 
   render(){
-    const { title, content, showEditor, savedStatus } = this.state
+    const { title, content, showEditor, savedStatus, contentLoading } = this.state
 
     return (
       <EditorWrapper>
@@ -121,7 +124,9 @@ class Editor extends React.Component {
             </ToolBar>
             <ContentWrapper value={content} onChange={this.changeContent}></ContentWrapper>
           </React.Fragment> : 
-          <EmptyArea></EmptyArea>
+          <EmptyArea>
+            <Loading data-loading={contentLoading}></Loading>
+          </EmptyArea>
         }
       </EditorWrapper>
     )
