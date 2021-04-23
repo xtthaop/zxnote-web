@@ -108,7 +108,7 @@ class Notelist extends React.Component {
   }
 
   changeActiveNoteTitle(title){
-    const { noteList, activeIndex } = this.state.noteList
+    const { noteList, activeIndex } = this.state
     noteList[activeIndex].note_title = title
     this.setState({ noteList })
   }
@@ -192,6 +192,7 @@ class Notelist extends React.Component {
           activeIndex = document.getElementById(`note_${hashNoteId}`) ? Number(document.getElementById(`note_${hashNoteId}`).getAttribute('data-index')) : undefined
         }
         const activeTitle = noteList[activeIndex] && noteList[activeIndex].note_title
+        this.setState({ activeIndex })
         this.props.active(activeId, activeTitle)
         this.props.changeNoteList(noteList)
       })
