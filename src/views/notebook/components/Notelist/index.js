@@ -1,5 +1,4 @@
 import React from 'react'
-import { withRouter } from 'react-router-dom'
 import moment from 'moment'
 import { createNote, getCategoryNote, deleteNote, moveNote } from '@/api/notebook/note'
 import SvgIcon from '@/components/SvgIcon'
@@ -295,4 +294,4 @@ class Notelist extends React.Component {
   }
 }
 
-export default withRouter(Notelist)
+export default Notelist

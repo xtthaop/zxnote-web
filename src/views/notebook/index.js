@@ -1,11 +1,7 @@
 import React from 'react'
-import { withRouter } from 'react-router-dom'
 import Page404 from '@/views/errorpage/404'
-import {
-  Sidebar,
-  Notelist,
-  Editor
-} from './components'
+import { Sidebar, Notelist, Editor } from './components'
+import Preview from './preview'
 import {
   NotebookWrapper
 } from './style'
@@ -20,7 +16,7 @@ class Notebook extends React.Component {
       activeNoteId: undefined,
       activeNoteTitle: '',
       titleFocus: false,
-      pageNoteFound: false,
+      page: false,
     }
     this.noteListRef = React.createRef()
     this.changeActiveCategory = this.changeActiveCategory.bind(this)
@@ -96,7 +92,7 @@ class Notebook extends React.Component {
   }
 
   handlePageNotefound(){
-    this.setState({ pageNoteFound: true })
+    this.setState({ page: false })
   }
 
   getHash(){
@@ -108,38 +104,53 @@ class Notebook extends React.Component {
   handleHashChange(){
     const hash = this.getHash()
     const regExp = /^\d+$/
-    let pageNoteFound = false
-    if(this.state.activeCategoryId && this.state.activeNoteId){
+    const { activeCategoryId, activeNoteId } = this.state
+
+    if(hash[5]){
+      if(hash[5] === 'preview'){
+        this.setState({ page: 'preview', activeCategoryId: undefined, activeNoteId: undefined })
+      }else{
+        this.setState({ page: false })
+      }
+      return
+    }
+
+    if(activeCategoryId && activeNoteId){
       if(location.hash === '' || location.hash === '#/'){
-        location.hash = `/category/${this.state.activeCategoryId}/note/${this.state.activeNoteId}`
+        location.hash = `/category/${activeCategoryId}/note/${activeNoteId}`
         return
       }
 
       if(hash[1] !== 'category' || !regExp.test(hash[2]) || hash[3] !== 'note' || !regExp.test(hash[4])){
-        pageNoteFound = true
-        this.setState({ pageNoteFound }, () => {
+        this.setState({ page: false }, () => {
           this.setState({ activeCategoryId: undefined, activeNoteId: undefined })
         })
       }
-    }else if(this.state.activeCategoryId && !this.state.activeNoteId){
+    }else if(activeCategoryId && !activeNoteId){
       if(location.hash === '' || location.hash === '#/'){
-        location.hash = `/category/${this.state.activeCategoryId}`
+        location.hash = `/category/${activeCategoryId}`
         return
       }
 
       if(hash[1] !== 'category' || !regExp.test(hash[2])){
-        pageNoteFound = true
-        this.setState({ pageNoteFound }, () => {
+        this.setState({ page: false }, () => {
           this.setState({ activeCategoryId: undefined })
         })
       }
     }else{
-      pageNoteFound = false
-      this.setState({ pageNoteFound })
+      this.setState({ page: 'note' })
     }
   }
 
   componentDidMount(){
+    const hash = this.getHash()
+
+    if(hash[5] && hash[5] === 'preview'){
+      this.setState({ page: 'preview' })
+    }else{
+      this.setState({ page: 'note' })
+    }
+
     window.addEventListener('hashchange', this.handleHashChange)
   }
 
@@ -148,37 +159,43 @@ class Notebook extends React.Component {
   }
 
   render(){
-    const { categoryList, activeCategoryId, activeNoteId, activeNoteTitle, titleFocus, pageNoteFound } = this.state
+    const { categoryList, activeCategoryId, activeNoteId, activeNoteTitle, titleFocus, page } = this.state
     return (
       <React.Fragment>
-        {
-          pageNoteFound ? <Page404></Page404> :
-          <NotebookWrapper>
-            <Sidebar 
-              active={this.changeActiveCategory} 
-              changeCategoryList={this.changeCategoryList}
-              handlePageNotefound={this.handlePageNotefound}
-            >
-            </Sidebar>
-            <Notelist 
-              wrappedComponentRef={this.noteListRef}
-              active={this.changeActiveNote}
-              changeNoteList={this.changeNoteList}
-              activeCategoryId={activeCategoryId} 
-              categoryList={categoryList}
-            ></Notelist>
-            <Editor 
-              activeCategoryId={activeCategoryId}
-              activeNoteId={activeNoteId} 
-              activeNoteTitle={activeNoteTitle} 
-              titleFocus={titleFocus}
-              handleSyncTitle={this.handleSyncTitle}
-            ></Editor>
-          </NotebookWrapper>
-        }
+        {(() => {
+          switch(page){
+            case 'note':
+              return <NotebookWrapper>
+                <Sidebar 
+                  active={this.changeActiveCategory} 
+                  changeCategoryList={this.changeCategoryList}
+                  handlePageNotefound={this.handlePageNotefound}
+                >
+                </Sidebar>
+                <Notelist 
+                  wrappedComponentRef={this.noteListRef}
+                  active={this.changeActiveNote}
+                  changeNoteList={this.changeNoteList}
+                  activeCategoryId={activeCategoryId} 
+                  categoryList={categoryList}
+                ></Notelist>
+                <Editor 
+                  activeCategoryId={activeCategoryId}
+                  activeNoteId={activeNoteId} 
+                  activeNoteTitle={activeNoteTitle} 
+                  titleFocus={titleFocus}
+                  handleSyncTitle={this.handleSyncTitle}
+                ></Editor>
+              </NotebookWrapper>
+            case 'preview':
+              return <Preview></Preview>
+            default:
+              return <Page404></Page404>
+          }
+        })()}
       </React.Fragment>
     )
   }
 }
 
-export default withRouter(Notebook)
+export default Notebook

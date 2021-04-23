@@ -2,12 +2,12 @@ import styled from 'styled-components'
 import { sidebarWidth } from '../Sidebar/style'
 import { notelistWidth } from '../Notelist/style'
 
-const otherWidth = (parseInt(sidebarWidth) + parseInt(notelistWidth)) + 'px'
+const otherWidth = (100 - (parseInt(sidebarWidth) + parseInt(notelistWidth))) + '%'
 
 export const EditorWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  width: calc(100% - ${otherWidth});
+  width: ${props => props.isPreviewMode ? '50%' : otherWidth};
   height: 100%;
   background: #fffff9;
 `

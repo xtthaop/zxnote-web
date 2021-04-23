@@ -187,7 +187,7 @@ class Sidebar extends React.Component {
     if(location.hash === '' || location.hash === '#/'){
       this.handleGetCategoryList()
     }else{
-      if(hash[1] === 'category' && regExp.test(hash[2])){
+      if(hash[1] === 'category' && regExp.test(hash[2]) && hash[3] === 'note' && regExp.test(hash[4])){
         this.handleGetCategoryList()
       }else{
         this.props.handlePageNotefound()

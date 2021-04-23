@@ -20,12 +20,14 @@ class Editor extends React.Component {
       savedStatus: true,
       timeoutId: undefined,
       contentLoading: false,
+      isPreviewMode: false,
     }
     this.titleRef = React.createRef()
     this.changeTitle = this.changeTitle.bind(this)
     this.changeContent = this.changeContent.bind(this)
     this.handleSaveNote = this.handleSaveNote.bind(this)
     this.handleGetNoteContent = this.handleGetNoteContent.bind(this)
+    this.handleToPreview = this.handleToPreview.bind(this)
   }
 
   changeTitle(e){
@@ -89,6 +91,18 @@ class Editor extends React.Component {
     })
   }
 
+  handleToPreview(){
+    if(this.state.isPreviewMode){
+      
+    }else{
+      if(location.hash.substr(location.hash.length - 1, 1) === '/'){
+        location.hash = location.hash + 'preview'
+      }else{
+        location.hash = location.hash + '/preview'
+      }
+    }
+  }
+
   componentDidUpdate(prevProp){
     if(prevProp.activeNoteId !== this.props.activeNoteId){
       this.setState({ 
@@ -103,11 +117,25 @@ class Editor extends React.Component {
     }
   }
 
+  getHash(){
+    const hash = location.hash
+    const hashArr = hash.split('/')
+    return hashArr
+  }
+
+  componentDidMount(){
+    const hash = this.getHash()
+
+    if(hash[5] && hash[5] === 'preview'){
+      this.setState({ isPreviewMode: true })
+    }
+  }
+
   render(){
-    const { title, content, showEditor, savedStatus, contentLoading } = this.state
+    const { title, content, showEditor, savedStatus, contentLoading, isPreviewMode } = this.state
 
     return (
-      <EditorWrapper>
+      <EditorWrapper isPreviewMode={isPreviewMode}>
         {
           showEditor ?
           <React.Fragment>
@@ -122,6 +150,7 @@ class Editor extends React.Component {
               </li>
               <li className="tool"><SvgIcon iconClass="pic"></SvgIcon></li>
               <li className="tool right" onClick={this.handleSaveNote}><SvgIcon iconClass="save"></SvgIcon></li>
+              <li className="tool right" onClick={this.handleToPreview}><SvgIcon iconClass="square-split"></SvgIcon></li>
             </ToolBar>
             <ContentWrapper value={content} onChange={this.changeContent}></ContentWrapper>
           </React.Fragment> : 
