@@ -39,7 +39,6 @@ class Notelist extends React.Component {
     this.handleSubmitForm = this.handleSubmitForm.bind(this)
     this.handleMoveNote = this.handleMoveNote.bind(this)
     this.handleHashChange = this.handleHashChange.bind(this)
-    this.getActiveNoteIndex = this.getActiveNoteIndex.bind(this)
   }
 
   handleNoteItemClick(id, index) {
@@ -109,9 +108,9 @@ class Notelist extends React.Component {
   }
 
   changeActiveNoteTitle(title){
-    const data = this.state.noteList
-    data[this.state.activeIndex].note_title = title
-    this.setState({ noteList: data })
+    const { noteList, activeIndex } = this.state.noteList
+    noteList[activeIndex].note_title = title
+    this.setState({ noteList })
   }
 
   handleSubmitForm(){
@@ -153,18 +152,6 @@ class Notelist extends React.Component {
     })
   }
 
-  getActiveNoteIndex(noteList, id){
-    if(noteList.length){
-      for(let i = 0; i < noteList.length; i++){
-        if(id === noteList[i].note_id){
-          return i
-        }
-      }
-    }
-
-    return undefined
-  }
-
   getHashNoteId(){
     const hash = location.hash
     const hashArr = hash.split('/')
@@ -175,9 +162,9 @@ class Notelist extends React.Component {
     const hashNoteId = this.getHashNoteId()
     if(hashNoteId === undefined) return
     if(hashNoteId !== this.state.activeId){
-      const activeIndex = this.getActiveNoteIndex(this.state.noteList, hashNoteId)
-      this.setState({ activeId: hashNoteId, activeIndex })
+      const activeIndex = document.getElementById(`note_${hashNoteId}`) ? Number(document.getElementById(`note_${hashNoteId}`).getAttribute('data-index')) : undefined
       const activeTitle = this.state.noteList[activeIndex] && this.state.noteList[activeIndex].note_title
+      this.setState({ activeId: hashNoteId, activeIndex })
       this.props.active(hashNoteId, activeTitle)
     }
   }
@@ -194,16 +181,20 @@ class Notelist extends React.Component {
       
       if(hashNoteId){
         activeId = hashNoteId
-        activeIndex = this.getActiveNoteIndex(noteList, hashNoteId)
+        activeIndex = undefined
       }else{
         activeIndex = 0
         activeId = noteList[activeIndex] && noteList[activeIndex].note_id
       }
 
-      const activeTitle = noteList[activeIndex] && noteList[activeIndex].note_title
-      this.setState({ noteList, listLoading: false, activeId, activeIndex })
-      this.props.active(activeId, activeTitle)
-      this.props.changeNoteList(noteList)
+      this.setState({ noteList, listLoading: false, activeId }, () => {
+        if(activeIndex === undefined){
+          activeIndex = document.getElementById(`note_${hashNoteId}`) ? Number(document.getElementById(`note_${hashNoteId}`).getAttribute('data-index')) : undefined
+        }
+        const activeTitle = noteList[activeIndex] && noteList[activeIndex].note_title
+        this.props.active(activeId, activeTitle)
+        this.props.changeNoteList(noteList)
+      })
     }).catch(() => {
       activeId = hashNoteId
       activeIndex = undefined
@@ -275,7 +266,7 @@ class Notelist extends React.Component {
                   onClick={this.handleNoteItemClick.bind(this, item.note_id, index)}
                 >
                   <div className="noteinfo">
-                    <div className="title">{item.note_title}</div>
+                    <div id={`note_${item.note_id}`} data-index={index} className="title">{item.note_title}</div>
                     <div className="update-time">{moment(item.update_time).format('YYYY-MM-DD')}</div>
                   </div>
                   <div className="handle-btn">

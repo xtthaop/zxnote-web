@@ -73,9 +73,10 @@ class Editor extends React.Component {
   handleGetNoteContent(){
     this.setState({ contentLoading: true })
     getNoteContent({ note_id: this.props.activeNoteId }).then(res => {
-      const noteContent = res.data.note_content
+      let noteContent = res.data.note_content
+      noteContent = noteContent === null ? '' : noteContent, 
       this.setState({ 
-        content: noteContent === null ? '' : noteContent, 
+        content: noteContent, 
         showEditor: this.props.activeNoteTitle === undefined ? false : true,
         contentLoading: false,
       }, () => {
