@@ -1,4 +1,5 @@
 import React from 'react'
+import { withRouter } from 'react-router-dom'
 import moment from 'moment'
 import { createNote, getCategoryNote, deleteNote, moveNote } from '@/api/notebook/note'
 import SvgIcon from '@/components/SvgIcon'
@@ -23,8 +24,9 @@ class Notelist extends React.Component {
     super(props)
     this.state = {
       noteList: [],
-      activeId: undefined,
-      activeIndex: undefined,
+      activeCategoryId: undefined,
+      activeNoteId: undefined,
+      activeNoteIndex: undefined,
       listLoading: false,
       dialogVisible: false,
       moveCategoryId: undefined,
@@ -37,57 +39,70 @@ class Notelist extends React.Component {
     this.handleClose = this.handleClose.bind(this)
     this.handleSubmitForm = this.handleSubmitForm.bind(this)
     this.handleMoveNote = this.handleMoveNote.bind(this)
-    this.handleHashChange = this.handleHashChange.bind(this)
   }
 
-  handleNoteItemClick(id, index) {
-    this.setState({
-      activeId: id,
-      activeIndex: index,
-    })
-    const activeId = id
-    const activeTitle = this.state.noteList[index].note_title
-    this.props.active(activeId, activeTitle)
+  handleNoteItemClick(id, index){
+    if(this.state.activeNoteId !== id){
+      this.setState({
+        activeNoteId: id,
+        activeNoteIndex: index,
+      })
+
+      const activeTitle = this.state.noteList[index].note_title
+      this.props.active(id, activeTitle)
+      this.props.history.push(`/category/${this.state.activeCategoryId}/note/${id}`)
+    }
   }
 
   handleCreateNote(){
     const currentDate = moment().format('YYYY-MM-DD')
     let data = {
       note_title: currentDate,
-      category_id: this.props.activeCategoryId
+      category_id: this.state.activeCategoryId
     }
 
     createNote(data).then(res => {
       const noteData = this.state.noteList
+      const activeId = res.data.note_id
+
       noteData.unshift({
-        note_id: res.data.note_id,
+        note_id: activeId,
         note_title: currentDate,
         create_time: currentDate,
       })
+
       const activeIndex = 0
       this.setState({ 
         notelist: noteData,
-        activeId: res.data.note_id,
-        activeIndex
+        activeNoteId: activeId,
+        activeNoteIndex: activeIndex
       })
-      const activeId = res.data.note_id
+
       const activeTitle = currentDate
       this.props.active(activeId, activeTitle, true)
+      this.props.history.push(`/category/${this.state.activeCategoryId}/note/${activeId}`)
     })
   }
 
   handleDelete(index){
     messagebox.warning('提示', '确认删除笔记？').then(() => {
-      const data = { note_id: this.state.activeId }
+      const data = { note_id: this.state.activeNoteId }
       deleteNote(data).then(() => {
         let noteList = this.state.noteList
         noteList.splice(index, 1)
+
         const activeIndex = 0
         const activeId = noteList[activeIndex] && noteList[activeIndex].note_id
         const activeTitle = noteList[activeIndex] && noteList[activeIndex].note_title
-        this.setState({ noteList, activeId, activeIndex })
+
+        this.setState({ noteList, activeNoteId: activeId, activeNoteIndex: activeIndex })
         this.props.active(activeId, activeTitle)
         message.success('删除成功！')
+        if(!!activeId){
+          this.props.history.push(`/category/${this.state.activeCategoryId}/note/${activeId}`)
+        }else{
+          this.props.history.push(`/category/${this.state.activeCategoryId}`)
+        }
       })
     }).catch(() => {})
   }
@@ -101,131 +116,116 @@ class Notelist extends React.Component {
   }
 
   handleClose(){
-    this.setState({
-      dialogVisible: false,
-    })
+    this.setState({ dialogVisible: false })
   }
 
   changeActiveNoteTitle(title){
-    const { noteList, activeIndex } = this.state
-    noteList[activeIndex].note_title = title
+    const { noteList, activeNoteIndex } = this.state
+    noteList[activeNoteIndex].note_title = title
     this.setState({ noteList })
   }
 
   handleSubmitForm(){
-    const { moveCategoryId, activeId } = this.state
+    const { moveCategoryId, activeNoteId, activeNoteIndex } = this.state
 
-    if(!moveCategoryId || moveCategoryId === this.props.activeCategoryId){
+    if(!moveCategoryId || moveCategoryId === this.state.activeCategoryId){
       this.handleClose()
       return
     }
 
     const data = {
       category_id: moveCategoryId,
-      note_id: activeId,
+      note_id: activeNoteId,
     }
 
     this.setState({ confirmLoading: true })
     moveNote(data).then(() => {
-      let noteList = this.state.noteList
-      noteList.splice(activeIndex, 1)
+      const noteList = this.state.noteList
+      noteList.splice(activeNoteIndex, 1)
+
       const activeIndex = 0
       const activeId = noteList[activeIndex] && noteList[activeIndex].note_id
       const activeTitle = noteList[activeIndex] && noteList[activeIndex].note_title
-      this.props.active(activeId, activeTitle)
+
       this.setState({ 
         confirmLoading: false,
         dialogVisible: false,
         noteList,
-        activeId,
-        activeIndex,
+        activeNoteId: activeId,
+        activeNoteIndex: activeIndex,
       })
+      this.props.active(activeId, activeTitle)
+      if(!!activeId){
+        this.props.history.push(`/category/${this.state.activeCategoryId}/note/${activeId}`)
+      }else{
+        this.props.history.push(`/category/${this.state.activeCategoryId}`)
+      }
     }).catch(() => {
       this.setState({ confirmLoading: false })
     })
   }
 
   handleSelectChange(val){
-    this.setState({
-      moveCategoryId: val
-    })
-  }
-
-  getHashNoteId(){
-    const hash = location.hash
-    const hashArr = hash.split('/')
-    return Number(hashArr[4]) ? Number(hashArr[4]) : undefined
-  }
-
-  handleHashChange(){
-    const hashNoteId = this.getHashNoteId()
-    if(hashNoteId === undefined) return
-    if(hashNoteId !== this.state.activeId){
-      const activeIndex = document.getElementById(`note_${hashNoteId}`) ? Number(document.getElementById(`note_${hashNoteId}`).getAttribute('data-index')) : undefined
-      const activeTitle = this.state.noteList[activeIndex] && this.state.noteList[activeIndex].note_title
-      this.setState({ activeId: hashNoteId, activeIndex })
-      this.props.active(hashNoteId, activeTitle)
-    }
+    this.setState({ moveCategoryId: val })
   }
 
   handleGetCategoryNote(){
-    const data = { category_id: this.props.activeCategoryId }
-    const hashNoteId = this.getHashNoteId()
-    let activeId, activeIndex
+    const categoryId = this.state.activeCategoryId
+    const data = { category_id: categoryId }
+    let activeNoteIndex, activeNoteId
 
     this.setState({ listLoading: true, noteList: [] })
-
     getCategoryNote(data).then(res => {
       const noteList = res.data.category_note_list
-      
-      if(hashNoteId){
-        activeId = hashNoteId
-        activeIndex = undefined
+
+      if(this.props.match.params.noteId){
+        activeNoteId = parseInt(this.props.match.params.noteId) ? parseInt(this.props.match.params.noteId) : this.props.match.params.noteId
+        activeNoteIndex = noteList.findIndex(item => item.note_id === activeNoteId)
       }else{
-        activeIndex = 0
-        activeId = noteList[activeIndex] && noteList[activeIndex].note_id
+        activeNoteIndex = 0
+        activeNoteId = noteList[activeNoteIndex] && noteList[activeNoteIndex].note_id
       }
 
-      this.setState({ noteList, listLoading: false, activeId }, () => {
-        if(activeIndex === undefined){
-          activeIndex = document.getElementById(`note_${hashNoteId}`) ? Number(document.getElementById(`note_${hashNoteId}`).getAttribute('data-index')) : undefined
-        }
-        const activeTitle = noteList[activeIndex] && noteList[activeIndex].note_title
-        this.setState({ activeIndex })
-        this.props.active(activeId, activeTitle)
-        this.props.changeNoteList(noteList)
-      })
+      const activeTitle = noteList[activeNoteIndex] && noteList[activeNoteIndex].note_title
+      this.setState({ noteList, listLoading: false, activeNoteId, activeNoteIndex })
+      this.props.active(activeNoteId, activeTitle)
+      if(!!activeNoteId){
+        this.props.history.push(`/category/${categoryId}/note/${activeNoteId}`)
+      }
     }).catch(() => {
-      activeId = hashNoteId
-      activeIndex = undefined
-      this.setState({ listLoading: false, activeId, activeIndex })
-      this.props.active(activeId, undefined)
-      this.props.changeNoteList([])
+      this.setState({ listLoading: false })
+      this.props.active()
     })
   }
 
-  componentDidUpdate(prevProp){
-    if(prevProp.activeCategoryId !== this.props.activeCategoryId){
-      if(!this.props.activeCategoryId){
-        this.setState({ noteList: [], listLoading: false, activeId: undefined, activeIndex: undefined })
-        this.props.active(undefined, undefined)
-        this.props.changeNoteList([])
+  componentDidUpdate(prevProps){
+    if(this.props.match.params.categoryId !== this.state.activeCategoryId){
+      this.setState({ activeCategoryId: this.props.match.params.categoryId }, () => {
+        if(this.state.activeCategoryId){
+          this.handleGetCategoryNote()
+        }else{
+          this.setState({ listLoading: false, noteList: [] })
+          this.props.active()
+        }
+      })
+      return
+    }
+
+    if(prevProps.match.params.noteId !== this.props.match.params.noteId){
+      if(this.props.match.params.noteId){
+        const activeNoteId = parseInt(this.props.match.params.noteId) ? parseInt(this.props.match.params.noteId) : this.props.match.params.noteId
+        const activeNoteIndex = this.state.noteList.findIndex(item => item.note_id === activeNoteId)
+        this.setState({ activeNoteId, activeNoteIndex })
+        const activeNoteTitle = this.state.noteList[activeNoteIndex] && this.state.noteList[activeNoteIndex].note_title
+        this.props.active(activeNoteId, activeNoteTitle)
       }else{
         this.handleGetCategoryNote()
       }
     }
   }
 
-  componentDidMount(){
-    window.addEventListener('hashchange', this.handleHashChange)
-  }
-
-  componentWillUnmount(){
-    window.removeEventListener('hashchange', this.handleHashChange)
-  }
-
   render(){
-    const { noteList, activeId, listLoading, dialogVisible, moveCategoryId, confirmLoading } = this.state
+    const { noteList, activeNoteId, listLoading, dialogVisible, moveCategoryId, confirmLoading } = this.state
 
     const menu = (item, index) => (
       <Menu>
@@ -262,11 +262,11 @@ class Notelist extends React.Component {
               return (
                 <li 
                   key={item.note_id} 
-                  className={activeId === item.note_id ? 'active' : ''}
+                  className={activeNoteId == item.note_id ? 'active' : ''}
                   onClick={this.handleNoteItemClick.bind(this, item.note_id, index)}
                 >
                   <div className="noteinfo">
-                    <div id={`note_${item.note_id}`} data-index={index} className="title">{item.note_title}</div>
+                    <div className="title">{item.note_title}</div>
                     <div className="update-time">{moment(item.update_time).format('YYYY-MM-DD')}</div>
                   </div>
                   <div className="handle-btn">
@@ -294,4 +294,4 @@ class Notelist extends React.Component {
   }
 }
 
-export default Notelist
+export default withRouter(Notelist)

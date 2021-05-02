@@ -73,13 +73,18 @@ class Editor extends React.Component {
   }
 
   handleGetNoteContent(){
-    this.setState({ contentLoading: true })
-    getNoteContent({ note_id: this.props.activeNoteId }).then(res => {
-      let noteContent = res.data.note_content
-      noteContent = noteContent === null ? '' : noteContent, 
+    this.setState({ contentLoading: true, showEditor: false })
+    const data = {
+      note_id: this.props.activeNoteId
+    }
+
+    getNoteContent(data).then(res => {
+      const noteContent = res.data.note_content === null ? '' : res.data.note_content
+
       this.setState({ 
+        title: this.props.activeNoteTitle,
         content: noteContent, 
-        showEditor: this.props.activeNoteTitle === undefined ? false : true,
+        showEditor: true,
         contentLoading: false,
       }, () => {
         if(this.props.titleFocus){
@@ -105,29 +110,11 @@ class Editor extends React.Component {
 
   componentDidUpdate(prevProp){
     if(prevProp.activeNoteId !== this.props.activeNoteId){
-      this.setState({ 
-        title: this.props.activeNoteTitle === undefined ? '' : this.props.activeNoteTitle,
-      })
-
       if(this.props.activeNoteId){
         this.handleGetNoteContent()
       }else{
-        this.setState({ title: '', content: '', showEditor: false })
+        this.setState({ showEditor: false, content: '', title: '', contentLoading: false })
       }
-    }
-  }
-
-  getHash(){
-    const hash = location.hash
-    const hashArr = hash.split('/')
-    return hashArr
-  }
-
-  componentDidMount(){
-    const hash = this.getHash()
-
-    if(hash[5] && hash[5] === 'preview'){
-      this.setState({ isPreviewMode: true })
     }
   }
 

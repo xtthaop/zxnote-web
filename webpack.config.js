@@ -11,13 +11,15 @@ module.exports = {
     filename: '[name].[contenthash].js',
     path: path.join(__dirname, 'dist'),
     clean: true,
-    publicPath: '/',
+    publicPath: '/notebook',
   },
   devtool: 'inline-source-map',
   devServer: {
     port: 10990,
-    contentBase: path.join(__dirname, 'dist'),
-    historyApiFallback: true,
+    publicPath: '/notebook',
+    historyApiFallback: {
+      index: '/notebook/index.html',
+    },
     proxy: {
       '/restful': {
         target: 'https://zxctb.top:10600',

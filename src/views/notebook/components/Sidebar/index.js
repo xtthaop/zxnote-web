@@ -1,4 +1,5 @@
 import React from 'react'
+import { withRouter } from 'react-router-dom'
 import SvgIcon from '@/components/SvgIcon'
 import Dropdown from '@/components/Dropdown'
 import Menu from '@/components/Menu'
@@ -22,7 +23,7 @@ class Sidebar extends React.Component {
     super(props)
     this.state = {
       categories: [],
-      activeId: 1,
+      activeId: 0,
       dialogVisible: false,
       categoryForm: {
         category_name: '',
@@ -40,14 +41,31 @@ class Sidebar extends React.Component {
     this.handleDelete = this.handleDelete.bind(this)
     this.reset = this.reset.bind(this)
     this.handleSubmitForm = this.handleSubmitForm.bind(this)
-    this.handleHashChange = this.handleHashChange.bind(this)
   }
 
   handleItemClick(id){
-    this.setState({
-      activeId: id
-    })
-    this.props.active(id, true)
+    if(this.state.activeId !== id){
+      this.setState({ activeId: id })
+      this.props.history.push(`/category/${id}`)
+    }
+  }
+
+  handleDelete(index){
+    messagebox.warning('提示', '确认删除分类及分类下所有笔记？').then(() => {
+      const data = { category_id: this.state.activeId }
+      deleteCategory(data).then(() => {
+        let categories = this.state.categories
+        categories.splice(index, 1)
+        const activeId = categories[0] && categories[0].category_id
+        this.setState({ categories, activeId })
+        message.success('删除成功！')
+        if(!!activeId){
+          this.props.history.push(`/category/${activeId}`)
+        }else{
+          this.props.history.push('/')
+        }
+      })
+    }).catch(() => {})
   }
 
   handleClose(){
@@ -78,20 +96,6 @@ class Sidebar extends React.Component {
       dialogVisible: true,
       dialogTitle: '新建分类',
     })
-  }
-
-  handleDelete(index){
-    messagebox.warning('提示', '确认删除分类及分类下所有笔记？').then(() => {
-      const data = { category_id: this.state.activeId }
-      deleteCategory(data).then(() => {
-        let categories = this.state.categories
-        categories.splice(index, 1)
-        const activeId = categories[0] && categories[0].category_id
-        this.setState({ categories, activeId })
-        this.props.active(activeId, true)
-        message.success('删除成功！')
-      })
-    }).catch(() => {})
   }
 
   handleUpdateCategory(item, index){
@@ -130,74 +134,48 @@ class Sidebar extends React.Component {
         const categories = this.state.categories
         categories.push({ category_id: activeId, category_name: category_name })
         this.setState({ activeId, categories, confirmLoading: false })
-        this.props.active(activeId)
+        this.props.history.push(`/category/${activeId}`)
         this.handleClose()
       })
     }
   }
 
-  getHashCategoryId(){
-    const hash = location.hash
-    const hashArr = hash.split('/')
-    return Number(hashArr[2]) ? Number(hashArr[2]) : undefined
-  }
-
-  handleHashChange(){
-    const hashCategoryId = this.getHashCategoryId()
-    if(hashCategoryId === undefined) return
-    if(hashCategoryId !== this.state.activeId){
-      this.setState({ activeId: hashCategoryId })
-      this.props.active(hashCategoryId)
-    }
-  }
-
   handleGetCategoryList(){
-    const hashCategoryId = this.getHashCategoryId()
-    let activeId
-
     this.setState({ listLoading: true, categories: [] })
     getCategoryList().then(res => {
       const categories = res.data.category_list
-
-      if(hashCategoryId){
-        activeId = hashCategoryId
-      }else{
-        activeId = categories[0] && categories[0].category_id
-      }
-
-      this.setState({ categories, listLoading: false, activeId })
-      this.props.active(activeId)
+      this.setState({ categories, listLoading: false }, () => {
+        let activeId
+        if(this.props.match.params.categoryId){
+          activeId = parseInt(this.props.match.params.categoryId)
+          this.setState({ activeId })
+        }else{
+          activeId = this.state.categories[0] && this.state.categories[0].category_id
+          this.setState({ activeId })
+          if(!!activeId){
+            this.props.history.push(`/category/${activeId}`)
+          }
+        }
+      })
       this.props.changeCategoryList(categories)
     }).catch(() => {
-      activeId = hashCategoryId
-      this.setState({ categories: [], listLoading: false, activeId })
-      this.props.active(activeId)
+      this.setState({ categories: [], listLoading: false })
     })
   }
 
-  getHash(){
-    const hash = location.hash
-    const hashArr = hash.split('/')
-    return hashArr
+  componentDidUpdate(prevProps){
+    if(prevProps.match.params.categoryId !== this.props.match.params.categoryId){
+      if(this.props.match.params.categoryId){
+        const activeId = parseInt(this.props.match.params.categoryId)
+        this.setState({ activeId })
+      }else{
+        this.handleGetCategoryList()
+      }
+    }
   }
 
   componentDidMount(){
-    const hash = this.getHash()
-    const regExp = /^\d+$/
-    if(location.hash === '' || location.hash === '#/'){
-      this.handleGetCategoryList()
-    }else{
-      if(hash[1] === 'category' && regExp.test(hash[2]) && hash[3] === 'note' && regExp.test(hash[4])){
-        this.handleGetCategoryList()
-      }else{
-        this.props.handlePageNotefound()
-      }
-    }
-    window.addEventListener('hashchange', this.handleHashChange)
-  }
-
-  componentWillUnmount(){
-    window.removeEventListener('hashchange', this.handleHashChange)
+    this.handleGetCategoryList()
   }
 
   render(){
@@ -268,4 +246,4 @@ class Sidebar extends React.Component {
   }
 }
 
-export default Sidebar
+export default withRouter(Sidebar)
