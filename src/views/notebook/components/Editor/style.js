@@ -2,12 +2,13 @@ import styled from 'styled-components'
 import { sidebarWidth } from '../Sidebar/style'
 import { notelistWidth } from '../Notelist/style'
 
-const otherWidth = (100 - (parseInt(sidebarWidth) + parseInt(notelistWidth))) + '%'
+const eidtWidth = (100 - (parseInt(sidebarWidth) + parseInt(notelistWidth))) + '%'
+const previewWidth = 50 + '%'
 
 export const EditorWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  width: ${props => props.isPreviewMode ? '50%' : otherWidth};
+  width: ${props => props.isPreviewMode ? previewWidth : eidtWidth};
   height: 100%;
   background: #fffff9;
 `
@@ -83,9 +84,12 @@ export const ContentWrapper = styled.textarea`
   border: none;
   outline: none;
   padding: 30px;
+  font-weight: 400;
+  line-height: 30px;
   background: #fffff9;
   resize: none;
-  font-size: 16px;
+  font-size: 18px;
+  font-family: -apple-system,SF UI Text,Arial,PingFang SC,Hiragino Sans GB,Microsoft YaHei,WenQuanYi Micro Hei,sans-serif;
 `
 
 export const EmptyArea = styled.div`

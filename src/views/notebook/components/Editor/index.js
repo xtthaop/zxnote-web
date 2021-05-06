@@ -1,4 +1,5 @@
 import React from 'react'
+import { withRouter } from 'react-router-dom'
 import SvgIcon from '@/components/SvgIcon'
 import Loading from '@/components/Loading'
 import { getNoteContent, saveNote } from '@/api/notebook/note'
@@ -66,8 +67,11 @@ class Editor extends React.Component {
     }
 
     this.setState({ savedStatus: false })
-    saveNote(data).then(() => {
+    saveNote(data).then(() => { 
       this.props.handleSyncTitle(this.state.title)
+      if(this.props.isPreviewMode){
+        this.props.handleSyncContent(this.state.content)
+      }
       this.setState({ savedStatus: true })
     })
   }
@@ -90,6 +94,10 @@ class Editor extends React.Component {
         if(this.props.titleFocus){
           this.titleRef.current.select()
         }
+
+        if(this.props.isPreviewMode){
+          this.props.handleSyncContent(this.state.content)
+        }
       })
     }).catch(() => {
       this.setState({ showEditor: false, content: '', title: '', contentLoading: false })
@@ -97,14 +105,12 @@ class Editor extends React.Component {
   }
 
   handleToPreview(){
-    if(this.state.isPreviewMode){
-      
+    if(this.props.isPreviewMode){
+      const pathArr = this.props.history.location.pathname.split('/')
+      pathArr.pop()
+      this.props.history.push(pathArr.join('/'))
     }else{
-      if(location.hash.substr(location.hash.length - 1, 1) === '/'){
-        location.hash = location.hash + 'preview'
-      }else{
-        location.hash = location.hash + '/preview'
-      }
+      this.props.history.push(this.props.history.location.pathname + '/preview')
     }
   }
 
@@ -122,7 +128,7 @@ class Editor extends React.Component {
     const { title, content, showEditor, savedStatus, contentLoading, isPreviewMode } = this.state
 
     return (
-      <EditorWrapper isPreviewMode={isPreviewMode}>
+      <EditorWrapper isPreviewMode={this.props.isPreviewMode}>
         {
           showEditor ?
           <React.Fragment>
@@ -150,4 +156,4 @@ class Editor extends React.Component {
   }
 }
 
-export default Editor
+export default withRouter(Editor)

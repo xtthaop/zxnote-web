@@ -37,12 +37,20 @@ const GlobalStyle = createGlobalStyle`
     line-height: 1;
   }
 
+  body b, body h1, body h2, body h3, body h4, body h5, body h6, body strong {
+    font-weight: 600;
+  }
+
   ol, ul {
     list-style: none;
   }
 
   blockquote, q {
     quotes: none;
+  }
+
+  code{
+    font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,Courier,monospace;
   }
 
   blockquote:before, blockquote:after,

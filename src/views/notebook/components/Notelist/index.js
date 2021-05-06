@@ -211,7 +211,7 @@ class Notelist extends React.Component {
       return
     }
 
-    if(prevProps.match.params.noteId !== this.props.match.params.noteId){
+    if(prevProps.match.params.noteId !== this.props.match.params.noteId && this.props.match.params.noteId !== this.state.activeNoteId.toString()){
       if(this.props.match.params.noteId){
         const activeNoteId = parseInt(this.props.match.params.noteId) ? parseInt(this.props.match.params.noteId) : this.props.match.params.noteId
         const activeNoteIndex = this.state.noteList.findIndex(item => item.note_id === activeNoteId)
