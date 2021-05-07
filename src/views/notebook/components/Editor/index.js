@@ -2,6 +2,7 @@ import React, { Fragment } from 'react'
 import { withRouter } from 'react-router-dom'
 import SvgIcon from '@/components/SvgIcon'
 import Loading from '@/components/Loading'
+import { message } from '@/components/message'
 import { getNoteContent, saveNote, releaseNote } from '@/api/notebook/note'
 import {
   EditorWrapper,
@@ -83,6 +84,11 @@ class Editor extends React.Component {
 
   handleGetNoteContent(){
     this.setState({ contentLoading: true, showEditor: false })
+
+    if(this.props.isPreviewMode){
+      this.props.handleSyncContent(false)
+    }
+    
     const data = {
       note_id: this.props.activeNoteInfo.note_id
     }
@@ -121,11 +127,17 @@ class Editor extends React.Component {
   }
 
   componentDidUpdate(prevProp){
-    if(prevProp.activeNoteInfo.note_id !== this.props.activeNoteInfo.note_id){
-      if(this.props.activeNoteInfo && this.props.activeNoteInfo.note_id){
+    const activeNoteInfo = this.props.activeNoteInfo ? this.props.activeNoteInfo : {}
+    const prevActiveNoteInfo = prevProp.activeNoteInfo ? prevProp.activeNoteInfo : {}
+
+    if(prevActiveNoteInfo.note_id !== activeNoteInfo.note_id){
+      if(activeNoteInfo.note_id){
         this.handleGetNoteContent()
       }else{
         this.setState({ showEditor: false, content: '', title: '', contentLoading: false })
+        if(this.props.isPreviewMode){
+          this.props.handleSyncContent(false)
+        }
       }
     }
   }
@@ -154,7 +166,7 @@ class Editor extends React.Component {
     const { title, content, showEditor, savedStatus, contentLoading, releaseStatus, releaseLoading, cancelStatus } = this.state
 
     return (
-      <EditorWrapper isPreviewMode={this.props.isPreviewMode}>
+      <EditorWrapper isPreviewMode={this.props.isPreviewMode} showEditor={showEditor}>
         {
           showEditor ?
           <React.Fragment>

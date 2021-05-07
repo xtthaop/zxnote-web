@@ -8,7 +8,7 @@ const previewWidth = 50 + '%'
 export const EditorWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  width: ${props => props.isPreviewMode ? previewWidth : eidtWidth};
+  width: ${props => props.isPreviewMode ? (props.showEditor ? previewWidth : '100%') : eidtWidth};
   height: 100%;
   background: #fffff9;
 `

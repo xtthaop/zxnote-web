@@ -1,7 +1,6 @@
 import React from 'react'
 import { withRouter } from 'react-router-dom'
 import { Editor } from '../notebook/components/index'
-import { getCategoryList } from '@/api/notebook/category'
 import { getCategoryNote } from '@/api/notebook/note'
 import 'highlight.js/styles/atom-one-dark.css';
 import {
@@ -15,14 +14,17 @@ class Preview extends React.Component {
   constructor(props){
     super(props)
     this.state = {
-      activeNoteId: undefined,
-      activeNoteTitle: undefined,
+      showPreviewer: false,
+      activeNoteInfo: {},
       previewerTitle: undefined,
       previewerContent: undefined,
     }
     this.handleInitMarkdown()
+    this.editorRef = React.createRef()
     this.handleSyncTitle = this.handleSyncTitle.bind(this)
     this.handleSyncContent = this.handleSyncContent.bind(this)
+    this.handleGetNote = this.handleGetNote.bind(this)
+    this.handleClearNote = this.handleClearNote.bind(this)
   }
 
   handleInitMarkdown(){
@@ -85,52 +87,77 @@ class Preview extends React.Component {
   }
 
   handleSyncContent(content){
-    this.setState({ previewerContent: { __html: this.md.render(content) } })
+    if(content === false){
+      this.setState({ 
+        showPreviewer: false,
+        previewerContent: '',
+      })
+    }else{
+      this.setState({ 
+        showPreviewer: true,
+        previewerContent: { __html: this.md.render(content) },
+      })
+    }
   }
 
-  componentDidMount(){
-    getCategoryList().then(res => {
-      const categories = res.data.category_list
-      const categoryIndex = categories.findIndex(item => item.category_id.toString() === this.props.match.params.categoryId)
-      if(categoryIndex >= 0){
-        const data = {
-          category_id: parseInt(this.props.match.params.categoryId)
-        }
-        getCategoryNote(data).then(res => {
-          const notes = res.data.category_note_list
-          const noteIndex = notes.findIndex(item => item.note_id.toString() === this.props.match.params.noteId)
-          if(noteIndex >= 0){
-            this.setState({
-              activeNoteId: parseInt(this.props.match.params.noteId),
-              activeNoteTitle: notes[noteIndex].note_title,
-              previewerTitle: notes[noteIndex].note_title,
-            })
-          }
-        })
-      }
-    }).catch(() => {
-      this.setState({
-        activeNoteId: undefined,
-        activeNoteTitle: undefined,
-      })
+  handleClearNote(){
+    this.setState({
+      showPreviewer: false,
+      activeNoteInfo: {},
+      previewerTitle: '',
     })
   }
 
+  handleGetNote(){
+    this.editorRef.current.setState({ contentLoading: true, showEditor: false })
+    this.setState({ showPreviewer: false })
+
+    const data = {
+      category_id: parseInt(this.props.match.params.categoryId)
+    }
+
+    getCategoryNote(data).then(res => {
+      const notes = res.data.category_note_list
+      const noteId = parseInt(this.props.match.params.noteId) ? parseInt(this.props.match.params.noteId) : this.props.match.params.noteId
+      const noteIndex = notes.findIndex(item => item.note_id === noteId)
+      this.setState({
+        activeNoteInfo: notes[noteIndex] ? notes[noteIndex] : { note_id: noteId },
+        previewerTitle: notes[noteIndex] && notes[noteIndex].note_title,
+      })
+    }).catch(() => {
+      this.handleClearNote()
+      this.editorRef.current.setState({ contentLoading: false })
+    })
+  }
+
+  componentDidUpdate(prevProps){
+    if(prevProps.match.params.noteId !== this.props.match.params.noteId || prevProps.match.params.categoryId !== this.props.match.params.categoryId){
+      this.handleGetNote()
+    }
+  }
+
+  componentDidMount(){
+    this.handleGetNote()
+  }
+
   render(){
-    const { activeNoteId, activeNoteTitle, previewerTitle, previewerContent } = this.state
+    const { activeNoteInfo, previewerTitle, previewerContent, showPreviewer } = this.state
     return (
       <PreviewWrapper>
         <Editor 
+          wrappedComponentRef={this.editorRef}
           isPreviewMode={true}
-          activeNoteId={activeNoteId} 
-          activeNoteTitle={activeNoteTitle}
+          activeNoteInfo={activeNoteInfo}
           handleSyncContent={this.handleSyncContent}
           handleSyncTitle={this.handleSyncTitle}
         ></Editor>
-        <Previewer>
-          <TitleWrapper>{previewerTitle}</TitleWrapper>
-          <ContentWrapper dangerouslySetInnerHTML={previewerContent}></ContentWrapper>
-        </Previewer>
+        {
+          showPreviewer ?
+          <Previewer>
+            <TitleWrapper>{previewerTitle}</TitleWrapper>
+            <ContentWrapper dangerouslySetInnerHTML={previewerContent}></ContentWrapper>
+          </Previewer> : null
+        }
       </PreviewWrapper>
     )
   }

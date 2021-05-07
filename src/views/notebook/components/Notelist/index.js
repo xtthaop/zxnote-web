@@ -189,9 +189,11 @@ class Notelist extends React.Component {
         activeNoteId = noteList[activeNoteIndex] && noteList[activeNoteIndex].note_id
       }
 
-      const activeNoteInfo = noteList[activeNoteIndex]
       this.setState({ noteList, listLoading: false, activeNoteId, activeNoteIndex })
+
+      const activeNoteInfo = noteList[activeNoteIndex] ? noteList[activeNoteIndex] : { note_id: activeNoteId }
       this.props.active(activeNoteInfo)
+
       if(!!activeNoteId){
         this.props.history.push(`/category/${categoryId}/note/${activeNoteId}`)
       }
@@ -214,12 +216,12 @@ class Notelist extends React.Component {
       return
     }
 
-    if(prevProps.match.params.noteId !== this.props.match.params.noteId && this.props.match.params.noteId !== this.state.activeNoteId.toString()){
+    if(prevProps.match.params.noteId !== this.props.match.params.noteId && this.props.match.params.noteId !== String(this.state.activeNoteId)){
       if(this.props.match.params.noteId){
         const activeNoteId = parseInt(this.props.match.params.noteId) ? parseInt(this.props.match.params.noteId) : this.props.match.params.noteId
         const activeNoteIndex = this.state.noteList.findIndex(item => item.note_id === activeNoteId)
         this.setState({ activeNoteId, activeNoteIndex })
-        const activeNoteInfo = this.state.noteList[activeNoteIndex]
+        const activeNoteInfo = this.state.noteList[activeNoteIndex] ? this.state.noteList[activeNoteIndex] : { note_id: activeNoteId }
         this.props.active(activeNoteInfo)
       }else{
         this.handleGetCategoryNote()
