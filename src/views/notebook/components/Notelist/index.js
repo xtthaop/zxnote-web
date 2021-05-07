@@ -79,6 +79,7 @@ class Notelist extends React.Component {
       })
 
       const activeNoteInfo = {
+        note_id: activeId,
         note_title: currentDate,
         release_status: false,
       }
