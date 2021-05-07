@@ -68,6 +68,11 @@ export const ToolBar = styled.ul`
       float: right;
     }
 
+    &.release{
+      width: 80px;
+      text-align: center;
+    }
+
     .release-text{
       display: inline-block;
       font-size: 13px;

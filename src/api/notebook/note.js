@@ -47,3 +47,11 @@ export function saveNote(data){
     data
   })
 }
+
+export function releaseNote(data){
+  return request({
+    url: '/note/release_note',
+    method: 'post',
+    data
+  })
+}

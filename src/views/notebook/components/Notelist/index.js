@@ -48,8 +48,8 @@ class Notelist extends React.Component {
         activeNoteIndex: index,
       })
 
-      const activeTitle = this.state.noteList[index].note_title
-      this.props.active(id, activeTitle)
+      const activeNoteInfo = this.state.noteList[index]
+      this.props.active(activeNoteInfo)
       this.props.history.push(`/category/${this.state.activeCategoryId}/note/${id}`)
     }
   }
@@ -78,8 +78,11 @@ class Notelist extends React.Component {
         activeNoteIndex: activeIndex
       })
 
-      const activeTitle = currentDate
-      this.props.active(activeId, activeTitle, true)
+      const activeNoteInfo = {
+        note_title: currentDate,
+        release_status: false,
+      }
+      this.props.active(activeNoteInfo, true)
       this.props.history.push(`/category/${this.state.activeCategoryId}/note/${activeId}`)
     })
   }
@@ -93,10 +96,10 @@ class Notelist extends React.Component {
 
         const activeIndex = 0
         const activeId = noteList[activeIndex] && noteList[activeIndex].note_id
-        const activeTitle = noteList[activeIndex] && noteList[activeIndex].note_title
+        const activeNoteInfo = noteList[activeIndex]
 
         this.setState({ noteList, activeNoteId: activeId, activeNoteIndex: activeIndex })
-        this.props.active(activeId, activeTitle)
+        this.props.active(activeNoteInfo)
         message.success('删除成功！')
         if(!!activeId){
           this.props.history.push(`/category/${this.state.activeCategoryId}/note/${activeId}`)
@@ -145,7 +148,7 @@ class Notelist extends React.Component {
 
       const activeIndex = 0
       const activeId = noteList[activeIndex] && noteList[activeIndex].note_id
-      const activeTitle = noteList[activeIndex] && noteList[activeIndex].note_title
+      const activeNoteInfo = noteList[activeIndex]
 
       this.setState({ 
         confirmLoading: false,
@@ -154,7 +157,7 @@ class Notelist extends React.Component {
         activeNoteId: activeId,
         activeNoteIndex: activeIndex,
       })
-      this.props.active(activeId, activeTitle)
+      this.props.active(activeNoteInfo)
       if(!!activeId){
         this.props.history.push(`/category/${this.state.activeCategoryId}/note/${activeId}`)
       }else{
@@ -186,9 +189,9 @@ class Notelist extends React.Component {
         activeNoteId = noteList[activeNoteIndex] && noteList[activeNoteIndex].note_id
       }
 
-      const activeTitle = noteList[activeNoteIndex] && noteList[activeNoteIndex].note_title
+      const activeNoteInfo = noteList[activeNoteIndex]
       this.setState({ noteList, listLoading: false, activeNoteId, activeNoteIndex })
-      this.props.active(activeNoteId, activeTitle)
+      this.props.active(activeNoteInfo)
       if(!!activeNoteId){
         this.props.history.push(`/category/${categoryId}/note/${activeNoteId}`)
       }
@@ -216,8 +219,8 @@ class Notelist extends React.Component {
         const activeNoteId = parseInt(this.props.match.params.noteId) ? parseInt(this.props.match.params.noteId) : this.props.match.params.noteId
         const activeNoteIndex = this.state.noteList.findIndex(item => item.note_id === activeNoteId)
         this.setState({ activeNoteId, activeNoteIndex })
-        const activeNoteTitle = this.state.noteList[activeNoteIndex] && this.state.noteList[activeNoteIndex].note_title
-        this.props.active(activeNoteId, activeNoteTitle)
+        const activeNoteInfo = this.state.noteList[activeNoteIndex]
+        this.props.active(activeNoteInfo)
       }else{
         this.handleGetCategoryNote()
       }

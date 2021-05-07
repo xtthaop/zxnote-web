@@ -9,8 +9,7 @@ class Notebook extends React.Component {
     super(props)
     this.state = {
       categoryList: [],
-      activeNoteId: undefined,
-      activeNoteTitle: '',
+      activeNoteInfo: {},
       titleFocus: false,
     }
     this.noteListRef = React.createRef()
@@ -23,10 +22,9 @@ class Notebook extends React.Component {
     this.setState({ categoryList: val })
   }
 
-  changeActiveNote(activeId, activeTitle, titleFocus){
+  changeActiveNote(activeNoteInfo, titleFocus){
     this.setState({
-      activeNoteId: activeId,
-      activeNoteTitle: activeTitle,
+      activeNoteInfo,
       titleFocus,
     })
   }
@@ -36,7 +34,7 @@ class Notebook extends React.Component {
   }
 
   render(){
-    const { categoryList, activeNoteId, activeNoteTitle, titleFocus } = this.state
+    const { categoryList, activeNoteInfo, titleFocus } = this.state
     return (
       <NotebookWrapper>
         <Sidebar changeCategoryList={this.changeCategoryList}></Sidebar>
@@ -46,8 +44,7 @@ class Notebook extends React.Component {
           categoryList={categoryList}
         ></Notelist>
         <Editor 
-          activeNoteId={activeNoteId} 
-          activeNoteTitle={activeNoteTitle} 
+          activeNoteInfo={activeNoteInfo}
           titleFocus={titleFocus}
           handleSyncTitle={this.handleSyncTitle}
         ></Editor>

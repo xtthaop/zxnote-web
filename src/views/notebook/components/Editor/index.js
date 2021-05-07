@@ -1,8 +1,8 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import { withRouter } from 'react-router-dom'
 import SvgIcon from '@/components/SvgIcon'
 import Loading from '@/components/Loading'
-import { getNoteContent, saveNote } from '@/api/notebook/note'
+import { getNoteContent, saveNote, releaseNote } from '@/api/notebook/note'
 import {
   EditorWrapper,
   TitleWrapper,
@@ -19,6 +19,9 @@ class Editor extends React.Component {
       content: '',
       showEditor: false,
       savedStatus: true,
+      releaseStatus: false,
+      cancelStatus: false,
+      releaseLoading: false,
       timeoutId: undefined,
       contentLoading: false,
       isPreviewMode: false,
@@ -29,6 +32,8 @@ class Editor extends React.Component {
     this.handleSaveNote = this.handleSaveNote.bind(this)
     this.handleGetNoteContent = this.handleGetNoteContent.bind(this)
     this.handleToPreview = this.handleToPreview.bind(this)
+    this.handleRelease = this.handleRelease.bind(this)
+    this.handleChangeCancelStatus = this.handleChangeCancelStatus.bind(this)
   }
 
   changeTitle(e){
@@ -61,7 +66,7 @@ class Editor extends React.Component {
 
   handleSaveNote(){
     const data = {
-      note_id: this.props.activeNoteId,
+      note_id: this.props.activeNoteInfo.note_id,
       note_title: this.state.title,
       note_content: this.state.content,
     }
@@ -79,14 +84,15 @@ class Editor extends React.Component {
   handleGetNoteContent(){
     this.setState({ contentLoading: true, showEditor: false })
     const data = {
-      note_id: this.props.activeNoteId
+      note_id: this.props.activeNoteInfo.note_id
     }
 
     getNoteContent(data).then(res => {
       const noteContent = res.data.note_content === null ? '' : res.data.note_content
 
       this.setState({ 
-        title: this.props.activeNoteTitle,
+        title: this.props.activeNoteInfo.note_title,
+        releaseStatus: this.props.activeNoteInfo.release_status ? true : false,
         content: noteContent, 
         showEditor: true,
         contentLoading: false,
@@ -115,8 +121,8 @@ class Editor extends React.Component {
   }
 
   componentDidUpdate(prevProp){
-    if(prevProp.activeNoteId !== this.props.activeNoteId){
-      if(this.props.activeNoteId){
+    if(prevProp.activeNoteInfo.note_id !== this.props.activeNoteInfo.note_id){
+      if(this.props.activeNoteInfo && this.props.activeNoteInfo.note_id){
         this.handleGetNoteContent()
       }else{
         this.setState({ showEditor: false, content: '', title: '', contentLoading: false })
@@ -124,8 +130,28 @@ class Editor extends React.Component {
     }
   }
 
+  handleRelease(status){
+    if(this.state.releaseLoading) return
+
+    const data = {
+      note_id: this.props.activeNoteInfo.note_id,
+      release_status: status ? 1 : 0,
+    }
+
+    this.setState({ releaseLoading: true })
+    releaseNote(data).then(() => {
+      this.setState({ releaseStatus: status, releaseLoading: false })
+    })
+  }
+
+  handleChangeCancelStatus(status){
+    if(this.state.savedStatus && this.state.releaseStatus){
+      this.setState({ cancelStatus: status })
+    }
+  }
+
   render(){
-    const { title, content, showEditor, savedStatus, contentLoading, isPreviewMode } = this.state
+    const { title, content, showEditor, savedStatus, contentLoading, releaseStatus, releaseLoading, cancelStatus } = this.state
 
     return (
       <EditorWrapper isPreviewMode={this.props.isPreviewMode}>
@@ -137,9 +163,28 @@ class Editor extends React.Component {
               <input ref={this.titleRef} className="custom-input" value={title} onChange={this.changeTitle}></input>
             </TitleWrapper>
             <ToolBar>
-              <li className="tool right">
-                <SvgIcon iconClass="release"></SvgIcon>
-                <span className="release-text">发布笔记</span>
+              <li 
+                className="tool right release" 
+                onMouseEnter={() => this.handleChangeCancelStatus(true)}
+                onMouseLeave={() => this.handleChangeCancelStatus(false)}
+              >
+                {
+                  savedStatus ?
+                  <Fragment>
+                    {
+                      releaseStatus ?
+                      <div onClick={() => this.handleRelease(false)}>
+                        <SvgIcon iconClass={cancelStatus ? 'error' : 'success'}></SvgIcon>
+                        <span className="release-text">{cancelStatus ? (releaseLoading ? '取消中...' : '取消发布') : '已发布'}</span>
+                      </div> : 
+                      <div onClick={() => this.handleRelease(true)}>
+                        <SvgIcon iconClass={releaseLoading ? '' : 'release'}></SvgIcon>
+                        <span className="release-text">{releaseLoading ? '发布中...' : '发布笔记'}</span>
+                      </div>
+                    }
+                  </Fragment> :
+                  <span className="release-text">保存中...</span>
+                }
               </li>
               <li className="tool"><SvgIcon iconClass="pic"></SvgIcon></li>
               <li className="tool right" onClick={this.handleSaveNote}><SvgIcon iconClass="save"></SvgIcon></li>
