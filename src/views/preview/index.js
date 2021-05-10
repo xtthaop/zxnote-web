@@ -1,4 +1,5 @@
 import React from 'react'
+import debounce from 'lodash/debounce'
 import { withRouter } from 'react-router-dom'
 import { Editor } from '../notebook/components/index'
 import { getCategoryNote } from '@/api/notebook/note'
@@ -29,8 +30,8 @@ class Preview extends React.Component {
     this.handleSyncContent = this.handleSyncContent.bind(this)
     this.handleGetNote = this.handleGetNote.bind(this)
     this.handleClearNote = this.handleClearNote.bind(this)
-    this.syncPreviewScroll = this.syncPreviewScroll.bind(this)
-    this.syncEditorScroll = this.syncEditorScroll.bind(this)
+    this.syncPreviewScroll = debounce(this.syncPreviewScroll.bind(this), 50, { maxWait: 50 })
+    this.syncEditorScroll = debounce(this.syncEditorScroll.bind(this), 50, { maxWait: 50 })
   }
 
   handleInitMarkdown(){
@@ -151,7 +152,7 @@ class Preview extends React.Component {
 
       break
     }
-    
+
     $editor.scrollTop = lineHeight * line
   }
 
