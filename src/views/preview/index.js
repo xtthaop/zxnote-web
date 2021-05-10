@@ -145,7 +145,6 @@ class Preview extends React.Component {
 
     const { $editor, $preview } = this.state
 
-    this.previewMouseEnter()
     $editor.addEventListener('mouseenter', this.editorMouseEnter)
     $preview.addEventListener('mouseenter', this.previewMouseEnter)
   }
@@ -176,6 +175,7 @@ class Preview extends React.Component {
   handleToggleSyncScroll(val){
     this.setState({ syncScrollStatus: val }, () => {
       if(val){
+        this.previewMouseEnter()
         this.syncScrollInit()
       }else{
         this.syncScrollDestroy()
