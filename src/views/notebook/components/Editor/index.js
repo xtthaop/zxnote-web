@@ -2,7 +2,6 @@ import React, { Fragment } from 'react'
 import { withRouter } from 'react-router-dom'
 import SvgIcon from '@/components/SvgIcon'
 import Loading from '@/components/Loading'
-import { message } from '@/components/message'
 import { getNoteContent, saveNote, releaseNote } from '@/api/notebook/note'
 import {
   EditorWrapper,
@@ -28,6 +27,7 @@ class Editor extends React.Component {
       isPreviewMode: false,
     }
     this.titleRef = React.createRef()
+    this.contentRef = React.createRef()
     this.changeTitle = this.changeTitle.bind(this)
     this.changeContent = this.changeContent.bind(this)
     this.handleSaveNote = this.handleSaveNote.bind(this)
@@ -202,7 +202,11 @@ class Editor extends React.Component {
               <li className="tool right" onClick={this.handleSaveNote}><SvgIcon iconClass="save"></SvgIcon></li>
               <li className="tool right" onClick={this.handleToPreview}><SvgIcon iconClass="square-split"></SvgIcon></li>
             </ToolBar>
-            <ContentWrapper value={content} onChange={this.changeContent}></ContentWrapper>
+            <ContentWrapper 
+              ref={this.contentRef}
+              value={content}
+              onChange={this.changeContent}
+            ></ContentWrapper>
           </React.Fragment> : 
           <EmptyArea>
             <Loading data-loading={contentLoading}></Loading>

@@ -33,6 +33,10 @@ const GlobalStyle = createGlobalStyle`
     display: block;
   }
 
+  html{
+    overflow: hidden;
+  }
+
   body {
     line-height: 1;
   }
