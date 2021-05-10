@@ -7,6 +7,7 @@ export const PreviewWrapper = styled.div`
 `
 
 export const Previewer = styled.div`
+  position: relative;
   width: 50%;
   height: 100%;
   padding: 30px;
@@ -23,7 +24,16 @@ export const TitleWrapper = styled.h1`
   font-weight: 600;
 `
 
+export const SyncScrollToggle = styled.div`
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 13px;
+  color: #6d6d6d;
+`
+
 export const ContentWrapper = styled.div`
+  position: relative;
   font-size: 16px;
   line-height: 1.7;
 

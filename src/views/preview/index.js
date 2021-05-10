@@ -2,6 +2,7 @@ import React from 'react'
 import debounce from 'lodash/debounce'
 import { withRouter } from 'react-router-dom'
 import { Editor } from '../notebook/components/index'
+import Switch from '@/components/Switch'
 import { getCategoryNote } from '@/api/notebook/note'
 import 'highlight.js/styles/atom-one-dark.css';
 import {
@@ -9,6 +10,7 @@ import {
   Previewer,
   TitleWrapper,
   ContentWrapper,
+  SyncScrollToggle,
 } from './style'
 
 class Preview extends React.Component {
@@ -21,7 +23,10 @@ class Preview extends React.Component {
       previewerContent: undefined,
       scale: 0,
       currentTab: '',
-      scrollMap: null
+      scrollMap: null,
+      syncScrollStatus: true,
+      $editor: null,
+      $preview: null,
     }
     this.handleInitMarkdown()
     this.editorRef = React.createRef()
@@ -32,6 +37,11 @@ class Preview extends React.Component {
     this.handleClearNote = this.handleClearNote.bind(this)
     this.syncPreviewScroll = debounce(this.syncPreviewScroll.bind(this), 50, { maxWait: 50 })
     this.syncEditorScroll = debounce(this.syncEditorScroll.bind(this), 50, { maxWait: 50 })
+    this.handleToggleSyncScroll = this.handleToggleSyncScroll.bind(this)
+    this.syncScrollInit = this.syncScrollInit.bind(this)
+    this.syncScrollDestroy = this.syncScrollDestroy.bind(this)
+    this.editorMouseEnter = this.editorMouseEnter.bind(this)
+    this.previewMouseEnter = this.previewMouseEnter.bind(this)
   }
 
   handleInitMarkdown(){
@@ -118,26 +128,63 @@ class Preview extends React.Component {
         previewerContent: { __html: this.md.render(content) },
         scrollMap: null,
       }, () => {
-        const scrollMap = this.buildScrollMap()
-        this.setState({ scrollMap })
-
         const $editor = this.editorRef.current.contentRef.current
         const $preview = this.previewerRef.current
-        $editor.addEventListener('mouseover', () => {
-          $preview.removeEventListener('scroll', this.syncEditorScroll)
-          $editor.addEventListener('scroll', this.syncPreviewScroll)
-        })
-        $preview.addEventListener('mouseover', () => {
-          $editor.removeEventListener('scroll', this.syncPreviewScroll)
-          $preview.addEventListener('scroll', this.syncEditorScroll)
+        this.setState({ $editor, $preview }, () => {
+          this.syncScrollInit()
         })
       })
     }
   }
 
+  syncScrollInit(){
+    if(!this.state.syncScrollStatus) return
+
+    const scrollMap = this.buildScrollMap()
+    this.setState({ scrollMap })
+
+    const { $editor, $preview } = this.state
+
+    this.previewMouseEnter()
+    $editor.addEventListener('mouseenter', this.editorMouseEnter)
+    $preview.addEventListener('mouseenter', this.previewMouseEnter)
+  }
+
+  editorMouseEnter(){
+    const { $editor, $preview } = this.state
+    $preview.removeEventListener('scroll', this.syncEditorScroll)
+    $editor.addEventListener('scroll', this.syncPreviewScroll)
+  }
+
+  previewMouseEnter(){
+    const { $editor, $preview } = this.state
+    $editor.removeEventListener('scroll', this.syncPreviewScroll)
+    $preview.addEventListener('scroll', this.syncEditorScroll)
+  }
+
+  syncScrollDestroy(){
+    const scrollMap = null
+    this.setState({ scrollMap })
+
+    const { $editor, $preview } = this.state
+    $editor.removeEventListener('mouseenter', this.editorMouseEnter)
+    $preview.removeEventListener('mouseenter', this.previewMouseEnter)
+    $preview.removeEventListener('scroll', this.syncEditorScroll)
+    $editor.removeEventListener('scroll', this.syncPreviewScroll)
+  }
+
+  handleToggleSyncScroll(val){
+    this.setState({ syncScrollStatus: val }, () => {
+      if(val){
+        this.syncScrollInit()
+      }else{
+        this.syncScrollDestroy()
+      }
+    })
+  }
+
   syncEditorScroll(){
-    const $editor = this.editorRef.current.contentRef.current
-    const $preview = this.previewerRef.current
+    const { $editor, $preview } = this.state
     const scrollTop = $preview.scrollTop
     const lineHeight = parseFloat(getComputedStyle($editor).lineHeight)
 
@@ -157,8 +204,7 @@ class Preview extends React.Component {
   }
 
   syncPreviewScroll(){
-    const $editor = this.editorRef.current.contentRef.current
-    const $preview = this.previewerRef.current
+    const { $editor, $preview } = this.state
     const lineHeight = parseFloat(getComputedStyle($editor).lineHeight)
 
     const lineNo = Math.floor($editor.scrollTop / lineHeight)
@@ -167,8 +213,7 @@ class Preview extends React.Component {
   }
 
   buildScrollMap(){
-    const $editor = this.editorRef.current.contentRef.current
-    const $preview = this.previewerRef.current
+    const { $editor, $preview } = this.state
 
     const textareaStyle = getComputedStyle($editor)
     const sourceLikeDiv = document.createElement('div')
@@ -288,7 +333,7 @@ class Preview extends React.Component {
   }
 
   render(){
-    const { activeNoteInfo, previewerTitle, previewerContent, showPreviewer } = this.state
+    const { activeNoteInfo, previewerTitle, previewerContent, showPreviewer, syncScrollStatus } = this.state
     return (
       <PreviewWrapper>
         <Editor 
@@ -302,6 +347,10 @@ class Preview extends React.Component {
           showPreviewer ?
           <Previewer ref={this.previewerRef}>
             <TitleWrapper>{previewerTitle}</TitleWrapper>
+            <SyncScrollToggle>
+              <span>同步滚动：</span>
+              <Switch onChange={this.handleToggleSyncScroll} checked={syncScrollStatus}></Switch>
+            </SyncScrollToggle>
             <ContentWrapper dangerouslySetInnerHTML={previewerContent}></ContentWrapper>
           </Previewer> : null
         }
