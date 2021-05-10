@@ -13,6 +13,7 @@ export const Previewer = styled.div`
   box-sizing: border-box;
   background: #fcfaf2;
   overflow-y: scroll;
+  scroll-behavior: smooth;
 `
 
 export const TitleWrapper = styled.h1`

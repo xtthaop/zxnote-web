@@ -92,6 +92,7 @@ export const ContentWrapper = styled.textarea`
   font-weight: 400;
   line-height: 30px;
   background: #fffff9;
+  scroll-behavior: smooth;
   resize: none;
   font-size: 18px;
   font-family: -apple-system,SF UI Text,Arial,PingFang SC,Hiragino Sans GB,Microsoft YaHei,WenQuanYi Micro Hei,sans-serif;
