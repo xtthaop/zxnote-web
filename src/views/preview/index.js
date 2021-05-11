@@ -126,7 +126,6 @@ class Preview extends React.Component {
       this.setState({ 
         showPreviewer: true,
         previewerContent: { __html: this.md.render(content) },
-        scrollMap: null,
       }, () => {
         const $editor = this.editorRef.current.contentRef.current
         const $preview = this.previewerRef.current
@@ -140,13 +139,24 @@ class Preview extends React.Component {
   }
 
   syncScrollInit(){
-    const scrollMap = this.buildScrollMap()
-    this.setState({ scrollMap })
-
     const { $editor, $preview } = this.state
 
+    const scrollMap = this.buildScrollMap()
+    this.setState({ scrollMap })
     $editor.addEventListener('mouseenter', this.editorMouseEnter)
     $preview.addEventListener('mouseenter', this.previewMouseEnter)
+
+    const imgPackage = $preview.getElementsByClassName('image-package')
+    let completeNum = 0
+    for(let i = 0; i < imgPackage.length; i++){
+      imgPackage[i].getElementsByTagName('img')[0].onload = () => {
+        completeNum++
+        if(completeNum === imgPackage.length){
+          const scrollMap = this.buildScrollMap()
+          this.setState({ scrollMap })
+        }
+      }
+    }
   }
 
   editorMouseEnter(){
@@ -184,6 +194,7 @@ class Preview extends React.Component {
   }
 
   syncEditorScroll(){
+    if(!this.state.scrollMap) return
     const { $editor, $preview } = this.state
     const scrollTop = $preview.scrollTop
     const lineHeight = parseFloat(getComputedStyle($editor).lineHeight)
@@ -204,6 +215,7 @@ class Preview extends React.Component {
   }
 
   syncPreviewScroll(){
+    if(!this.state.scrollMap) return
     const { $editor, $preview } = this.state
     const lineHeight = parseFloat(getComputedStyle($editor).lineHeight)
 

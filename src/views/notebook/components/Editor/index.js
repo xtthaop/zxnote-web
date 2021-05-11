@@ -58,7 +58,7 @@ class Editor extends React.Component {
         const start = state.content.indexOf(uploadingStr)
         const end = start + uploadingStr.length
         return {
-          content: state.content.slice(0, start) + `![${file.name}](${imgUrl})\n` + state.content.slice(end)
+          content: state.content.slice(0, start) + `![${file.name}](${imgUrl})` + state.content.slice(end)
         }
       })
     })
