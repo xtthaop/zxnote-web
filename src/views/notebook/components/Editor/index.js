@@ -1,8 +1,10 @@
 import React, { Fragment } from 'react'
 import { withRouter } from 'react-router-dom'
+import md5 from 'js-md5'
 import SvgIcon from '@/components/SvgIcon'
 import Loading from '@/components/Loading'
 import { getNoteContent, saveNote, releaseNote } from '@/api/notebook/note'
+import { uploadFile } from '@/api/upload'
 import {
   EditorWrapper,
   TitleWrapper,
@@ -25,9 +27,11 @@ class Editor extends React.Component {
       timeoutId: undefined,
       contentLoading: false,
       isPreviewMode: false,
+      imgUploading: false,
     }
     this.titleRef = React.createRef()
     this.contentRef = React.createRef()
+    this.imgFileInputRef = React.createRef()
     this.changeTitle = this.changeTitle.bind(this)
     this.changeContent = this.changeContent.bind(this)
     this.handleSaveNote = this.handleSaveNote.bind(this)
@@ -35,6 +39,64 @@ class Editor extends React.Component {
     this.handleToPreview = this.handleToPreview.bind(this)
     this.handleRelease = this.handleRelease.bind(this)
     this.handleChangeCancelStatus = this.handleChangeCancelStatus.bind(this)
+    this.handleUploadImg = this.handleUploadImg.bind(this)
+    this.handleImgFileChange = this.handleImgFileChange.bind(this)
+    this.handleClickImgInput = this.handleClickImgInput.bind(this)
+  }
+
+  handleUploadImg(file, uploadingStr, filePromiseArr){
+    const fileNameArr = file.name.split('.')
+    const newFileName = +new Date() + '-' + md5(file.name) + '.' + fileNameArr[fileNameArr.length - 1]
+
+    const data = new FormData()
+    data.append('key', `images/${newFileName}`)
+    data.append('file', file)
+
+    const filePromise = uploadFile(data).then(res => {
+      const imgUrl = res.data.url
+      this.setState(state => {
+        const start = state.content.indexOf(uploadingStr)
+        const end = start + uploadingStr.length
+        return {
+          content: state.content.slice(0, start) + `![${file.name}](${imgUrl})\n` + state.content.slice(end)
+        }
+      })
+    })
+
+    filePromiseArr.push(filePromise)
+  }
+
+  handleImgFileChange(e){
+    this.setState({ imgUploading: true })
+    let start = this.contentRef.current.selectionStart
+    let end = this.contentRef.current.selectionEnd
+    let uploadingStr = ''
+
+    for(let i = 0; i < e.target.files.length; i++){
+      const tmpStr = `[图片正在上传...(${e.target.files[i].name}-${+new Date()})]\n`
+      uploadingStr += tmpStr
+    }
+
+    this.setState((state) => ({
+      content: state.content.slice(0, start) + uploadingStr + state.content.slice(end)
+    }))
+
+    const filePromiseArr = []
+    const uploadingArr = uploadingStr.split('\n')
+    for(let i = 0; i < e.target.files.length; i++){
+      const tmpStr = uploadingArr[i]
+      this.handleUploadImg(e.target.files[i], tmpStr, filePromiseArr)
+    }
+
+    Promise.all(filePromiseArr).then(() => {
+      this.setState({ imgUploading: false })
+      this.imgFileInputRef.current.value = ''
+      this.handleSaveNote()
+    })
+  }
+
+  handleClickImgInput(){
+    this.imgFileInputRef.current.click()
   }
 
   changeTitle(e){
@@ -60,7 +122,9 @@ class Editor extends React.Component {
     })
 
     const timeoutId = setTimeout(() => {
-      this.handleSaveNote()
+      if(!this.state.imgUploading){
+        this.handleSaveNote()
+      }
     }, 1000)
     this.setState({ timeoutId })
   }
@@ -103,6 +167,8 @@ class Editor extends React.Component {
         showEditor: true,
         contentLoading: false,
       }, () => {
+        this.contentRef.current.setSelectionRange(-1, -1)
+
         if(this.props.titleFocus){
           this.titleRef.current.select()
         }
@@ -198,7 +264,10 @@ class Editor extends React.Component {
                   <span className="release-text">保存中...</span>
                 }
               </li>
-              <li className="tool"><SvgIcon iconClass="pic"></SvgIcon></li>
+              <li className="tool" onClick={this.handleClickImgInput}>
+                <input ref={this.imgFileInputRef} type="file" multiple="multiple" onChange={this.handleImgFileChange} />
+                <SvgIcon iconClass="pic"></SvgIcon>
+              </li>
               <li className="tool right" onClick={this.handleSaveNote}><SvgIcon iconClass="save"></SvgIcon></li>
               <li className="tool right" onClick={this.handleToPreview}><SvgIcon iconClass="square-split"></SvgIcon></li>
             </ToolBar>

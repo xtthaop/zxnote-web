@@ -59,6 +59,12 @@ export const ToolBar = styled.ul`
     vertical-align: top;
     cursor: pointer;
 
+    input{
+      width: 0;
+      height: 0;
+      display: none;
+    }
+
     &:hover{
       background: #555;
       color: #efefef;

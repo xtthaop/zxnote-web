@@ -4,7 +4,7 @@ import { message } from '@/components/message.js'
 // create an axios instance
 const service = axios.create({
   baseURL: '/restful',
-  timeout: 5000,
+  timeout: 30000,
 })
 
 // request interceptor

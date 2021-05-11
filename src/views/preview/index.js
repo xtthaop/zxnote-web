@@ -95,7 +95,7 @@ class Preview extends React.Component {
       return '<div class="image-package"><img' + 
              '  src="' + token.attrs[token.attrIndex('src')][1] + '"' + 
              '  alt="' + token.attrs[token.attrIndex('alt')][1] + '"' +
-             '  title="' + token.attrs[token.attrIndex('title')][1] + '"' +
+             '  title="' + (token.attrs[token.attrIndex('title')] ? token.attrs[token.attrIndex('title')][1] : '') + '"' +
              '/></div>'
     }
 
@@ -131,15 +131,15 @@ class Preview extends React.Component {
         const $editor = this.editorRef.current.contentRef.current
         const $preview = this.previewerRef.current
         this.setState({ $editor, $preview }, () => {
-          this.syncScrollInit()
+          if(this.state.syncScrollStatus){
+            this.syncScrollInit()
+          }
         })
       })
     }
   }
 
   syncScrollInit(){
-    if(!this.state.syncScrollStatus) return
-
     const scrollMap = this.buildScrollMap()
     this.setState({ scrollMap })
 

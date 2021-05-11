@@ -22,7 +22,7 @@ module.exports = {
     },
     proxy: {
       '/restful': {
-        target: 'https://zxctb.top:10600',
+        target: 'https://zxctb.top',
         changeOrigin: true,
       },
     }
