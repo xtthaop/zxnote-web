@@ -43,7 +43,8 @@ module.exports = {
   ],
   module: {
     rules: [
-      { test: /\.css$/, use:['style-loader', 'css-loader'] },
+      { test: /\.(jpg|png|gif|bmp|jpeg)$/, use: 'url-loader?limit=7631&name=[hash:8]-[name].[ext]' },
+      { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       { test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader' },
       {
         test: /\.svg$/,
