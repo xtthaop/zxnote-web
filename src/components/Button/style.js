@@ -11,6 +11,39 @@ function switchColor(type){
   }
 }
 
+function switchPadding(size){
+  switch(size){
+    case 'small':
+      return '4px 6px'
+    case 'medium':
+      return '6px 8px'
+    default:
+      return '8px 10px'
+  }
+}
+
+function switchFontSize(size){
+  switch(size){
+    case 'small':
+      return '12px'
+    case 'medium':
+      return '14px'
+    default:
+      return '14px'
+  }
+}
+
+function switchBorderRadius(shape){
+  switch(shape){
+    case 'round':
+      return '20px'
+    case 'circle':
+      return '50%'
+    default:
+      return '4px'
+  }
+}
+
 const loading = keyframes`
   from{
     transform: rotate(0deg);
@@ -24,21 +57,21 @@ const loading = keyframes`
 export const ButtonWrapper = styled.button`
   display: inline-block;
   text-align: center;
-  height: 30px;
-  line-height: 20px;
-  padding: 4px 12px;
+  line-height: 1;
+  padding: ${props => switchPadding(props.size)};
   border: 1px solid ${props => switchColor(props.type)};
-  border-radius: 15px;
-  font-size: 14px;
+  border-radius: ${props => switchBorderRadius(props.shape)};
+  font-size: ${props => switchFontSize(props.size)};
+  background: ${props => switchColor(props.type)};
   font-weight: 500;
   touch-action: manipulation;
   cursor: pointer;
   background-image: none;
   white-space: nowrap;
   user-select: none;
-  background: #fff;
-  color: ${props => switchColor(props.type)};
+  color: #fff;
   outline: none;
+  box-sizing: border-box;
 
   .loading{
     display: ${props => props['data-loading'] ? 'inline-block' : 'none'};

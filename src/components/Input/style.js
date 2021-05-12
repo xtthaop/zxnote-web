@@ -2,9 +2,9 @@ import styled from 'styled-components'
 
 export const InputWrapper = styled.input`
   width: 100%;
-  line-height: 20px;
-  padding: 5px 10px;
-  font-size: 15px;
+  line-height: 1;
+  padding: 8px 10px;
+  font-size: 14px;
   border: 1px solid #ccc;
   border-radius: 4px; 
   background-color: transparent;

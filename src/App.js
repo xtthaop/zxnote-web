@@ -5,6 +5,7 @@ import GlobalStyle from '@/style'
 import Notebook from '@/views/notebook'
 import Preview from '@/views/preview'
 import Page404 from '@/views/errorpage/404'
+import Login from '@/views/login'
 
 class App extends React.Component {
   render(){
@@ -19,6 +20,7 @@ class App extends React.Component {
             <Route path="/category/:categoryId/note/:noteId/preview" exact>
               <Preview></Preview>
             </Route>
+            <Route path="/login" exact><Login></Login></Route>
             <Route path="*" exact><Page404></Page404></Route>
           </Switch>
         </Router>
