@@ -1,4 +1,6 @@
 import React from 'react'
+import { withRouter } from 'react-router-dom'
+import md5 from 'js-md5'
 import SvgIcon from '@/components/SvgIcon'
 import Loading from '@/components/Loading'
 import { getCaptcha, login } from '@/api/permission'
@@ -40,8 +42,11 @@ class Captcha extends React.Component {
   }
 
   handleGetCaptcha(){
+    this.setState({ imgLoading: true, loadedNum: 0 })
     getCaptcha().then(res => {
       this.drawCaptcha(res.data)
+    }).catch(() => {
+      this.setState({ imgLoading: false })
     })
   }
 
@@ -51,6 +56,10 @@ class Captcha extends React.Component {
 
     const dstCtx = $dst.getContext('2d')
     const jigsawCtx = $jigsaw.getContext('2d')
+
+    // 重绘清空画布
+    $dst.height = 320
+    $jigsaw.height = 320
 
     const dstImg = new Image()
     const jigsawImg = new Image()
@@ -88,9 +97,8 @@ class Captcha extends React.Component {
   dragStart(e){
     if(this.state.verifyLoading) return
 
-    this.setState({
-      downX: e.clientX,
-    })
+    this.initCaptchaStatus()
+    this.setState({ downX: e.clientX })
 
     this.slider.current.addEventListener('mousemove', this.dragMove)
     document.addEventListener('mouseup', this.dragUp)
@@ -128,16 +136,43 @@ class Captcha extends React.Component {
   }
 
   handleVerify(){
-    const data = this.props.formData
-    data.x = this.state.offset
+    const data = {
+      username: this.props.formData.username,
+      password: md5(this.props.formData.password),
+      x: this.state.offset,
+    }
 
     this.setState({ verifyLoading: true })
     login(data).then(res => {
-      console.log(res)
-      this.setState({ verifyLoading: false })
-    }).catch(() => {
-      this.setState({ verifyLoading: false })
-      this.initCaptchaStatus()
+      this.setState(state => ({
+        btnShow: false,
+        statusStyle: Object.assign({}, state.statusStyle, { width: '320px' }),
+      }))
+
+      setTimeout(() => {
+        this.props.history.push('/')
+      }, 300)
+    }).catch(error => {
+      switch(error.code){
+        case 4010:
+          // 用户名与密码不匹配
+          this.props.onClose()
+          break
+        case 4007:
+          // 拼图验证失败
+          this.setState(state => ({
+            offset: 0,
+            jigsawLeft: 0,
+            btnStyle: Object.assign({}, state.btnStyle, { left: 0 + 'px', transition: 'left 1s' }),
+            statusStyle: Object.assign({}, state.statusStyle, { width: '40px', background: '#F56C6C', transition: 'width 1s' }),
+          }), () => {
+            this.setState({ verifyLoading: false })
+          })
+          this.handleGetCaptcha()
+          break
+        default:
+          this.props.onClose()
+      }
     })
   }
 
@@ -177,7 +212,7 @@ class Captcha extends React.Component {
                 <SvgIcon iconClass="arrow-right" className="arrow-icon"></SvgIcon>
               </div>
               <div className="status" style={statusStyle}>
-                { btnShow ? '拼接成功' : null }
+                { !btnShow ? '拼接成功' : null }
               </div>
               <div className="track">向右滑动完成拼图</div>
             </div>
@@ -188,4 +223,4 @@ class Captcha extends React.Component {
   }
 }
 
-export default Captcha
+export default withRouter(Captcha)
