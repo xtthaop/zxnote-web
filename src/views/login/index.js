@@ -1,6 +1,8 @@
 import React from 'react'
 import Button from '@/components/Button'
 import Input from '@/components/Input'
+import { message } from '@/components/message'
+import Captcha from './components/Captcha'
 import { LoginWrapper } from './style'
 
 class Login extends React.Component {
@@ -9,10 +11,18 @@ class Login extends React.Component {
     this.state = {
       username: '',
       password: '',
+      showCaptcha: false,
     }
     this.handleChangeUsername = this.handleChangeUsername.bind(this)
     this.handleChangePassword = this.handleChangePassword.bind(this)
     this.handleLogin = this.handleLogin.bind(this)
+    this.handleClose = this.handleClose.bind(this)
+  }
+
+  handleClose(){
+    this.setState({
+      showCaptcha: false
+    })
   }
 
   handleChangeUsername(val){
@@ -25,15 +35,29 @@ class Login extends React.Component {
 
   handleLogin(){
     const { username, password } = this.state 
+
+    // if(!username){
+    //   message.error('请输入用户名！')
+    //   return
+    // }
+
+    // if(!password){
+    //   message.error('请输入密码！')
+    //   return
+    // }
+
+    this.setState({ showCaptcha: true })
+
     const data = {
       username,
       password
     }
+
     console.log(data)
   }
 
   render(){
-    const { username, password } = this.state 
+    const { username, password, showCaptcha } = this.state 
     return (
       <LoginWrapper>
         <div className="login-form-container">
@@ -57,6 +81,12 @@ class Login extends React.Component {
               style={{ marginTop: '25px', width: '100%' }}
             >登 录</Button>
           </div>
+          {
+            showCaptcha ? 
+            <div className="captcha-wrapper">
+              <Captcha onClose={this.handleClose}></Captcha>
+            </div> : null
+          }
         </div>
       </LoginWrapper>
     )

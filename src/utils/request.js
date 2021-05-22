@@ -21,10 +21,13 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   response => {
     const res = response.data
+    const config = response.config
 
     // if the custom code is not 0, it is judged as an error.
     if(res.code !== 0){
-      message.error(res.message || 'Error')
+      if(!config.noMessageError){
+        message.error(res.message || 'Error')
+      }
       return Promise.reject(new Error(res.message || 'Error'))
     }else{
       return res

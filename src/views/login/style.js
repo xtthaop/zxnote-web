@@ -10,11 +10,11 @@ export const LoginWrapper = styled.div`
   background: #eee;
 
   .login-form-container{
-    width: 100%;
-    max-width: 300px;
-    margin: 150px auto;
+    position: relative;
+    width: 300px;
+    margin: 150px auto 0;
     background: #fff;
-    padding: 50px;
+    padding: 120px 60px;
     border-radius: 10px;
 
     .head{
@@ -23,11 +23,24 @@ export const LoginWrapper = styled.div`
       font-size: 25px;
       font-weight: 500;
       color: #1E90FF;
+      letter-spacing: 2px;
     }
 
     .form{
       width: 100%;
       margin-top: 30px;
     }
+  }
+
+  .captcha-wrapper{
+    position: absolute;
+    top: 55px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 320px;
+    height: 200px;
+    padding: 10px;
+    background: #fff;
+    box-shadow: 0 0 2px 2px #eee;
   }
 `
