@@ -23,6 +23,7 @@ class Captcha extends React.Component {
       },
       verifyLoading: false,
       btnShow: true,
+      imgLoading: true,
     }
     this.captcha = React.createRef()
     this.slider = React.createRef()
@@ -56,13 +57,18 @@ class Captcha extends React.Component {
 
     dstImg.src = imgInfo.dst_img
     jigsawImg.src = imgInfo.jigsaw_img
+
     dstImg.onload = () => {
-      this.setState(state => {
-        return {
-          loadedNum: ++state.loadedNum
-        }
-      })
+      this.setState(state => ({
+        loadedNum: ++state.loadedNum
+      }))
       dstCtx.drawImage(dstImg, 0, 0, 320, 140)
+    }
+
+    dstImg.onerror = () => {
+      this.setState({
+        imgLoading: false
+      })
     }
 
     jigsawImg.onload = () => {
@@ -70,6 +76,12 @@ class Captcha extends React.Component {
         loadedNum: ++state.loadedNum
       }))
       jigsawCtx.drawImage(jigsawImg, 0, imgInfo.y, 40, 40)
+    }
+
+    jigsawImg.onerror = () => {
+      this.setState({
+        imgLoading: false
+      })
     }
   }
 
@@ -134,7 +146,7 @@ class Captcha extends React.Component {
   }
 
   render(){
-    const { jigsawLeft, loadedNum, statusStyle, btnStyle, btnShow } = this.state
+    const { jigsawLeft, loadedNum, statusStyle, btnStyle, btnShow, imgLoading } = this.state
 
     return (
       <CaptchaWrapper btnShow={btnShow}>
@@ -151,7 +163,8 @@ class Captcha extends React.Component {
           {
             loadedNum !== 2 ?
             <div className="loading-mask">
-              <Loading data-loading={true}></Loading>
+              <Loading data-loading={imgLoading}></Loading>
+              { imgLoading ? null : <span className="img-error">验证码图片加载失败</span> }
             </div> : null
           }
           <div className="captcha">
@@ -170,7 +183,6 @@ class Captcha extends React.Component {
             </div>
           </div>
         </div>
-        
       </CaptchaWrapper>
     )
   }

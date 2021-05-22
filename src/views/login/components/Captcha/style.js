@@ -35,7 +35,14 @@ export const CaptchaWrapper = styled.div`
       height: 100%;
       margin: 0 -5px;
       background: #fff;
+      text-align: center;
       z-index: 3;
+
+      .img-error{
+        display: inline-block;
+        margin-top: 50px;
+        color: red;
+      }
     }
 
     .captcha{
