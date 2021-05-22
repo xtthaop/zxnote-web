@@ -6,3 +6,11 @@ export function getCaptcha(){
     method: 'get',
   })
 }
+
+export function login(data){
+  return request({
+    url: '/permission/login',
+    method: 'post',
+    data
+  })
+}

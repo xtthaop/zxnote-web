@@ -1,7 +1,7 @@
 import React from 'react'
 import SvgIcon from '@/components/SvgIcon'
 import Loading from '@/components/Loading'
-import { getCaptcha } from '@/api/permission'
+import { getCaptcha, login } from '@/api/permission'
 import { CaptchaWrapper } from './style'
 
 class Captcha extends React.Component {
@@ -10,10 +10,28 @@ class Captcha extends React.Component {
     this.state = {
       jigsawLeft: 0,
       loadedNum: 0,
+      downX: 0,
+      offset: 0,
+      statusStyle: {
+        width: 0,
+        background: '#409EFF',
+        transition: ''
+      },
+      btnStyle: {
+        left: 0,
+        transition: ''
+      },
+      verifyLoading: false,
+      btnShow: true,
     }
     this.captcha = React.createRef()
+    this.slider = React.createRef()
     this.drawCaptcha = this.drawCaptcha.bind(this)
     this.handleClose = this.handleClose.bind(this)
+    this.dragStart = this.dragStart.bind(this)
+    this.dragMove = this.dragMove.bind(this)
+    this.dragUp = this.dragUp.bind(this)
+    this.initCaptchaStatus = this.initCaptchaStatus.bind(this)
   }
 
   handleClose(){
@@ -51,8 +69,64 @@ class Captcha extends React.Component {
       this.setState(state => ({
         loadedNum: ++state.loadedNum
       }))
-      jigsawCtx.drawImage(jigsawImg, 2, imgInfo.y, 40, 40)
+      jigsawCtx.drawImage(jigsawImg, 0, imgInfo.y, 40, 40)
     }
+  }
+
+  dragStart(e){
+    if(this.state.verifyLoading) return
+
+    this.setState({
+      downX: e.clientX,
+    })
+
+    this.slider.current.addEventListener('mousemove', this.dragMove)
+    document.addEventListener('mouseup', this.dragUp)
+  }
+
+  initCaptchaStatus(){
+    this.setState({
+      jigsawLeft: 0,
+      downX: 0,
+      offset: 0,
+      btnStyle: { left: 0, transition: '' },
+      statusStyle: { width: 0, background: '#409EFF', transition: '' }
+    })
+  }
+
+  dragMove(e){
+    const moveX = e.clientX
+    const offset = moveX - this.state.downX
+
+    if(offset >= (320 - 40) || offset <= 0) return
+
+    this.setState(state => ({ 
+      offset,
+      jigsawLeft: offset + 'px',
+      btnStyle: Object.assign({}, state.btnStyle, { left: offset + 'px' }),
+      statusStyle: Object.assign({}, state.statusStyle, { width: offset + 40 + 'px' }),
+    }))
+  }
+
+  dragUp(){
+    this.slider.current.removeEventListener('mousemove', this.dragMove)
+    document.removeEventListener('mouseup', this.dragUp)
+
+    this.handleVerify()
+  }
+
+  handleVerify(){
+    const data = this.props.formData
+    data.x = this.state.offset
+
+    this.setState({ verifyLoading: true })
+    login(data).then(res => {
+      console.log(res)
+      this.setState({ verifyLoading: false })
+    }).catch(() => {
+      this.setState({ verifyLoading: false })
+      this.initCaptchaStatus()
+    })
   }
 
   componentDidMount(){
@@ -60,10 +134,10 @@ class Captcha extends React.Component {
   }
 
   render(){
-    const { jigsawLeft, loadedNum } = this.state
+    const { jigsawLeft, loadedNum, statusStyle, btnStyle, btnShow } = this.state
 
     return (
-      <CaptchaWrapper>
+      <CaptchaWrapper btnShow={btnShow}>
         <header>
           <div className="header-left">
             <span>完成拼图验证</span>
@@ -80,13 +154,19 @@ class Captcha extends React.Component {
               <Loading data-loading={true}></Loading>
             </div> : null
           }
-          <div>
-            <div className="captcha" ref={this.captcha}>
+          <div className="captcha">
+            <div className="captcha-img-container" ref={this.captcha}>
               <canvas id="jigsaw" width="320" height="140" style={{ left: jigsawLeft }}></canvas>
               <canvas id="dst" width="320" height="140"></canvas>
             </div>
-            <div className="slider-container">
-
+            <div ref={this.slider} className="slider-container">
+              <div className="btn" style={btnStyle} onMouseDown={this.dragStart}>
+                <SvgIcon iconClass="arrow-right" className="arrow-icon"></SvgIcon>
+              </div>
+              <div className="status" style={statusStyle}>
+                { btnShow ? '拼接成功' : null }
+              </div>
+              <div className="track">向右滑动完成拼图</div>
             </div>
           </div>
         </div>

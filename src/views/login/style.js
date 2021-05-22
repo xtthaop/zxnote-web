@@ -34,11 +34,11 @@ export const LoginWrapper = styled.div`
 
   .captcha-wrapper{
     position: absolute;
-    top: 55px;
+    top: 32px;
     left: 50%;
     transform: translateX(-50%);
     width: 320px;
-    height: 200px;
+    height: 220px;
     padding: 10px;
     background: #fff;
     box-shadow: 0 0 2px 2px #eee;

@@ -9,8 +9,10 @@ class Login extends React.Component {
   constructor(props){
     super(props)
     this.state = {
-      username: '',
-      password: '',
+      form: {
+        username: '',
+        password: '',
+      },
       showCaptcha: false,
     }
     this.handleChangeUsername = this.handleChangeUsername.bind(this)
@@ -26,38 +28,35 @@ class Login extends React.Component {
   }
 
   handleChangeUsername(val){
-    this.setState({ username: val })
+    this.setState({ 
+      form: Object.assign({}, this.state.form, { username: val })
+    })
   }
 
   handleChangePassword(val){
-    this.setState({ password: val })
+    this.setState({
+      form: Object.assign({}, this.state.form, { password: val })
+    })
   }
 
   handleLogin(){
-    const { username, password } = this.state 
+    const { form } = this.state 
 
-    // if(!username){
-    //   message.error('请输入用户名！')
-    //   return
-    // }
-
-    // if(!password){
-    //   message.error('请输入密码！')
-    //   return
-    // }
-
-    this.setState({ showCaptcha: true })
-
-    const data = {
-      username,
-      password
+    if(!form.username){
+      message.error('请输入用户名！')
+      return
     }
 
-    console.log(data)
+    if(!form.password){
+      message.error('请输入密码！')
+      return
+    }
+
+    this.setState({ showCaptcha: true })
   }
 
   render(){
-    const { username, password, showCaptcha } = this.state 
+    const { form, showCaptcha } = this.state 
     return (
       <LoginWrapper>
         <div className="login-form-container">
@@ -65,13 +64,13 @@ class Login extends React.Component {
           <div className="form">
             <Input 
               placeholder="用户名" 
-              value={username} 
+              value={form.username} 
               onChange={this.handleChangeUsername}
             ></Input>
             <Input 
               placeholder="密码" 
               type="password"
-              value={password} 
+              value={form.password} 
               onChange={this.handleChangePassword} 
               style={{ marginTop: '20px' }}
             ></Input>
@@ -84,7 +83,7 @@ class Login extends React.Component {
           {
             showCaptcha ? 
             <div className="captcha-wrapper">
-              <Captcha onClose={this.handleClose}></Captcha>
+              <Captcha onClose={this.handleClose} formData={form}></Captcha>
             </div> : null
           }
         </div>
