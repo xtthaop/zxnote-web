@@ -3,6 +3,7 @@ import { withRouter } from 'react-router-dom'
 import md5 from 'js-md5'
 import SvgIcon from '@/components/SvgIcon'
 import Loading from '@/components/Loading'
+import { setToken } from '@/utils/auth'
 import { getCaptcha, login } from '@/api/permission'
 import { CaptchaWrapper } from './style'
 
@@ -148,6 +149,8 @@ class Captcha extends React.Component {
         btnShow: false,
         statusStyle: Object.assign({}, state.statusStyle, { width: '320px' }),
       }))
+
+      setToken(res.data.token)
 
       setTimeout(() => {
         this.props.history.push('/')
