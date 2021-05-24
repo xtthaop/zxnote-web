@@ -31,7 +31,7 @@ service.interceptors.response.use(
     }
   },
   error => {
-    message.error(error.message)
+    message.error(error.response.data.message || error.message || 'Error')
     return Promise.reject(error)
   }
 )

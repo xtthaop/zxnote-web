@@ -1,4 +1,5 @@
 import { fromJS } from 'immutable'
+import { getUserInfo } from '@/api/permission'
 
 const defaultState = fromJS({
   username: '',
@@ -18,8 +19,14 @@ export const reducer = (state = defaultState, action) => {
 }
 
 export const actions = {
-  changeAuthStatus: (payload) => ({
-    type: types.CHANGE_AUTH_STATUS,
-    payload,
-  }),
+  handleChangeAuthStatus: () => new Promise((resolve, reject) => {
+    getUserInfo().then(res => {
+      resolve({
+        type: types.CHANGE_AUTH_STATUS,
+        payload: { username: res.data.username },
+      })
+    }).catch(error => {
+      reject(error)
+    })
+  })
 }

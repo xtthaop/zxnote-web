@@ -22,20 +22,18 @@ class PrivateRoute extends React.Component {
               return children
             }else{
               // try{
-                // handleGetUserInfo()
-                console.log(location)
+                handleGetUserInfo()
+
+                return (
+                  <Redirect to={{  pathname: "/login", state: { from: location }}}></Redirect>
+                )
               // }catch{
   
               // }
             }
           }else{
             return (
-              <Redirect
-                to={{ 
-                  pathname: "/login", 
-                  state: { from: location }
-                }}
-              ></Redirect>
+              <Redirect to={{  pathname: "/login", state: { from: location }}}></Redirect>
             )
           }
         }}
@@ -50,7 +48,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   handleGetUserInfo(){
-    dispatch(actions.getUserInfo())
+    dispatch(actions.handleChangeAuthStatus())
   },
 })
 

@@ -14,3 +14,10 @@ export function login(data){
     data
   })
 }
+
+export function getUserInfo(){
+  return request({
+    url: '/permission/get_user_info',
+    method: 'get',
+  })
+}
