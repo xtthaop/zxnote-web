@@ -26,7 +26,7 @@ export const actions = {
         payload: { username: res.data.username },
       })
     }).catch(error => {
-      reject(error)
+      reject(error.message)
     })
   })
 }
