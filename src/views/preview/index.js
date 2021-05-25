@@ -44,9 +44,9 @@ class Preview extends React.Component {
     this.previewMouseEnter = this.previewMouseEnter.bind(this)
   }
 
-  handleInitMarkdown(){
+  async handleInitMarkdown(){
     // Apply syntax highlighting to fenced code blocks with the highlight option:
-    const hljs = require('highlight.js') // https://highlightjs.org/
+    const hljs = await import('highlight.js') // https://highlightjs.org/
 
     this.md = require('markdown-it')({
       // html: true,
