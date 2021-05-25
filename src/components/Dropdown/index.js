@@ -45,7 +45,7 @@ class Dropdown extends React.Component {
         <div id="menu-item-handle" className="handle" onClick={this.handleToggle}>
           {this.props.children}
         </div>
-        <DropdownFrame show={show}>
+        <DropdownFrame show={show} placement={this.props.placement || 'bottom-end'}>
           {this.props.overlay}
         </DropdownFrame>
       </DropdownWrapper>

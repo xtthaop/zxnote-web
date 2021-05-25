@@ -15,6 +15,7 @@ class MsgBox {
       type: 'warning',
       title,
       message,
+      showCancelButton: true,
       ...options,
     })
   }

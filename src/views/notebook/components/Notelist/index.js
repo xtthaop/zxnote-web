@@ -190,14 +190,14 @@ class Notelist extends React.Component {
         activeNoteId = noteList[activeNoteIndex] && noteList[activeNoteIndex].note_id
       }
 
-      this.setState({ noteList, listLoading: false, activeNoteId, activeNoteIndex })
+      this.setState({ noteList, listLoading: false, activeNoteId, activeNoteIndex }, () => {
+        const activeNoteInfo = noteList[activeNoteIndex] ? noteList[activeNoteIndex] : { note_id: activeNoteId }
+        this.props.active(activeNoteInfo)
 
-      const activeNoteInfo = noteList[activeNoteIndex] ? noteList[activeNoteIndex] : { note_id: activeNoteId }
-      this.props.active(activeNoteInfo)
-
-      if(!!activeNoteId){
-        this.props.history.push(`/category/${categoryId}/note/${activeNoteId}`)
-      }
+        if(!!activeNoteId){
+          this.props.history.push(`/category/${categoryId}/note/${activeNoteId}`)
+        }
+      })
     }).catch(() => {
       this.setState({ listLoading: false })
       this.props.active()

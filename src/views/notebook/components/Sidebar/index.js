@@ -10,6 +10,8 @@ import Loading from '@/components/Loading'
 import { message } from '@/components/message'
 import { messagebox } from '@/components/messagebox'
 import { createCategory, getCategoryList, deleteCategory, updateCategory } from '@/api/notebook/category'
+import { getUserInfo } from '@/api/permission'
+import { removeToken } from '@/utils/auth'
 import {
   SidebarWrapper,
   Header,
@@ -33,6 +35,7 @@ class Sidebar extends React.Component {
       confirmLoading: false,
       listLoading: false,
       activeIndex: '',
+      username: '',
     }
     this.handleItemClick = this.handleItemClick.bind(this)
     this.handleClose = this.handleClose.bind(this)
@@ -148,14 +151,15 @@ class Sidebar extends React.Component {
         let activeId
         if(this.props.match.params.categoryId){
           activeId = parseInt(this.props.match.params.categoryId)
-          this.setState({ activeId })
         }else{
           activeId = this.state.categories[0] && this.state.categories[0].category_id
-          this.setState({ activeId })
+        }
+
+        this.setState({ activeId }, () => {
           if(!!activeId){
             this.props.history.push(`/category/${activeId}`)
           }
-        }
+        })
       })
       this.props.changeCategoryList(categories)
     }).catch(() => {
@@ -174,14 +178,28 @@ class Sidebar extends React.Component {
     }
   }
 
+  handleGetUserInfo(){
+    getUserInfo().then(res => {
+      this.setState({
+        username: res.data.username
+      })
+    })
+  }
+
+  handleLogOut(){
+    removeToken()
+    location.reload()
+  }
+
   componentDidMount(){
     this.handleGetCategoryList()
+    this.handleGetUserInfo()
   }
 
   render(){
-    const { dialogVisible, categories, activeId, categoryForm, dialogTitle, confirmLoading, listLoading } = this.state
+    const { dialogVisible, categories, activeId, categoryForm, dialogTitle, confirmLoading, listLoading, username } = this.state
 
-    const menu = (item, index) => {
+    const categoryMenu = (item, index) => {
       return (
         <Menu>
           <Menu.Item onClick={() => this.handleUpdateCategory(item, index)}>
@@ -195,6 +213,15 @@ class Sidebar extends React.Component {
         </Menu>
       )
     }
+
+    const userMenu = (
+      <Menu>
+        <Menu.Item onClick={this.handleLogOut}>
+        <SvgIcon iconClass="log-out" style={{ marginRight: '5px' }}></SvgIcon>
+          <span>退出登录</span>
+        </Menu.Item>
+      </Menu>
+    )
 
     const dialogFooter = (
       <div>
@@ -224,7 +251,7 @@ class Sidebar extends React.Component {
                 >
                   <div className="title">{item.category_name}</div>
                   <div className="handle-btn">
-                    <Dropdown overlay={menu(item, index)}>
+                    <Dropdown overlay={categoryMenu(item, index)}>
                       <SvgIcon iconClass="setting"></SvgIcon>
                     </Dropdown>
                   </div>
@@ -234,8 +261,15 @@ class Sidebar extends React.Component {
           }
         </Categories>
         <Foot>
-          <div className="icon">U</div>
-          <span className="username">user</span>
+          {
+            username ? 
+            <React.Fragment>
+              <Dropdown overlay={userMenu} placement="top-start">
+                <div className="icon">{ username.substr(0, 1).toUpperCase() }</div>
+              </Dropdown>
+              <span className="username">{ username }</span>
+            </React.Fragment> : null
+          }
         </Foot>
 
         <Dialog visible={dialogVisible} title={dialogTitle} footer={dialogFooter}>
