@@ -12,7 +12,7 @@ const config = {
     filename: '[name].[contenthash].js',
     path: path.join(__dirname, 'dist'),
     clean: true,
-    publicPath: '/notebook',
+    publicPath: '/notebook/',
   },
   optimization: {
     splitChunks: {
