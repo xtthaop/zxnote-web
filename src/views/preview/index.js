@@ -28,7 +28,7 @@ class Preview extends React.Component {
       $editor: null,
       $preview: null,
     }
-    this.handleInitMarkdown()
+    this.md = null
     this.editorRef = React.createRef()
     this.previewerRef = React.createRef()
     this.handleSyncTitle = this.handleSyncTitle.bind(this)
@@ -125,7 +125,7 @@ class Preview extends React.Component {
     }else{
       this.setState({ 
         showPreviewer: true,
-        previewerContent: { __html: this.md.render(content) },
+        previewerContent: { __html: this.md.render(content) }
       }, () => {
         const $editor = this.editorRef.current.contentRef.current
         const $preview = this.previewerRef.current
@@ -340,7 +340,8 @@ class Preview extends React.Component {
     }
   }
 
-  componentDidMount(){
+  async componentDidMount(){
+    await this.handleInitMarkdown()
     this.handleGetNote()
   }
 

@@ -3,7 +3,7 @@ const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
-module.exports = {
+const config = {
   mode: 'production',
   entry: {
     app: './src/index.js',
@@ -30,7 +30,6 @@ module.exports = {
       },
     },
   },
-  devtool: 'inline-source-map',
   devServer: {
     port: 10990,
     publicPath: '/notebook',
@@ -79,4 +78,12 @@ module.exports = {
       }
     ]
   }
+}
+
+module.exports = (env, argv) => {
+  if(argv.mode === 'development'){
+    config.devtool = 'inline-source-map';
+  }
+
+  return config
 }
