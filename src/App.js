@@ -21,9 +21,9 @@ class App extends React.Component {
               <PrivateRoute path={["/", '/category/:categoryId', '/category/:categoryId/note/:noteId']} exact>
                 <Notebook></Notebook>
               </PrivateRoute>
-              <Route path="/category/:categoryId/note/:noteId/preview" exact>
+              <PrivateRoute path="/category/:categoryId/note/:noteId/preview" exact>
                 <Preview></Preview>
-              </Route>
+              </PrivateRoute>
               <Route path="/login" exact><Login></Login></Route>
               <Route path="*" exact><Page404></Page404></Route>
             </Switch>

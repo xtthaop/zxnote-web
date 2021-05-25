@@ -1,5 +1,7 @@
 import axios from 'axios'
+import { getToken, removeToken } from '@/utils/auth'
 import { message } from '@/components/message.js'
+import { messagebox } from '@/components/messagebox'
 
 // create an axios instance
 const service = axios.create({
@@ -10,6 +12,10 @@ const service = axios.create({
 // request interceptor
 service.interceptors.request.use(
   config => {
+    const token = getToken()
+    if(token){
+      config.headers['X-Token'] = token
+    }
     return config
   },
   error => {
@@ -31,7 +37,16 @@ service.interceptors.response.use(
     }
   },
   error => {
-    message.error(error.response.data.message || error.message || 'Error')
+    if (error.response.status === 401) {
+      messagebox.warning('提示', '登录验证失败，请重新登录', {
+        showCancelButton: false,
+      }).then(() => {
+        removeToken()
+        location.reload()
+      })
+    }else{
+      message.error(error.response.data.message || error.message || 'Error')
+    }
     return Promise.reject(error)
   }
 )

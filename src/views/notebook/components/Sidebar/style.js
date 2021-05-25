@@ -98,6 +98,7 @@ export const Foot = styled.div`
     text-align: center;
     background: #666;
     border-radius: 50%;
+    cursor: pointer;
   }
 
   .username{

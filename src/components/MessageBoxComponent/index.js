@@ -17,6 +17,7 @@ class MessageBox extends React.Component {
       type: '',
       title: '',
       message: '',
+      showCancelButton: true,
       footer: undefined,
     }
     this.handleHide = this.handleHide.bind(this)
@@ -26,8 +27,19 @@ class MessageBox extends React.Component {
     return new Promise((resolve, reject) => {
       const footer = (
         <div>
-          <Button style={{ marginRight: '10px' }} onClick={() => this.handleHide(reject)}>取消</Button>
-          <Button type="success" type="primary" onClick={() => this.handleHide(resolve)}>确认</Button>
+          <Button 
+            style={{ marginRight: '10px', display: options.showCancelButton ? 'inline-block' : 'none' }} 
+            onClick={() => this.handleHide(reject)}
+          >
+            取消
+          </Button>
+          <Button 
+            type="success" 
+            type="primary" 
+            onClick={() => this.handleHide(resolve)}
+          >
+            确认
+          </Button>
         </div>
       )
 
