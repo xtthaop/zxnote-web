@@ -3,7 +3,7 @@ import { withRouter } from 'react-router-dom'
 import md5 from 'js-md5'
 import SvgIcon from '@/components/SvgIcon'
 import Loading from '@/components/Loading'
-import { getNoteContent, saveNote, releaseNote } from '@/api/notebook/note'
+import { getNoteContent, saveNote, publishNote } from '@/api/notebook/note'
 import { uploadFile } from '@/api/upload'
 import {
   EditorWrapper,
@@ -21,9 +21,9 @@ class Editor extends React.Component {
       content: '',
       showEditor: false,
       savedStatus: true,
-      releaseStatus: false,
+      publishStatus: false,
       cancelStatus: false,
-      releaseLoading: false,
+      publishLoading: false,
       timeoutId: undefined,
       contentLoading: false,
       isPreviewMode: false,
@@ -37,7 +37,7 @@ class Editor extends React.Component {
     this.handleSaveNote = this.handleSaveNote.bind(this)
     this.handleGetNoteContent = this.handleGetNoteContent.bind(this)
     this.handleToPreview = this.handleToPreview.bind(this)
-    this.handleRelease = this.handleRelease.bind(this)
+    this.handlePublish = this.handlePublish.bind(this)
     this.handleChangeCancelStatus = this.handleChangeCancelStatus.bind(this)
     this.handleUploadImg = this.handleUploadImg.bind(this)
     this.handleImgFileChange = this.handleImgFileChange.bind(this)
@@ -162,7 +162,7 @@ class Editor extends React.Component {
 
       this.setState({ 
         title: this.props.activeNoteInfo.note_title,
-        releaseStatus: this.props.activeNoteInfo.release_status ? true : false,
+        publishStatus: this.props.activeNoteInfo.publish_status ? true : false,
         content: noteContent, 
         showEditor: true,
         contentLoading: false,
@@ -208,28 +208,28 @@ class Editor extends React.Component {
     }
   }
 
-  handleRelease(status){
-    if(this.state.releaseLoading) return
+  handlePublish(status){
+    if(this.state.publishLoading) return
 
     const data = {
       note_id: this.props.activeNoteInfo.note_id,
-      release_status: status ? 1 : 0,
+      publish_status: status ? 1 : 0,
     }
 
-    this.setState({ releaseLoading: true })
-    releaseNote(data).then(() => {
-      this.setState({ releaseStatus: status, releaseLoading: false })
+    this.setState({ publishLoading: true })
+    publishNote(data).then(() => {
+      this.setState({ publishStatus: status, publishLoading: false })
     })
   }
 
   handleChangeCancelStatus(status){
-    if(this.state.savedStatus && this.state.releaseStatus){
+    if(this.state.savedStatus && this.state.publishStatus){
       this.setState({ cancelStatus: status })
     }
   }
 
   render(){
-    const { title, content, showEditor, savedStatus, contentLoading, releaseStatus, releaseLoading, cancelStatus } = this.state
+    const { title, content, showEditor, savedStatus, contentLoading, publishStatus, publishLoading, cancelStatus } = this.state
 
     return (
       <EditorWrapper isPreviewMode={this.props.isPreviewMode} showEditor={showEditor}>
@@ -242,7 +242,7 @@ class Editor extends React.Component {
             </TitleWrapper>
             <ToolBar>
               <li 
-                className="tool right release" 
+                className="tool right publish" 
                 onMouseEnter={() => this.handleChangeCancelStatus(true)}
                 onMouseLeave={() => this.handleChangeCancelStatus(false)}
               >
@@ -250,18 +250,18 @@ class Editor extends React.Component {
                   savedStatus ?
                   <Fragment>
                     {
-                      releaseStatus ?
-                      <div onClick={() => this.handleRelease(false)}>
+                      publishStatus ?
+                      <div onClick={() => this.handlePublish(false)}>
                         <SvgIcon iconClass={cancelStatus ? 'error' : 'success'}></SvgIcon>
-                        <span className="release-text">{cancelStatus ? (releaseLoading ? '取消中...' : '取消发布') : '已发布'}</span>
+                        <span className="publish-text">{cancelStatus ? (publishLoading ? '取消中...' : '取消发布') : '已发布'}</span>
                       </div> : 
-                      <div onClick={() => this.handleRelease(true)}>
-                        <SvgIcon iconClass={releaseLoading ? '' : 'release'}></SvgIcon>
-                        <span className="release-text">{releaseLoading ? '发布中...' : '发布笔记'}</span>
+                      <div onClick={() => this.handlePublish(true)}>
+                        <SvgIcon iconClass={publishLoading ? '' : 'publish'}></SvgIcon>
+                        <span className="publish-text">{publishLoading ? '发布中...' : '发布笔记'}</span>
                       </div>
                     }
                   </Fragment> :
-                  <span className="release-text">保存中...</span>
+                  <span className="publish-text">保存中...</span>
                 }
               </li>
               <li className="tool" onClick={this.handleClickImgInput}>

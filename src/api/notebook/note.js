@@ -48,9 +48,9 @@ export function saveNote(data){
   })
 }
 
-export function releaseNote(data){
+export function publishNote(data){
   return request({
-    url: '/note/release_note',
+    url: '/note/publish_note',
     method: 'post',
     data
   })

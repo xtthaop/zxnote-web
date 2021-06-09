@@ -74,12 +74,12 @@ export const ToolBar = styled.ul`
       float: right;
     }
 
-    &.release{
+    &.publish{
       width: 80px;
       text-align: center;
     }
 
-    .release-text{
+    .publish-text{
       display: inline-block;
       font-size: 13px;
       vertical-align: 0.05em;
