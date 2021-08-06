@@ -36,6 +36,7 @@ class Captcha extends React.Component {
     this.dragMove = this.dragMove.bind(this)
     this.dragUp = this.dragUp.bind(this)
     this.initCaptchaStatus = this.initCaptchaStatus.bind(this)
+    this.handleGetCaptcha = this.handleGetCaptcha.bind(this)
   }
 
   handleClose(){
@@ -191,7 +192,7 @@ class Captcha extends React.Component {
         <header>
           <div className="header-left">
             <span>完成拼图验证</span>
-            <span className="switch">换一张</span>
+            <span className="switch" onClick={this.handleGetCaptcha}>换一张</span>
           </div>
           <div className="header-right">
             <SvgIcon iconClass="close" style={{ cursor: 'pointer' }} onClick={this.handleClose}></SvgIcon>

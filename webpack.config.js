@@ -38,8 +38,9 @@ const config = {
     },
     proxy: {
       '/restful': {
-        target: 'https://zxctb.top',
+        target: 'http://localhost:56899',
         changeOrigin: true,
+        pathRewrite: {'/restful' : ''},
       },
     }
   },

@@ -19,6 +19,7 @@ export const CaptchaWrapper = styled.div`
     .header-left .switch{
       color: #1E90FF;
       margin-left: 10px;
+      cursor: pointer;
     }
   }
 
