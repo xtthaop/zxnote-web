@@ -187,9 +187,8 @@ class Editor extends React.Component {
 
   handleToPreview(){
     if(this.props.isPreviewMode){
-      const pathArr = this.props.history.location.pathname.split('/')
-      pathArr.pop()
-      this.props.history.push(pathArr.join('/'))
+      const { noteId, categoryId } = this.props.match.params
+      this.props.history.push(`/category/${categoryId}/note/${noteId}`)
     }else{
       this.props.history.push(this.props.history.location.pathname + '/preview')
     }

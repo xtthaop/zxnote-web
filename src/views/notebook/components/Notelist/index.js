@@ -176,6 +176,7 @@ class Notelist extends React.Component {
   handleGetCategoryNote(){
     const categoryId = this.state.activeCategoryId
     const data = { category_id: categoryId }
+    let pushRoute = true
     let activeNoteIndex, activeNoteId
 
     this.setState({ listLoading: true, noteList: [] })
@@ -184,8 +185,20 @@ class Notelist extends React.Component {
       this.props.changeCategoryNoteList(noteList)
 
       if(noteList.length){
-        activeNoteIndex = 0
-        activeNoteId = noteList[activeNoteIndex] && noteList[activeNoteIndex].note_id
+        if(this.props.match.params.noteId){
+          activeNoteId = parseInt(this.props.match.params.noteId)
+          activeNoteIndex = noteList.findIndex(item => item.note_id === activeNoteId)
+  
+          if(activeNoteIndex < 0){
+            activeNoteIndex = undefined
+            activeNoteId = undefined
+          }else{
+            pushRoute = false
+          }
+        }else{
+          activeNoteIndex = 0
+          activeNoteId = noteList[activeNoteIndex] && noteList[activeNoteIndex].note_id
+        }
       }else{
         activeNoteIndex = undefined
         activeNoteId = undefined
@@ -195,7 +208,7 @@ class Notelist extends React.Component {
         const activeNoteInfo = activeNoteId && noteList[activeNoteIndex]
         this.props.active(activeNoteInfo)
 
-        if(!!activeNoteId){
+        if(!!activeNoteId && pushRoute){
           this.props.history.push(`/category/${categoryId}/note/${activeNoteId}`)
         }
       })
@@ -227,6 +240,8 @@ class Notelist extends React.Component {
         this.setState({ activeNoteId, activeNoteIndex })
         const activeNoteInfo = this.state.noteList[activeNoteIndex]
         this.props.active(activeNoteInfo)
+      }else{
+        this.handleGetCategoryNote()
       }
     }
   }

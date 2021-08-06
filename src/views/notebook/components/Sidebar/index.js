@@ -157,13 +157,18 @@ class Sidebar extends React.Component {
 
         this.setState({ activeId }, () => {
           if(!!activeId){
-            this.props.history.push(`/category/${activeId}`)
+            if(this.props.match.params.noteId){
+              return
+            }else{
+              this.props.history.push(`/category/${activeId}`)
+            }
           }
         })
       })
       this.props.changeCategoryList(categories)
     }).catch(() => {
       this.setState({ categories: [], listLoading: false })
+      this.props.changeCategoryList([])
     })
   }
 
