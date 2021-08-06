@@ -81,7 +81,7 @@ class Notelist extends React.Component {
       const activeNoteInfo = {
         note_id: activeId,
         note_title: currentDate,
-        release_status: false,
+        publish_status: false,
       }
       this.props.active(activeNoteInfo, true)
       this.props.history.push(`/category/${this.state.activeCategoryId}/note/${activeId}`)
@@ -181,17 +181,18 @@ class Notelist extends React.Component {
     this.setState({ listLoading: true, noteList: [] })
     getCategoryNote(data).then(res => {
       const noteList = res.data.category_note_list
+      this.props.changeCategoryNoteList(noteList)
 
-      if(this.props.match.params.noteId){
-        activeNoteId = parseInt(this.props.match.params.noteId) ? parseInt(this.props.match.params.noteId) : this.props.match.params.noteId
-        activeNoteIndex = noteList.findIndex(item => item.note_id === activeNoteId)
-      }else{
+      if(noteList.length){
         activeNoteIndex = 0
         activeNoteId = noteList[activeNoteIndex] && noteList[activeNoteIndex].note_id
+      }else{
+        activeNoteIndex = undefined
+        activeNoteId = undefined
       }
 
       this.setState({ noteList, listLoading: false, activeNoteId, activeNoteIndex }, () => {
-        const activeNoteInfo = noteList[activeNoteIndex] ? noteList[activeNoteIndex] : { note_id: activeNoteId }
+        const activeNoteInfo = activeNoteId && noteList[activeNoteIndex]
         this.props.active(activeNoteInfo)
 
         if(!!activeNoteId){
@@ -199,7 +200,9 @@ class Notelist extends React.Component {
         }
       })
     }).catch(() => {
-      this.setState({ listLoading: false })
+      this.setState({ listLoading: false, noteList: [] })
+      this.props.changeCategoryNoteList([])
+      this.props.history.push(`/category/${categoryId}`)
       this.props.active()
     })
   }
@@ -217,21 +220,26 @@ class Notelist extends React.Component {
       return
     }
 
-    if(prevProps.match.params.noteId !== this.props.match.params.noteId && this.props.match.params.noteId !== String(this.state.activeNoteId)){
+    if(prevProps.match.params.noteId !== this.props.match.params.noteId){
       if(this.props.match.params.noteId){
-        const activeNoteId = parseInt(this.props.match.params.noteId) ? parseInt(this.props.match.params.noteId) : this.props.match.params.noteId
+        const activeNoteId = parseInt(this.props.match.params.noteId)
         const activeNoteIndex = this.state.noteList.findIndex(item => item.note_id === activeNoteId)
         this.setState({ activeNoteId, activeNoteIndex })
-        const activeNoteInfo = this.state.noteList[activeNoteIndex] ? this.state.noteList[activeNoteIndex] : { note_id: activeNoteId }
+        const activeNoteInfo = this.state.noteList[activeNoteIndex]
         this.props.active(activeNoteInfo)
-      }else{
-        this.handleGetCategoryNote()
       }
     }
   }
 
   render(){
-    const { noteList, activeNoteId, listLoading, dialogVisible, moveCategoryId, confirmLoading } = this.state
+    const { 
+      noteList, 
+      activeNoteId, 
+      listLoading, 
+      dialogVisible, 
+      moveCategoryId, 
+      confirmLoading 
+    } = this.state
 
     const menu = (item, index) => (
       <Menu>
@@ -273,7 +281,16 @@ class Notelist extends React.Component {
                 >
                   <div className="noteinfo">
                     <div className="title">{item.note_title}</div>
-                    <div className="update-time">{moment(item.update_time).format('YYYY-MM-DD')}</div>
+                    <div className="other-info">
+                      <div className="publish-status">
+                        {
+                          item.publish_status ?
+                          <SvgIcon iconClass="published" className="published"></SvgIcon> :
+                          <SvgIcon iconClass="unpublished"></SvgIcon>
+                        }
+                      </div>
+                      <span className="create-time">{moment(item.create_time).format('YYYY-MM-DD')}</span>
+                    </div>
                   </div>
                   <div className="handle-btn">
                     <Dropdown overlay={menu(item, index)}>

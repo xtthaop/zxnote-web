@@ -5,6 +5,7 @@ import { Editor } from '../notebook/components/index'
 import Switch from '@/components/Switch'
 import { getCategoryNote } from '@/api/notebook/note'
 import 'highlight.js/styles/atom-one-dark.css';
+import { message } from '@/components/message'
 import {
   PreviewWrapper,
   Previewer,
@@ -19,6 +20,7 @@ class Preview extends React.Component {
     this.state = {
       showPreviewer: false,
       activeNoteInfo: {},
+      categoryNoteList: [],
       previewerTitle: undefined,
       previewerContent: undefined,
       scale: 0,
@@ -309,6 +311,7 @@ class Preview extends React.Component {
       showPreviewer: false,
       activeNoteInfo: {},
       previewerTitle: '',
+      categoryNoteList: [],
     })
   }
 
@@ -322,12 +325,18 @@ class Preview extends React.Component {
 
     getCategoryNote(data).then(res => {
       const notes = res.data.category_note_list
-      const noteId = parseInt(this.props.match.params.noteId) ? parseInt(this.props.match.params.noteId) : this.props.match.params.noteId
+      const noteId = parseInt(this.props.match.params.noteId)
       const noteIndex = notes.findIndex(item => item.note_id === noteId)
       this.setState({
-        activeNoteInfo: notes[noteIndex] ? notes[noteIndex] : { note_id: noteId },
+        categoryNoteList: notes,
+        activeNoteInfo: notes[noteIndex],
         previewerTitle: notes[noteIndex] && notes[noteIndex].note_title,
       })
+      
+      if(!notes[noteIndex]){
+        message.error('记录不存在')
+        this.editorRef.current.setState({ contentLoading: false })
+      }
     }).catch(() => {
       this.handleClearNote()
       this.editorRef.current.setState({ contentLoading: false })
@@ -346,12 +355,21 @@ class Preview extends React.Component {
   }
 
   render(){
-    const { activeNoteInfo, previewerTitle, previewerContent, showPreviewer, syncScrollStatus } = this.state
+    const { 
+      activeNoteInfo, 
+      previewerTitle, 
+      previewerContent, 
+      showPreviewer, 
+      syncScrollStatus,
+      categoryNoteList
+    } = this.state
+
     return (
       <PreviewWrapper>
         <Editor 
           wrappedComponentRef={this.editorRef}
           isPreviewMode={true}
+          categoryNoteList={categoryNoteList}
           activeNoteInfo={activeNoteInfo}
           handleSyncContent={this.handleSyncContent}
           handleSyncTitle={this.handleSyncTitle}

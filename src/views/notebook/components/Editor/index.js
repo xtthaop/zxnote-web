@@ -152,9 +152,9 @@ class Editor extends React.Component {
     if(this.props.isPreviewMode){
       this.props.handleSyncContent(false)
     }
-    
+
     const data = {
-      note_id: this.props.activeNoteInfo.note_id
+      note_id: this.props.activeNoteInfo ? this.props.activeNoteInfo.note_id : 'undefined'
     }
 
     getNoteContent(data).then(res => {
@@ -179,6 +179,9 @@ class Editor extends React.Component {
       })
     }).catch(() => {
       this.setState({ showEditor: false, content: '', title: '', contentLoading: false })
+      if(this.props.isPreviewMode){
+        this.props.handleSyncContent(false)
+      }
     })
   }
 
@@ -193,17 +196,14 @@ class Editor extends React.Component {
   }
 
   componentDidUpdate(prevProp){
-    const activeNoteInfo = this.props.activeNoteInfo ? this.props.activeNoteInfo : {}
-    const prevActiveNoteInfo = prevProp.activeNoteInfo ? prevProp.activeNoteInfo : {}
+    const activeNoteInfo = this.props.activeNoteInfo || {}
+    const prevActiveNoteInfo = prevProp.activeNoteInfo || {}
 
     if(prevActiveNoteInfo.note_id !== activeNoteInfo.note_id){
-      if(activeNoteInfo.note_id){
+      if(this.props.categoryNoteList.length){
         this.handleGetNoteContent()
       }else{
         this.setState({ showEditor: false, content: '', title: '', contentLoading: false })
-        if(this.props.isPreviewMode){
-          this.props.handleSyncContent(false)
-        }
       }
     }
   }

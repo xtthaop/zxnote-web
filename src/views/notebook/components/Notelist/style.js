@@ -67,9 +67,21 @@ export const Notes = styled.ul`
         font-weight: 500;
       }
 
-      .update-time{
+      .other-info{
+        width: 100%;
         line-height: 20px;
         font-size: 12px;
+
+        .publish-status{
+          display: inline-block;
+          color: #ccc;
+          font-size: 13px;
+          margin-right: 5px;
+
+          .published{
+            color: #42c02e;
+          }
+        }
       }
     }
 

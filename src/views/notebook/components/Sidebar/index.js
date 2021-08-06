@@ -197,7 +197,16 @@ class Sidebar extends React.Component {
   }
 
   render(){
-    const { dialogVisible, categories, activeId, categoryForm, dialogTitle, confirmLoading, listLoading, username } = this.state
+    const { 
+      dialogVisible, 
+      categories, 
+      activeId, 
+      categoryForm, 
+      dialogTitle, 
+      confirmLoading, 
+      listLoading, 
+      username 
+    } = this.state
 
     const categoryMenu = (item, index) => {
       return (
@@ -273,7 +282,11 @@ class Sidebar extends React.Component {
         </Foot>
 
         <Dialog visible={dialogVisible} title={dialogTitle} footer={dialogFooter}>
-          <Input onChange={this.handleValueChange} value={categoryForm.category_name} placeholder="请输入新分类名"></Input>
+          <Input 
+            onChange={this.handleValueChange} 
+            value={categoryForm.category_name} 
+            placeholder="请输入新分类名"
+          ></Input>
         </Dialog>
       </SidebarWrapper>
     )
