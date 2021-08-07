@@ -129,6 +129,12 @@ class Notelist extends React.Component {
     this.setState({ noteList })
   }
 
+  changeActiveNoteStatus(status){
+    const { noteList, activeNoteIndex } = this.state
+    noteList[activeNoteIndex].publish_status = status
+    this.setState({ noteList })
+  }
+
   handleSubmitForm(){
     const { moveCategoryId, activeNoteId, activeNoteIndex } = this.state
 

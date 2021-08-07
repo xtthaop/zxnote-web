@@ -22,6 +22,7 @@ class Editor extends React.Component {
       showEditor: false,
       savedStatus: true,
       publishStatus: false,
+      publishUpdateStatus: false,
       cancelStatus: false,
       publishLoading: false,
       timeoutId: undefined,
@@ -42,6 +43,7 @@ class Editor extends React.Component {
     this.handleUploadImg = this.handleUploadImg.bind(this)
     this.handleImgFileChange = this.handleImgFileChange.bind(this)
     this.handleClickImgInput = this.handleClickImgInput.bind(this)
+    this.updatingStatus = this.updatingStatus.bind(this)
   }
 
   handleUploadImg(file, uploadingStr, filePromiseArr){
@@ -142,7 +144,7 @@ class Editor extends React.Component {
       if(this.props.isPreviewMode){
         this.props.handleSyncContent(this.state.content)
       }
-      this.setState({ savedStatus: true })
+      this.setState({ savedStatus: true, publishUpdateStatus: false })
     })
   }
 
@@ -163,6 +165,7 @@ class Editor extends React.Component {
       this.setState({ 
         title: this.props.activeNoteInfo.note_title,
         publishStatus: this.props.activeNoteInfo.publish_status ? true : false,
+        publishUpdateStatus: this.props.activeNoteInfo.publish_update_status ? true : false,
         content: noteContent, 
         showEditor: true,
         contentLoading: false,
@@ -217,8 +220,19 @@ class Editor extends React.Component {
 
     this.setState({ publishLoading: true })
     publishNote(data).then(() => {
-      this.setState({ publishStatus: status, publishLoading: false })
+      this.setState({ publishStatus: status, publishUpdateStatus: status, publishLoading: false })
+      if(!this.props.isPreviewMode){
+        this.props.handleSyncPublishStatus(this.state.publishStatus)
+      }
     })
+  }
+
+  updatingStatus(){
+    if(!this.state.publishStatus){
+      return false
+    }else if(this.state.publishStatus && !this.state.publishUpdateStatus){
+      return true
+    }
   }
 
   handleChangeCancelStatus(status){
@@ -228,7 +242,17 @@ class Editor extends React.Component {
   }
 
   render(){
-    const { title, content, showEditor, savedStatus, contentLoading, publishStatus, publishLoading, cancelStatus } = this.state
+    const { 
+      title, 
+      content, 
+      showEditor, 
+      savedStatus, 
+      contentLoading, 
+      publishStatus, 
+      publishUpdateStatus,
+      publishLoading, 
+      cancelStatus 
+    } = this.state
 
     return (
       <EditorWrapper isPreviewMode={this.props.isPreviewMode} showEditor={showEditor}>
@@ -237,7 +261,12 @@ class Editor extends React.Component {
           <React.Fragment>
             <TitleWrapper>
               <div className="save-status">{savedStatus ? '已保存' : '保存中...'}</div>
-              <input ref={this.titleRef} className="custom-input" value={title} onChange={this.changeTitle}></input>
+              <input 
+                ref={this.titleRef} 
+                className="custom-input" 
+                value={title} 
+                onChange={this.changeTitle}
+              ></input>
             </TitleWrapper>
             <ToolBar>
               <li 
@@ -249,14 +278,18 @@ class Editor extends React.Component {
                   savedStatus ?
                   <Fragment>
                     {
-                      publishStatus ?
+                      (publishStatus && publishUpdateStatus) ?
                       <div onClick={() => this.handlePublish(false)}>
                         <SvgIcon iconClass={cancelStatus ? 'error' : 'success'}></SvgIcon>
-                        <span className="publish-text">{cancelStatus ? (publishLoading ? '取消中...' : '取消发布') : '已发布'}</span>
+                        <span className="publish-text">
+                          {cancelStatus ? (publishLoading ? '取消中...' : '取消发布') : '已发布'}
+                        </span>
                       </div> : 
                       <div onClick={() => this.handlePublish(true)}>
-                        <SvgIcon iconClass={publishLoading ? '' : 'publish'}></SvgIcon>
-                        <span className="publish-text">{publishLoading ? '发布中...' : '发布笔记'}</span>
+                        <SvgIcon iconClass={publishLoading ? '' : (this.updatingStatus() ? 'update' : 'publish')}></SvgIcon>
+                        <span className="publish-text">
+                          {publishLoading ? '发布中...' : (this.updatingStatus() ? '发布更新' : '发布笔记')}
+                        </span>
                       </div>
                     }
                   </Fragment> :
