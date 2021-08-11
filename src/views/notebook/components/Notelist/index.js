@@ -65,11 +65,15 @@ class Notelist extends React.Component {
       const noteData = this.state.noteList
       const activeId = res.data.note_id
 
-      noteData.unshift({
+      const activeNoteInfo = {
         note_id: activeId,
         note_title: currentDate,
         create_time: currentDate,
-      })
+        publish_status: false,
+        title_focus: true,
+      }
+
+      noteData.unshift(activeNoteInfo)
 
       const activeIndex = 0
       this.setState({ 
@@ -78,12 +82,7 @@ class Notelist extends React.Component {
         activeNoteIndex: activeIndex
       })
 
-      const activeNoteInfo = {
-        note_id: activeId,
-        note_title: currentDate,
-        publish_status: false,
-      }
-      this.props.active(activeNoteInfo, true)
+      this.props.active(activeNoteInfo)
       this.props.history.push(`/category/${this.state.activeCategoryId}/note/${activeId}`)
     })
   }
@@ -245,7 +244,7 @@ class Notelist extends React.Component {
         const activeNoteIndex = this.state.noteList.findIndex(item => item.note_id === activeNoteId)
         this.setState({ activeNoteId, activeNoteIndex })
         const activeNoteInfo = this.state.noteList[activeNoteIndex]
-        this.props.active(activeNoteInfo)
+        this.props.active(activeNoteInfo, activeNoteInfo.title_focus)
       }else{
         this.handleGetCategoryNote()
       }
