@@ -19,6 +19,7 @@ class Notebook extends React.Component {
     this.handleSyncTitle = this.handleSyncTitle.bind(this)
     this.changeCategoryNoteList = this.changeCategoryNoteList.bind(this)
     this.handleSyncPublishStatus = this.handleSyncPublishStatus.bind(this)
+    this.handleSyncPublishUpdateStatus = this.handleSyncPublishUpdateStatus.bind(this)
   }
 
   changeCategoryList(val){
@@ -44,6 +45,10 @@ class Notebook extends React.Component {
     this.noteListRef.current.changeActiveNoteStatus(status)
   }
 
+  handleSyncPublishUpdateStatus(status){
+    this.noteListRef.current.changeActiveNoteUpdateStatus(status)
+  }
+
   render(){
     const { categoryList, activeNoteInfo, titleFocus, categoryNoteList } = this.state
     return (
@@ -61,6 +66,7 @@ class Notebook extends React.Component {
           titleFocus={titleFocus}
           handleSyncTitle={this.handleSyncTitle}
           handleSyncPublishStatus={this.handleSyncPublishStatus}
+          handleSyncPublishUpdateStatus={this.handleSyncPublishUpdateStatus}
         ></Editor>
       </NotebookWrapper>
     )

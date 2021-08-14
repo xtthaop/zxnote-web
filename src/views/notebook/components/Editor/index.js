@@ -145,6 +145,9 @@ class Editor extends React.Component {
         this.props.handleSyncContent(this.state.content)
       }
       this.setState({ savedStatus: true, publishUpdateStatus: false })
+      if(!this.props.isPreviewMode){
+        this.props.handleSyncPublishUpdateStatus(false)
+      }
     })
   }
 
@@ -222,7 +225,8 @@ class Editor extends React.Component {
     publishNote(data).then(() => {
       this.setState({ publishStatus: status, publishUpdateStatus: status, publishLoading: false })
       if(!this.props.isPreviewMode){
-        this.props.handleSyncPublishStatus(this.state.publishStatus)
+        this.props.handleSyncPublishStatus(status)
+        this.props.handleSyncPublishUpdateStatus(status)
       }
     })
   }
