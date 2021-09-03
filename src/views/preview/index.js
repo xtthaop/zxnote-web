@@ -4,7 +4,7 @@ import { withRouter } from 'react-router-dom'
 import { Editor } from '../notebook/components/index'
 import Switch from '@/components/Switch'
 import { getCategoryNote } from '@/api/notebook/note'
-import 'highlight.js/styles/atom-one-dark.css';
+import 'highlight.js/styles/vs2015.css';
 import { message } from '@/components/message'
 import {
   PreviewWrapper,

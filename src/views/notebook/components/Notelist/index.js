@@ -49,6 +49,7 @@ class Notelist extends React.Component {
       })
 
       const activeNoteInfo = this.state.noteList[index]
+      activeNoteInfo.title_focus = false
       this.props.active(activeNoteInfo)
       this.props.history.push(`/category/${this.state.activeCategoryId}/note/${id}`)
     }

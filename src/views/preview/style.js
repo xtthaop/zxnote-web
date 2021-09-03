@@ -147,7 +147,8 @@ export const ContentWrapper = styled.div`
     vertical-align: middle;
     border: none;
     color: #c7254e;
-    font-size: 12px;
+    font-size: 15px;
+    line-height: 25px;
     white-space: pre-wrap;
   }
 
