@@ -42,6 +42,10 @@ const config = {
         changeOrigin: true,
         pathRewrite: {'/restful' : ''},
       },
+      '/uploads': {
+        target: 'http://localhost:56899',
+        changeOrigin: true,
+      },
     }
   },
   resolve: {

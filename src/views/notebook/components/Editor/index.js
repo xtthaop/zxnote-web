@@ -301,7 +301,13 @@ class Editor extends React.Component {
                 }
               </li>
               <li className="tool" onClick={this.handleClickImgInput}>
-                <input ref={this.imgFileInputRef} type="file" multiple="multiple" onChange={this.handleImgFileChange} />
+                <input 
+                  ref={this.imgFileInputRef} 
+                  type="file" 
+                  accept="image/png, image/jpg, image/jpeg"
+                  multiple="multiple" 
+                  onChange={this.handleImgFileChange} 
+                />
                 <SvgIcon iconClass="pic"></SvgIcon>
               </li>
               <li className="tool right" onClick={this.handleSaveNote}><SvgIcon iconClass="save"></SvgIcon></li>

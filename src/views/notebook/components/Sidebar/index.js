@@ -10,6 +10,7 @@ import Loading from '@/components/Loading'
 import { message } from '@/components/message'
 import { messagebox } from '@/components/messagebox'
 import { createCategory, getCategoryList, deleteCategory, updateCategory } from '@/api/notebook/category'
+import { clearCache } from '@/api/upload'
 import { getUserInfo } from '@/api/permission'
 import { removeToken } from '@/utils/auth'
 import {
@@ -196,6 +197,27 @@ class Sidebar extends React.Component {
     location.reload()
   }
 
+  handleClearCache(){
+    messagebox.warning('提示', '确认清理缓存？', {
+      beforeClose: (action, instance, done) => {
+        if(action === 'confirm'){
+          instance.setState({ confirmLoading: true })
+          clearCache().then(() => {
+            instance.setState({ confirmLoading: false })
+            message.success('清理缓存成功！')
+            done()
+          }).catch(() => {
+            instance.setState({ confirmLoading: false })
+          })
+        }else{
+          done()
+        }
+      }
+    }).then(() => {
+      
+    }).catch(() => {})
+  }
+
   componentDidMount(){
     this.handleGetCategoryList()
     this.handleGetUserInfo()
@@ -230,8 +252,12 @@ class Sidebar extends React.Component {
 
     const userMenu = (
       <Menu>
+        <Menu.Item onClick={this.handleClearCache}>
+          <SvgIcon iconClass="clear" style={{ marginRight: '5px' }}></SvgIcon>
+          <span>清理缓存</span>
+        </Menu.Item>
         <Menu.Item onClick={this.handleLogOut}>
-        <SvgIcon iconClass="log-out" style={{ marginRight: '5px' }}></SvgIcon>
+          <SvgIcon iconClass="log-out" style={{ marginRight: '5px' }}></SvgIcon>
           <span>退出登录</span>
         </Menu.Item>
       </Menu>

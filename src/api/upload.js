@@ -7,3 +7,10 @@ export function uploadFile(data){
     data
   })
 }
+
+export function clearCache(){
+  return request({
+    url: '/upload',
+    method: 'delete',
+  })
+}

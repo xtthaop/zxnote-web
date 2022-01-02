@@ -18,25 +18,29 @@ class MessageBox extends React.Component {
       title: '',
       message: '',
       showCancelButton: true,
-      footer: undefined,
+      footer: null,
+      beforeClose: null,
+      confirmLoading: false,
     }
     this.handleHide = this.handleHide.bind(this)
+    this.handleDone = this.handleDone.bind(this)
   }
 
   show(options){
     return new Promise((resolve, reject) => {
-      const footer = (
+      const footer = (confirmLoading) => (
         <div>
           <Button 
             style={{ marginRight: '10px', display: options.showCancelButton ? 'inline-block' : 'none' }} 
-            onClick={() => this.handleHide(reject)}
+            disabled={confirmLoading}
+            onClick={() => this.handleDone('cancel', reject)}
           >
             取消
           </Button>
           <Button 
-            type="success" 
             type="primary" 
-            onClick={() => this.handleHide(resolve)}
+            data-loading={confirmLoading}
+            onClick={() => this.handleDone('confirm', resolve)}
           >
             确认
           </Button>
@@ -51,7 +55,14 @@ class MessageBox extends React.Component {
     })
   }
 
-
+  handleDone(action, callback){
+    const done = () => { this.handleHide(callback) }
+    if(this.state.beforeClose){
+      this.state.beforeClose(action, this, done)
+    }else{
+      done()
+    }
+  }
 
   handleHide(callback){
     this.setState({
@@ -61,7 +72,7 @@ class MessageBox extends React.Component {
   }
 
   render(){
-    const { visible, title, message, footer, type } = this.state
+    const { visible, title, message, footer, type, confirmLoading } = this.state
     return (
       <MessageBoxWrapper>
         { !visible && null }
@@ -78,7 +89,7 @@ class MessageBox extends React.Component {
                 </div>
               </div>
               <div className="messagebox-content-wrapper"><div>{message}</div></div>
-              <div className="messagebox-footer-wrapper"><div>{footer}</div></div>
+              <div className="messagebox-footer-wrapper"><div>{footer && footer(confirmLoading)}</div></div>
             </MessageBoxContent>
           </MessageBoxContentWrapper>
         </CSSTransition>
