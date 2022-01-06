@@ -179,7 +179,6 @@ export const ContentWrapper = styled.div`
 
     img{
       max-width: 100%;
-      width: auto;
       height: auto;
     }
   }
