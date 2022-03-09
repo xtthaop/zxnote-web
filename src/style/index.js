@@ -67,6 +67,10 @@ const GlobalStyle = createGlobalStyle`
     border-collapse: collapse;
     border-spacing: 0;
   }
+
+  .katex {
+    font: 400 1.1em KaTeX_Main !important;
+  }
 `
 
 export default GlobalStyle
