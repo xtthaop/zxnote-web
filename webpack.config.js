@@ -1,6 +1,7 @@
 const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyPlugin = require("copy-webpack-plugin")
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const config = {
@@ -66,6 +67,20 @@ const config = {
       analyzerHost: '127.0.0.1',
       analyzerPort: 8888,
       reportFilename: 'report.html',
+      openAnalyzer: false,
+    }),
+    new CopyPlugin({
+      patterns: [
+        { 
+          from: "public",
+          globOptions: {
+            ignore: ["**/index.html"],
+          }
+        },
+      ],
+    }),
+    new webpack.DefinePlugin({
+      BASE_URL: "'/notebook/'"
     }),
   ],
   module: {

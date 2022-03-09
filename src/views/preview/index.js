@@ -52,6 +52,7 @@ class Preview extends React.Component {
   async handleInitMarkdown(){
     // Apply syntax highlighting to fenced code blocks with the highlight option:
     const hljs = await import('highlight.js') // https://highlightjs.org/
+    const mk = require('markdown-it-katex') // https://katex.org/
 
     this.md = require('markdown-it')({
       // html: true,
@@ -71,6 +72,8 @@ class Preview extends React.Component {
         return '<pre class="hljs"><code>' + this.md.utils.escapeHtml(str) + '</code></pre>';
       }
     })
+
+    this.md.use(mk)
 
     // add target="_blank" to all links
     // Remember old renderer, if overridden, or proxy to default renderer
