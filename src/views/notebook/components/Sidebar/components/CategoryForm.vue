@@ -1,0 +1,84 @@
+<template>
+  <el-dialog
+    :title="title"
+    v-model="dialogVisible"
+    :close-on-click-modal="false"
+    :draggable="true"
+    :show-close="false"
+    width="390px"
+  >
+    <el-form ref="formRef" :model="form" :rules="rules" :show-message="false">
+      <el-form-item label="" prop="category_name">
+        <el-input v-model="form.category_name" placeholder="请输入分类名称" maxlength="40" />
+      </el-form-item>
+    </el-form>
+
+    <template #footer>
+      <el-button @click="cancel">取 消</el-button>
+      <el-button type="primary" :loading="loading" @click="submitForm">确 定</el-button>
+    </template>
+  </el-dialog>
+</template>
+
+<script setup>
+import { ref, reactive, nextTick } from 'vue'
+import { addCategory, updateCategory } from '@/api/notebook/category'
+
+defineOptions({
+  name: 'CategoryForm',
+})
+
+const emits = defineEmits(['refresh'])
+
+const formRef = ref(null)
+
+const dialogVisible = ref(false)
+const title = ref('')
+
+const form = reactive({})
+const rules = ref({
+  category_name: [{ required: true, message: '分类名称不能为空', trigger: 'blur' }],
+})
+
+function open(item) {
+  dialogVisible.value = true
+  reset()
+  if (!item) {
+    title.value = '新增分类'
+  } else {
+    title.value = '重命名'
+    nextTick(() => {
+      Object.assign(form, item)
+    })
+  }
+}
+
+function reset() {
+  formRef.value?.resetFields()
+  form.id = undefined
+}
+
+const loading = ref(false)
+
+async function submitForm() {
+  const valid = await formRef.value.validate().catch(() => {})
+  if (!valid) return
+
+  loading.value = true
+  try {
+    const { data } = form.category_id ? await updateCategory(form) : await addCategory(form)
+    emits('refresh', data?.category_id)
+    dialogVisible.value = false
+  } finally {
+    loading.value = false
+  }
+}
+
+function cancel() {
+  dialogVisible.value = false
+}
+
+defineExpose({
+  open,
+})
+</script>

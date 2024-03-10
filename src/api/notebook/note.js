@@ -1,57 +1,57 @@
 import request from '@/utils/request'
 
-export function createNote(data){
+export function createNote(data) {
   return request({
     url: '/note/create_note',
     method: 'post',
-    data
+    data,
   })
 }
 
-export function getCategoryNote(params){
+export function getCategoryNote(params) {
   return request({
-    url: '/note/get_category_note',
+    url: '/restful/note/get_category_note',
     method: 'get',
-    params
+    params,
   })
 }
 
-export function deleteNote(data){
+export function deleteNote(data) {
   return request({
     url: '/note',
     method: 'delete',
-    data
+    data,
   })
 }
 
-export function moveNote(data){
+export function moveNote(data) {
   return request({
     url: '/note/move_note',
     method: 'post',
-    data
+    data,
   })
 }
 
-export function getNoteContent(params){
+export function getNoteContent(params) {
   return request({
     url: '/note/get_note_content',
     method: 'get',
-    params
+    params,
   })
 }
 
-export function saveNote(data){
+export function saveNote(data) {
   return request({
     url: '/note/save_note',
     method: 'post',
-    data
+    data,
   })
 }
 
-export function publishNote(data){
+export function publishNote(data) {
   return request({
     url: '/note/publish_note',
     method: 'post',
-    data
+    data,
   })
 }

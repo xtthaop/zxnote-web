@@ -1,32 +1,36 @@
 import request from '@/utils/request'
 
-export function createCategory(data){
+// 新增分类
+export function addCategory(data) {
   return request({
-    url: '/category',
+    url: '/restful/category',
     method: 'post',
-    data
+    data,
   })
 }
 
-export function getCategoryList(){
+// 获取分类列表
+export function getCategoryList() {
   return request({
-    url: '/category',
+    url: '/restful/category',
     method: 'get',
   })
 }
 
-export function deleteCategory(data){
+// 删除分类
+export function deleteCategory(data) {
   return request({
-    url: '/category',
+    url: '/restful/category',
     method: 'delete',
-    data
+    data,
   })
 }
 
-export function updateCategory(data){
+// 编辑分类
+export function updateCategory(data) {
   return request({
-    url: '/category',
+    url: '/restful/category',
     method: 'put',
-    data
+    data,
   })
 }

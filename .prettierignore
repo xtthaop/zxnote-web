@@ -1,0 +1,7 @@
+dist
+index.html
+.vscode
+.prettierrc.json
+pnpm-lock.yaml
+src/assets/*
+src/icons/*

@@ -1,51 +1,76 @@
 import axios from 'axios'
 import { getToken, removeToken } from '@/utils/auth'
-import { message } from '@/components/message.js'
-import { messagebox } from '@/components/messagebox'
+import router from '@/router'
+import { ElMessageBox, ElMessage } from 'element-plus'
 
-// create an axios instance
+let messageBoxFlag = 0
+
 const service = axios.create({
-  baseURL: '/restful',
-  timeout: 30000,
+  baseURL: '',
+  // timeout: 5000,
+  // `validateStatus` 定义了对于给定的 HTTP 状态码是 resolve 还是 reject promise，
+  // 如果 `validateStatus` 返回 `true` (或者设置为 `null` 或 `undefined`)，
+  // 则 promise 将会 resolved，否则是 rejected。
+  // validateStatus: function (status) {
+  //   return status >= 200 && status < 300; // 默认值
+  // },
 })
 
-// request interceptor
 service.interceptors.request.use(
-  config => {
+  (config) => {
     const token = getToken()
-    if(token){
+    if (token) {
       config.headers['X-Token'] = token
     }
     return config
   },
-  error => {
+  (error) => {
     return Promise.reject(error)
   }
 )
 
-// response interceptor
 service.interceptors.response.use(
-  response => {
+  (response) => {
     const res = response.data
+    if (res.code !== 0) {
+      ElMessage({
+        message: res.message || 'Error',
+        type: 'error',
+        duration: 5 * 1000,
+      })
 
-    // if the custom code is not 0, it is judged as an error.
-    if(res.code !== 0){
-      message.error(res.message || 'Error')
-      return Promise.reject(res || new Error('Error'))
-    }else{
+      return Promise.reject(res || 'Error')
+    } else {
       return res
     }
   },
-  error => {
+  (error) => {
     if (error.response.status === 401) {
-      messagebox.warning('提示', '登录验证失败，请重新登录', {
-        showCancelButton: false,
-      }).then(() => {
-        removeToken()
-        location.reload()
+      if (messageBoxFlag === 0) {
+        messageBoxFlag = 1
+        ElMessageBox.confirm('您的登录状态已失效，请重新登录', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          'show-close': false,
+          'close-on-click-modal': false,
+          type: 'warning',
+        })
+          .then(async () => {
+            messageBoxFlag = 0
+            removeToken()
+            router.push('/login')
+          })
+          .catch(() => {
+            messageBoxFlag = 0
+          })
+      }
+    } else {
+      ElMessage({
+        message: error.response.data?.message || error.message || 'Error',
+        type: 'error',
+        duration: 5 * 1000,
+        showClose: true,
       })
-    }else{
-      message.error(error.response.data.message || error.message || 'Error')
     }
     return Promise.reject(error)
   }

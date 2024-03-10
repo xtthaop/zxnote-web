@@ -1,0 +1,32 @@
+@forward 'element-plus/theme-chalk/src/common/var.scss' with (
+  $colors: (
+    'primary': (
+      'base': #42c02e,
+    ),
+  )
+);
+
+@use 'element-plus/theme-chalk/src/index.scss' as *;
+
+.el-dialog {
+  padding: 0;
+  border-radius: 6px;
+
+  .el-dialog__header {
+    padding: 10px 20px;
+    border-bottom: 1px solid #ddd;
+
+    .el-dialog__title {
+      font-size: 16px;
+      font-weight: 500;
+    }
+  }
+
+  .el-dialog__body {
+    padding: 25px 20px;
+  }
+
+  .el-dialog__footer {
+    padding: 0 20px 20px;
+  }
+}
