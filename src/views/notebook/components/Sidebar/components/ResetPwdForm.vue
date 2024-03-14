@@ -34,7 +34,7 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="cancel">取 消</el-button>
+      <el-button @click="cancel" :disabled="loading">取 消</el-button>
       <el-button type="primary" @click="submitForm" :loading="loading">确 定</el-button>
     </template>
   </el-dialog>
@@ -80,6 +80,8 @@ const rules = ref({
 async function submitForm() {
   const valid = await resetPwdFormRef.value.validate().catch(() => {})
   if (!valid) return
+
+  loading.value = true
 
   const data = {}
   for (let key in form) {

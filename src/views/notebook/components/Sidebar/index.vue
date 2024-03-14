@@ -84,29 +84,23 @@ defineOptions({
 
 const router = useRouter()
 const route = useRoute()
-let categoryId = Number(route.params.categoryId)
 
 const listLoading = ref(false)
-const activeId = ref(categoryId)
 const categoryList = ref([])
+const categoryId = Number(route.params.categoryId)
+const activeId = ref(categoryId)
 
-function handleRefreshCategoryList(id) {
-  handleGetCategoryList().then(() => {
-    if (id) {
-      activeId.value = id
-    }
-  })
-}
+handleGetCategoryList().then(() => {
+  if (!categoryId) {
+    activeId.value = categoryList.value[0]?.category_id
+  }
+})
 
 function handleGetCategoryList() {
   listLoading.value = true
   return getCategoryList()
     .then((res) => {
       categoryList.value = res.data.category_list
-
-      if (!categoryId) {
-        activeId.value = categoryList.value[0]?.category_id
-      }
     })
     .finally(() => {
       listLoading.value = false
@@ -119,20 +113,24 @@ watch(activeId, (val) => {
   }
 })
 
-handleGetCategoryList()
-
 function handleItemClick(id) {
   activeId.value = id
 }
 
 const categoryForm = ref(null)
-
 function handleAddCategory() {
   categoryForm.value.open()
 }
-
 function handleEditCategory(item) {
   categoryForm.value.open(item)
+}
+
+function handleRefreshCategoryList(id) {
+  handleGetCategoryList().then(() => {
+    if (id) {
+      activeId.value = id
+    }
+  })
 }
 
 function handleDeleteCategory(category_id) {
@@ -141,21 +139,28 @@ function handleDeleteCategory(category_id) {
     cancelButtonText: '取消',
     'show-close': false,
     'close-on-click-modal': false,
-    type: 'warning',
+    type: 'error',
   }).then(() => {
-    deleteCategory({ category_id }).then(() => {
-      categoryId = undefined
-      handleGetCategoryList()
-      ElMessage({
-        message: '删除成功',
-        type: 'success',
+    listLoading.value = true
+    deleteCategory({ category_id })
+      .then(() => {
+        handleGetCategoryList().then(() => {
+          activeId.value = categoryList.value[0]?.category_id
+        })
+        ElMessage({
+          message: '删除成功',
+          type: 'success',
+        })
       })
-    })
+      .catch(() => {
+        listLoading.value = false
+      })
   })
 }
 
-const userInfo = reactive({})
+handleGetUserInfo()
 
+const userInfo = reactive({})
 function handleGetUserInfo() {
   getUserInfo().then((res) => {
     userInfo.user_id = res.data.user_id
@@ -163,18 +168,23 @@ function handleGetUserInfo() {
   })
 }
 
-handleGetUserInfo()
-
 const resetPwdForm = ref()
-
 function handleChangePassword() {
   resetPwdForm.value.open()
 }
 
 function handleLogout() {
-  logout().then(() => {
-    removeToken()
-    router.push('login')
+  ElMessageBox.confirm('确认退出登录？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    'show-close': false,
+    'close-on-click-modal': false,
+    type: 'warning',
+  }).then(() => {
+    logout().then(() => {
+      removeToken()
+      router.push('/login')
+    })
   })
 }
 </script>

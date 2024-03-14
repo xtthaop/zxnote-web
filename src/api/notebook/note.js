@@ -1,13 +1,15 @@
 import request from '@/utils/request'
 
-export function createNote(data) {
+// 新增笔记
+export function addNote(data) {
   return request({
-    url: '/note/create_note',
+    url: '/restful/note/add_note',
     method: 'post',
     data,
   })
 }
 
+// 获取分类下笔记
 export function getCategoryNote(params) {
   return request({
     url: '/restful/note/get_category_note',
@@ -16,17 +18,19 @@ export function getCategoryNote(params) {
   })
 }
 
+// 删除笔记
 export function deleteNote(data) {
   return request({
-    url: '/note',
+    url: '/restful/note',
     method: 'delete',
     data,
   })
 }
 
+// 移动笔记
 export function moveNote(data) {
   return request({
-    url: '/note/move_note',
+    url: '/restful/note/move_note',
     method: 'post',
     data,
   })

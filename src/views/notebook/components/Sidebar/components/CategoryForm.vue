@@ -14,7 +14,7 @@
     </el-form>
 
     <template #footer>
-      <el-button @click="cancel">取 消</el-button>
+      <el-button @click="cancel" :disabled="loading">取 消</el-button>
       <el-button type="primary" :loading="loading" @click="submitForm">确 定</el-button>
     </template>
   </el-dialog>
@@ -31,10 +31,9 @@ defineOptions({
 const emits = defineEmits(['refresh'])
 
 const formRef = ref(null)
-
 const dialogVisible = ref(false)
+const loading = ref(false)
 const title = ref('')
-
 const form = reactive({})
 const rules = ref({
   category_name: [{ required: true, message: '分类名称不能为空', trigger: 'blur' }],
@@ -44,7 +43,7 @@ function open(item) {
   dialogVisible.value = true
   reset()
   if (!item) {
-    title.value = '新增分类'
+    title.value = '新建分类'
   } else {
     title.value = '重命名'
     nextTick(() => {
@@ -55,10 +54,8 @@ function open(item) {
 
 function reset() {
   formRef.value?.resetFields()
-  form.id = undefined
+  form.category_id = undefined
 }
-
-const loading = ref(false)
 
 async function submitForm() {
   const valid = await formRef.value.validate().catch(() => {})

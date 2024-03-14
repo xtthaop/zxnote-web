@@ -1,6 +1,6 @@
 <template>
   <div class="note-list-wrapper" v-if="categoryId" v-loading="listLoading">
-    <div class="add-btn">
+    <div class="add-btn" @click="handleAddNote">
       <svg-icon name="plus"></svg-icon>
       <span>新建笔记</span>
     </div>
@@ -21,16 +21,32 @@
                   :style="{ backgroundColor: handlePublishStatus(item) }"
                 ></span>
                 <span class="create-time">
-                  {{ dayjs(item.create_time).format('YYYY-MM-DD') }}
+                  {{ dayjs(item.create_time).format('YYYY-MM-DD HH:mm:ss') }}
                 </span>
               </div>
             </div>
 
-            <span class="handle-btn"><svg-icon name="setting"></svg-icon></span>
+            <el-dropdown trigger="click">
+              <span class="handle-btn"><svg-icon name="setting"></svg-icon></span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="handleMoveNote(item.note_id)">
+                    <svg-icon name="folder" style="margin-right: 10px"></svg-icon>
+                    <span>移动笔记</span>
+                  </el-dropdown-item>
+                  <el-dropdown-item @click="handleDeleteNote(item.note_id)">
+                    <svg-icon name="delete" style="margin-right: 10px"></svg-icon>
+                    <span>删除笔记</span>
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
         </li>
       </ul>
     </el-scrollbar>
+
+    <NoteForm ref="noteFormRef" @refresh="handleMoveNoteRefresh"></NoteForm>
   </div>
 </template>
 
@@ -38,7 +54,9 @@
 import { ref, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { dayjs } from 'element-plus'
-import { getCategoryNote } from '@/api/notebook/note'
+import { getCategoryNote, addNote, deleteNote } from '@/api/notebook/note'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import NoteForm from './components/NoteForm.vue'
 
 defineOptions({
   name: 'NoteListComponent',
@@ -49,6 +67,10 @@ const router = useRouter()
 
 const categoryId = ref()
 const noteList = ref([])
+const listLoading = ref(false)
+let activeIndex = 0
+let noteId = Number(route.params.noteId)
+const activeId = ref(noteId)
 
 watch(
   () => route.params.categoryId,
@@ -56,7 +78,16 @@ watch(
     categoryId.value = Number(val)
     if (categoryId.value) {
       nextTick(() => {
-        handleGetCategoryNote()
+        noteId = Number(route.params.noteId)
+        handleGetCategoryNote().then(() => {
+          if (noteId) {
+            activeId.value = noteId
+            activeIndex = noteList.value.findIndex((item) => item.note_id === noteId)
+          } else {
+            activeId.value = noteList.value[0]?.note_id
+            activeIndex = 0
+          }
+        })
       })
     } else {
       noteList.value = []
@@ -67,33 +98,19 @@ watch(
   }
 )
 
-const listLoading = ref(false)
-const activeId = ref()
-let activeIndex = 0
-
 function handleGetCategoryNote() {
   listLoading.value = true
-  getCategoryNote({ category_id: categoryId.value })
+  return getCategoryNote({ category_id: categoryId.value })
     .then((res) => {
       noteList.value = res.data.category_note_list
-
-      let noteId = Number(route.params.noteId)
-      if (noteId) {
-        activeId.value = noteId
-        activeIndex = noteList.value.findIndex((item) => item.note_id === activeId.value)
-      } else {
-        activeId.value = noteList.value[0]?.note_id
-        activeIndex = 0
-      }
+    })
+    .catch(() => {
+      categoryId.value = undefined
+      noteList.value = []
     })
     .finally(() => {
       listLoading.value = false
     })
-}
-
-function handleNoteItemClick(id, index) {
-  activeId.value = id
-  activeIndex = index
 }
 
 watch(activeId, (val) => {
@@ -101,6 +118,69 @@ watch(activeId, (val) => {
     router.push(`/category/${categoryId.value}/note/${val}`)
   }
 })
+
+function handleNoteItemClick(id, index) {
+  activeId.value = id
+  activeIndex = index
+}
+
+function handleAddNote() {
+  listLoading.value = true
+  addNote({ category_id: categoryId.value })
+    .then((res) => {
+      handleGetCategoryNote().then(() => {
+        activeId.value = res.data.note_id
+        activeIndex = 0
+      })
+    })
+    .catch(() => {
+      listLoading.value = false
+    })
+}
+
+function handleDeleteNote(id) {
+  ElMessageBox.confirm('确认删除笔记？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    'show-close': false,
+    'close-on-click-modal': false,
+    type: 'error',
+  }).then(() => {
+    listLoading.value = true
+    deleteNote({ note_id: id })
+      .then(() => {
+        handleGetCategoryNote().then(() => {
+          activeId.value = noteList.value[0]?.note_id
+          activeIndex = 0
+        })
+        ElMessage({
+          message: '删除成功',
+          type: 'success',
+        })
+      })
+      .catch(() => {
+        listLoading.value = false
+      })
+  })
+}
+
+const noteFormRef = ref()
+function handleMoveNote(noteId) {
+  const data = {
+    note_id: noteId,
+    category_id: categoryId.value,
+  }
+  noteFormRef.value.open(data)
+}
+
+function handleMoveNoteRefresh(newCategoryId) {
+  if (newCategoryId !== categoryId.value) {
+    handleGetCategoryNote().then(() => {
+      activeId.value = noteList.value[0]?.note_id
+      activeIndex = 0
+    })
+  }
+}
 
 function handlePublishStatus(item) {
   if (item.publish_status && item.publish_update_status) {
@@ -219,8 +299,8 @@ defineExpose({
           width: 20px;
           font-size: 14px;
           color: #aaa;
-          text-align: right;
-          line-height: 30px;
+          text-align: center;
+          line-height: 15px;
         }
       }
     }
