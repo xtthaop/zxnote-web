@@ -103,7 +103,7 @@ async function submitForm() {
 }
 
 function cancel() {
-  this.dialogVisible = false
+  dialogVisible.value = false
 }
 
 function reset() {

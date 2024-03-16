@@ -15,9 +15,10 @@
         class="tool right publish"
         @mouseenter="publishCancel = true"
         @mouseleave="publishCancel = false"
+        @click="hanldePublish(published ? 0 : 1)"
       >
         <template v-if="savedStatus">
-          <span v-if="published" @click="hanldePublish(0)">
+          <span v-if="published">
             <span v-if="publishLoading">
               <span class="publish-text">取消中...</span>
             </span>
@@ -26,7 +27,7 @@
               <span class="publish-text">{{ publishCancel ? '取消发布' : '已发布' }}</span>
             </span>
           </span>
-          <span v-else @click="hanldePublish(1)">
+          <span v-else>
             <span v-if="publishLoading">
               <span class="publish-text">发布中...</span>
             </span>
@@ -40,10 +41,17 @@
           <span class="publish-text">保存中...</span>
         </template>
       </li>
-      <li class="tool">
+      <li class="tool" @click="handleImgInput">
+        <input
+          ref="imgFileInputRef"
+          type="file"
+          accept="image/png, image/jpg, image/jpeg"
+          multiple="multiple"
+          @change="handleImgFileChange"
+        />
         <svg-icon name="pic"></svg-icon>
       </li>
-      <li class="tool right">
+      <li class="tool right" @click="handleSaveNote">
         <svg-icon name="save"></svg-icon>
       </li>
       <li class="tool right">
@@ -51,6 +59,7 @@
       </li>
     </ul>
     <textarea
+      ref="contentRef"
       class="content-wrapper"
       placeholder="请输入内容"
       v-model="note.note_content"
@@ -62,7 +71,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import md5 from 'js-md5'
 import { getNoteContent, publishNote, saveNote } from '@/api/notebook/note'
+import { uploadFile } from '@/api/upload'
 
 defineOptions({
   name: 'EditorComponent',
@@ -91,11 +102,13 @@ watch(
   }
 )
 
+const contentRef = ref()
 function handleGetNoteContent() {
   noteLoading.value = true
   return getNoteContent({ note_id: noteId.value })
     .then((res) => {
       note.value = res.data
+      contentRef.value.setSelectionRange(-1, -1)
     })
     .catch(() => {
       noteId.value = undefined
@@ -135,7 +148,7 @@ function handleSaveNote() {
 }
 
 function hanldePublish(status) {
-  if (publishLoading.value) return
+  if (publishLoading.value || !savedStatus.value) return
 
   const data = {
     note_id: note.value.note_id,
@@ -150,6 +163,59 @@ function hanldePublish(status) {
     emits('sync-publish-status', status)
     emits('sync-publish-update-status', status)
   })
+}
+
+const imgFileInputRef = ref()
+function handleImgInput() {
+  imgFileInputRef.value.click()
+}
+
+function handleImgFileChange(e) {
+  let start = contentRef.value.selectionStart
+  let end = contentRef.value.selectionEnd
+  let uploadingStr = ''
+  const filePromiseArr = []
+
+  for (let i = 0; i < e.target.files.length; i++) {
+    const tmpStr = `[图片正在上传...(${e.target.files[i].name}-${+new Date()})]\n`
+    uploadingStr += tmpStr
+    handleUploadImg(e.target.files[i], tmpStr, filePromiseArr)
+  }
+
+  const content = note.value.note_content
+  note.value.note_content = content.slice(0, start) + uploadingStr + content.slice(end)
+
+  Promise.allSettled(filePromiseArr).then(() => {
+    imgFileInputRef.value.value = ''
+    handleSaveNote()
+  })
+}
+
+function handleUploadImg(file, uploadingStr, filePromiseArr) {
+  const fileNameArr = file.name.split('.')
+  const newFileName = +new Date() + '-' + md5(file.name) + '.' + fileNameArr[fileNameArr.length - 1]
+
+  const data = new FormData()
+  data.append('key', `images/${newFileName}`)
+  data.append('file', file)
+
+  const filePromise = uploadFile(data)
+    .then((res) => {
+      const imgUrl = res.data.url
+      const content = note.value.note_content
+      const start = content.indexOf(uploadingStr)
+      const end = start + uploadingStr.length
+      note.value.note_content =
+        content.slice(0, start) + `![${file.name}](${imgUrl})\n` + content.slice(end)
+    })
+    .catch(() => {
+      const content = note.value.note_content
+      const start = content.indexOf(uploadingStr)
+      const end = start + uploadingStr.length
+      note.value.note_content = content.slice(0, start) + '' + content.slice(end)
+    })
+
+  filePromiseArr.push(filePromise)
 }
 </script>
 
