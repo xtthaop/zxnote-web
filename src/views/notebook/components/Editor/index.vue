@@ -69,7 +69,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import md5 from 'js-md5'
 import { getNoteContent, publishNote, saveNote } from '@/api/notebook/note'
@@ -102,13 +102,21 @@ watch(
   }
 )
 
+const titleRef = ref()
 const contentRef = ref()
+const titleFocus = defineModel('titleFocus')
 function handleGetNoteContent() {
   noteLoading.value = true
   return getNoteContent({ note_id: noteId.value })
     .then((res) => {
       note.value = res.data
       contentRef.value.setSelectionRange(-1, -1)
+      nextTick(() => {
+        if (titleFocus.value) {
+          titleRef.value.select()
+          titleFocus.value = false
+        }
+      })
     })
     .catch(() => {
       noteId.value = undefined

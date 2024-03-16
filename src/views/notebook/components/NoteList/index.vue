@@ -122,11 +122,13 @@ function handleNoteItemClick(id, index) {
   activeIndex = index
 }
 
+const titleFocus = defineModel('titleFocus')
 function handleAddNote() {
   listLoading.value = true
   addNote({ category_id: categoryId.value })
     .then((res) => {
       handleGetCategoryNote().then(() => {
+        titleFocus.value = true
         activeId.value = res.data.note_id
         activeIndex = 0
       })

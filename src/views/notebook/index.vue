@@ -1,8 +1,9 @@
 <template>
   <div class="notebook-wrapper">
     <Sidebar></Sidebar>
-    <NoteList ref="noteListRef"></NoteList>
+    <NoteList ref="noteListRef" v-model:title-focus="titleFocus"></NoteList>
     <Editor
+      v-model:title-focus="titleFocus"
       @sync-title="handleSyncTitle"
       @sync-publish-status="handleSyncPublishStatus"
       @sync-publish-update-status="handleSyncPublishUpdateStatus"
@@ -18,6 +19,7 @@ defineOptions({
   name: 'NotebookPage',
 })
 
+const titleFocus = ref(false)
 const noteListRef = ref()
 
 function handleSyncTitle(title) {
