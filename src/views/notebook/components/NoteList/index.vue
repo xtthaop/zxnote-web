@@ -51,7 +51,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { dayjs } from 'element-plus'
 import { getCategoryNote, addNote, deleteNote } from '@/api/notebook/note'
@@ -77,17 +77,15 @@ watch(
   (val) => {
     categoryId.value = Number(val)
     if (categoryId.value) {
-      nextTick(() => {
-        noteId = Number(route.params.noteId)
-        handleGetCategoryNote().then(() => {
-          if (noteId) {
-            activeId.value = noteId
-            activeIndex = noteList.value.findIndex((item) => item.note_id === noteId)
-          } else {
-            activeId.value = noteList.value[0]?.note_id
-            activeIndex = 0
-          }
-        })
+      noteId = Number(route.params.noteId)
+      handleGetCategoryNote().then(() => {
+        if (noteId) {
+          activeId.value = noteId
+          activeIndex = noteList.value.findIndex((item) => item.note_id === noteId)
+        } else {
+          activeId.value = noteList.value[0]?.note_id
+          activeIndex = 0
+        }
       })
     } else {
       noteList.value = []
@@ -197,17 +195,31 @@ function handlePublishStatus(item) {
 }
 
 function changeNoteTitle(title) {
-  noteList.value.length &&
-    (activeIndex || activeIndex === 0) &&
-    (noteList.value[activeIndex].note_title = title)
+  if (noteList.value.length && noteList.value[activeIndex]) {
+    noteList.value[activeIndex].note_title = title
+  }
+}
+
+function changeNotePublishStatus(status) {
+  if (noteList.value.length && noteList.value[activeIndex]) {
+    noteList.value[activeIndex].publish_status = status
+  }
+}
+
+function changeNotePublishUpdateStatus(status) {
+  if (noteList.value.length && noteList.value[activeIndex]) {
+    noteList.value[activeIndex].publish_update_status = status
+  }
 }
 
 defineExpose({
   changeNoteTitle,
+  changeNotePublishStatus,
+  changeNotePublishUpdateStatus,
 })
 </script>
 
-<style lang="scss" scope>
+<style lang="scss" scoped>
 .note-list-wrapper {
   position: relative;
   width: 25%;

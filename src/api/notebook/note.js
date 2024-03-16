@@ -36,25 +36,28 @@ export function moveNote(data) {
   })
 }
 
+// 获取笔记内容
 export function getNoteContent(params) {
   return request({
-    url: '/note/get_note_content',
+    url: '/restful/note/get_note_content',
     method: 'get',
     params,
   })
 }
 
+// 保存笔记
 export function saveNote(data) {
   return request({
-    url: '/note/save_note',
+    url: '/restful/note/save_note',
     method: 'post',
     data,
   })
 }
 
+// 发布笔记
 export function publishNote(data) {
   return request({
-    url: '/note/publish_note',
+    url: '/restful/note/publish_note',
     method: 'post',
     data,
   })
