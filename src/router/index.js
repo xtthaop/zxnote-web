@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Login from '@/views/login/index.vue'
 import Page404 from '@/views/error-page/404.vue'
 import Notebook from '@/views/notebook/index.vue'
+import Preview from '@/views/preview/index.vue'
 
 export const constantRoutes = [
   {
@@ -24,6 +25,11 @@ export const constantRoutes = [
     path: '/category/:categoryId/note/:noteId',
     name: 'Note',
     component: Notebook,
+  },
+  {
+    path: '/category/:categoryId/note/:noteId/preview',
+    name: 'Preview',
+    component: Preview,
   },
   {
     path: '/:pathMatch(.*)*',

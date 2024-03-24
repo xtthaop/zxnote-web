@@ -8,18 +8,27 @@ dependencies:
   '@element-plus/icons-vue':
     specifier: ^2.3.1
     version: registry.npmmirror.com/@element-plus/icons-vue@2.3.1(vue@3.4.21)
+  '@xtthaop/markdown-it-katex':
+    specifier: ^2.0.5
+    version: registry.npmmirror.com/@xtthaop/markdown-it-katex@2.0.5
   axios:
     specifier: ^1.6.8
     version: registry.npmmirror.com/axios@1.6.8
   element-plus:
     specifier: ^2.6.1
     version: registry.npmmirror.com/element-plus@2.6.1(vue@3.4.21)
+  highlight.js:
+    specifier: ^11.9.0
+    version: registry.npmmirror.com/highlight.js@11.9.0
   js-cookie:
     specifier: ^3.0.5
     version: registry.npmmirror.com/js-cookie@3.0.5
   js-md5:
     specifier: ^0.8.3
     version: registry.npmmirror.com/js-md5@0.8.3
+  markdown-it:
+    specifier: ^14.0.0
+    version: registry.npmmirror.com/markdown-it@14.0.0
   normalize.css:
     specifier: ^8.0.1
     version: registry.npmmirror.com/normalize.css@8.0.1
@@ -710,6 +719,14 @@ packages:
       - vue
     dev: false
 
+  registry.npmmirror.com/@xtthaop/markdown-it-katex@2.0.5:
+    resolution: {integrity: sha512-azVTCK/yp9ljs3kQ6X6gYeacYJUGXmm9Wi20foAPYPNyrLTmgRMc6HUIFAe28pZgXd0mbcV1ieAxfXw4EEhd0Q==, tarball: https://registry.npmmirror.com/@xtthaop/markdown-it-katex/-/markdown-it-katex-2.0.5.tgz}
+    name: '@xtthaop/markdown-it-katex'
+    version: 2.0.5
+    dependencies:
+      katex: registry.npmmirror.com/katex@0.16.9
+    dev: false
+
   registry.npmmirror.com/acorn-jsx@5.3.2(acorn@8.11.3):
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==, tarball: https://registry.npmmirror.com/acorn-jsx/-/acorn-jsx-5.3.2.tgz}
     id: registry.npmmirror.com/acorn-jsx/5.3.2
@@ -807,7 +824,6 @@ packages:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==, tarball: https://registry.npmmirror.com/argparse/-/argparse-2.0.1.tgz}
     name: argparse
     version: 2.0.1
-    dev: true
 
   registry.npmmirror.com/arr-diff@4.0.0:
     resolution: {integrity: sha512-YVIQ82gZPGBebQV/a8dar4AitzCQs0jjXwMPZllpXMaGjXPYVUawSxQrRsjhjupyVxEvbHgUmIhKVlND+j02kA==, tarball: https://registry.npmmirror.com/arr-diff/-/arr-diff-4.0.0.tgz}
@@ -1122,6 +1138,13 @@ packages:
     version: 7.2.0
     engines: {node: '>= 10'}
     dev: true
+
+  registry.npmmirror.com/commander@8.3.0:
+    resolution: {integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==, tarball: https://registry.npmmirror.com/commander/-/commander-8.3.0.tgz}
+    name: commander
+    version: 8.3.0
+    engines: {node: '>= 12'}
+    dev: false
 
   registry.npmmirror.com/component-emitter@1.3.1:
     resolution: {integrity: sha512-T0+barUSQRTUQASh8bx02dl+DhF54GtIDY13Y3m9oWTklKbb3Wv974meRpeZ3lp1JpLVECWWNHC4vaG2XHXouQ==, tarball: https://registry.npmmirror.com/component-emitter/-/component-emitter-1.3.1.tgz}
@@ -2058,6 +2081,13 @@ packages:
     hasBin: true
     dev: true
 
+  registry.npmmirror.com/highlight.js@11.9.0:
+    resolution: {integrity: sha512-fJ7cW7fQGCYAkgv4CPfwFHrfd/cLS4Hau96JuJ+ZTOWhjnhoeN1ub1tFmALm/+lW5z4WCAuAV9bm05AP0mS6Gw==, tarball: https://registry.npmmirror.com/highlight.js/-/highlight.js-11.9.0.tgz}
+    name: highlight.js
+    version: 11.9.0
+    engines: {node: '>=12.0.0'}
+    dev: false
+
   registry.npmmirror.com/htmlparser2@3.10.1:
     resolution: {integrity: sha512-IgieNijUMbkDovyoKObU1DUhm1iwNYE/fuifEoEHfd1oZKZDaONBSkal7Y01shxsM49R4XaMdGez3WnF9UfiCQ==, tarball: https://registry.npmmirror.com/htmlparser2/-/htmlparser2-3.10.1.tgz}
     name: htmlparser2
@@ -2386,6 +2416,15 @@ packages:
       graceful-fs: registry.npmmirror.com/graceful-fs@4.2.11
     dev: true
 
+  registry.npmmirror.com/katex@0.16.9:
+    resolution: {integrity: sha512-fsSYjWS0EEOwvy81j3vRA8TEAhQhKiqO+FQaKWp0m39qwOzHVBgAUBIXWj1pB+O2W3fIpNa6Y9KSKCVbfPhyAQ==, tarball: https://registry.npmmirror.com/katex/-/katex-0.16.9.tgz}
+    name: katex
+    version: 0.16.9
+    hasBin: true
+    dependencies:
+      commander: registry.npmmirror.com/commander@8.3.0
+    dev: false
+
   registry.npmmirror.com/keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==, tarball: https://registry.npmmirror.com/keyv/-/keyv-4.5.4.tgz}
     name: keyv
@@ -2442,6 +2481,14 @@ packages:
     version: 3.0.0
     engines: {node: '>=14'}
     dev: true
+
+  registry.npmmirror.com/linkify-it@5.0.0:
+    resolution: {integrity: sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==, tarball: https://registry.npmmirror.com/linkify-it/-/linkify-it-5.0.0.tgz}
+    name: linkify-it
+    version: 5.0.0
+    dependencies:
+      uc.micro: registry.npmmirror.com/uc.micro@2.1.0
+    dev: false
 
   registry.npmmirror.com/lint-staged@15.2.2:
     resolution: {integrity: sha512-TiTt93OPh1OZOsb5B7k96A/ATl2AjIZo+vnzFZ6oHK5FuTk63ByDtxGQpHm+kFETjEWqgkF95M8FRXKR/LEBcw==, tarball: https://registry.npmmirror.com/lint-staged/-/lint-staged-15.2.2.tgz}
@@ -2576,11 +2623,31 @@ packages:
       object-visit: registry.npmmirror.com/object-visit@1.0.1
     dev: true
 
+  registry.npmmirror.com/markdown-it@14.0.0:
+    resolution: {integrity: sha512-seFjF0FIcPt4P9U39Bq1JYblX0KZCjDLFFQPHpL5AzHpqPEKtosxmdq/LTVZnjfH7tjt9BxStm+wXcDBNuYmzw==, tarball: https://registry.npmmirror.com/markdown-it/-/markdown-it-14.0.0.tgz}
+    name: markdown-it
+    version: 14.0.0
+    hasBin: true
+    dependencies:
+      argparse: registry.npmmirror.com/argparse@2.0.1
+      entities: registry.npmmirror.com/entities@4.5.0
+      linkify-it: registry.npmmirror.com/linkify-it@5.0.0
+      mdurl: registry.npmmirror.com/mdurl@2.0.0
+      punycode.js: registry.npmmirror.com/punycode.js@2.3.1
+      uc.micro: registry.npmmirror.com/uc.micro@2.1.0
+    dev: false
+
   registry.npmmirror.com/mdn-data@2.0.14:
     resolution: {integrity: sha512-dn6wd0uw5GsdswPFfsgMp5NSB0/aDe6fK94YJV/AJDYXL6HVLWBsxeq7js7Ad+mU2K9LAlwpk6kN2D5mwCPVow==, tarball: https://registry.npmmirror.com/mdn-data/-/mdn-data-2.0.14.tgz}
     name: mdn-data
     version: 2.0.14
     dev: true
+
+  registry.npmmirror.com/mdurl@2.0.0:
+    resolution: {integrity: sha512-Lf+9+2r+Tdp5wXDXC4PcIBjTDtq4UKjCPMQhKIuzpJNW0b96kVqSwW0bT7FhRSfmAiFYgP+SCRvdrDozfh0U5w==, tarball: https://registry.npmmirror.com/mdurl/-/mdurl-2.0.0.tgz}
+    name: mdurl
+    version: 2.0.0
+    dev: false
 
   registry.npmmirror.com/memoize-one@6.0.0:
     resolution: {integrity: sha512-rkpe71W0N0c0Xz6QD0eJETuWAJGnJ9afsl1srmwPrI+yBCkge5EycXXbYRyvL29zZVUWQCY7InPRCv3GDXuZNw==, tarball: https://registry.npmmirror.com/memoize-one/-/memoize-one-6.0.0.tgz}
@@ -3072,6 +3139,13 @@ packages:
     resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==, tarball: https://registry.npmmirror.com/proxy-from-env/-/proxy-from-env-1.1.0.tgz}
     name: proxy-from-env
     version: 1.1.0
+    dev: false
+
+  registry.npmmirror.com/punycode.js@2.3.1:
+    resolution: {integrity: sha512-uxFIHU0YlHYhDQtV4R9J6a52SLx28BCjT+4ieh7IGbgwVJWO+km431c4yRlREUAsAmt/uMjQUyQHNEPf0M39CA==, tarball: https://registry.npmmirror.com/punycode.js/-/punycode.js-2.3.1.tgz}
+    name: punycode.js
+    version: 2.3.1
+    engines: {node: '>=6'}
     dev: false
 
   registry.npmmirror.com/punycode@2.3.1:
@@ -3631,6 +3705,12 @@ packages:
     version: 3.13.1
     engines: {node: '>=14.16'}
     dev: true
+
+  registry.npmmirror.com/uc.micro@2.1.0:
+    resolution: {integrity: sha512-ARDJmphmdvUk6Glw7y9DQ2bFkKBHwQHLi2lsaH6PPmz/Ka9sFOBsBluozhDltWmnv9u/cF6Rt87znRTPV+yp/A==, tarball: https://registry.npmmirror.com/uc.micro/-/uc.micro-2.1.0.tgz}
+    name: uc.micro
+    version: 2.1.0
+    dev: false
 
   registry.npmmirror.com/undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==, tarball: https://registry.npmmirror.com/undici-types/-/undici-types-5.26.5.tgz}

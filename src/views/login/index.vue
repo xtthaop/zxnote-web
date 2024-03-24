@@ -3,7 +3,7 @@
     <div class="login-card">
       <el-form :model="loginForm" ref="loginFormRef" :rules="rules" :show-message="false">
         <div class="login-card-title">
-          <img class="logo" src="@/assets/logo.png" />
+          <img class="logo" src="@/assets/images/logo.png" />
           <h1 class="title">知行笔记</h1>
         </div>
 

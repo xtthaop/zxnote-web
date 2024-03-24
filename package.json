@@ -21,10 +21,13 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
+    "@xtthaop/markdown-it-katex": "^2.0.5",
     "axios": "^1.6.8",
     "element-plus": "^2.6.1",
+    "highlight.js": "^11.9.0",
     "js-cookie": "^3.0.5",
     "js-md5": "^0.8.3",
+    "markdown-it": "^14.0.0",
     "normalize.css": "^8.0.1",
     "nprogress": "^0.2.0",
     "vue": "^3.4.21",

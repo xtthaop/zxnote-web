@@ -1,0 +1,177 @@
+.md-content-wrapper {
+  position: relative;
+  font-size: 16px;
+  line-height: 1.7;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    text-rendering: optimizelegibility;
+    line-height: 1.7;
+    margin: 0 0 15px;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+  h2 {
+    font-size: 24px;
+  }
+  h3 {
+    font-size: 22px;
+  }
+  h4 {
+    font-size: 20px;
+  }
+  h5 {
+    font-size: 18px;
+  }
+  h6 {
+    font-size: 16px;
+  }
+
+  hr {
+    margin: 0 0 20px;
+    border: 0;
+    border-top: 1px solid #d9d9d9 !important;
+  }
+
+  p {
+    margin: 0 0 15px;
+    word-break: break-word;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  strong {
+    font-weight: 600;
+  }
+
+  a,
+  a:focus,
+  a:hover {
+    color: #096dd9;
+    text-decoration: none;
+    background-color: transparent;
+    outline: none;
+    cursor: pointer;
+  }
+
+  a:active,
+  a:visited {
+    color: #4007a2;
+  }
+
+  blockquote {
+    padding: 20px;
+    background-color: #f2f2f2;
+    border-left: 6px solid #b3b3b3;
+    word-break: break-word;
+    margin: 0 0 20px;
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  ul,
+  ol {
+    word-break: break-word;
+    margin: -5px 0 20px 20px;
+    padding: 0;
+
+    li {
+      ul {
+        margin-top: 5px;
+        margin-bottom: 5px;
+      }
+
+      ol {
+        margin-top: 5px;
+        margin-bottom: 5px;
+      }
+    }
+  }
+
+  table {
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    margin: 0 auto 20px;
+    border-spacing: 0;
+    border-collapse: collapse;
+    overflow: auto;
+
+    tr:nth-of-type(2n) {
+      background-color: hsla(0, 0%, 71%, 0.1);
+    }
+
+    td,
+    th {
+      padding: 8px;
+      border: 1px solid #d9d9d9;
+      line-height: 20px;
+      vertical-align: middle;
+    }
+
+    th {
+      font-weight: 600;
+    }
+
+    thead th {
+      text-align: inherit;
+    }
+  }
+
+  code {
+    padding: 2px 4px;
+    background-color: #f6f6f6;
+    vertical-align: middle;
+    border: none;
+    color: #c7254e;
+    font-size: 15px;
+    line-height: 25px;
+    white-space: pre-wrap;
+  }
+
+  pre {
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    line-height: 20px;
+    background-color: #1e1e1e;
+    color: #c0c5ce;
+    overflow: auto;
+
+    code {
+      padding: 0;
+      background-color: transparent;
+      white-space: pre;
+      color: #c0c5ce;
+    }
+  }
+
+  .image-container {
+    text-align: center;
+    font-size: 0;
+    margin-bottom: 20px;
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+  }
+}

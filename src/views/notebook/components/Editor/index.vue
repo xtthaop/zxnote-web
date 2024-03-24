@@ -54,7 +54,7 @@
       <li class="tool right" @click="handleSaveNote">
         <svg-icon name="save"></svg-icon>
       </li>
-      <li class="tool right">
+      <li class="tool right" @click="handlePreview">
         <svg-icon name="square-split"></svg-icon>
       </li>
     </ul>
@@ -63,6 +63,8 @@
       class="content-wrapper"
       placeholder="请输入内容"
       v-model="note.note_content"
+      @keydown.tab.exact="handleKeyTab"
+      @keydown="handleKeyCtrl"
       @input="handleNoteChange"
     ></textarea>
   </div>
@@ -70,7 +72,7 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import md5 from 'js-md5'
 import { getNoteContent, publishNote, saveNote } from '@/api/notebook/note'
 import { uploadFile } from '@/api/upload'
@@ -79,7 +81,22 @@ defineOptions({
   name: 'EditorComponent',
 })
 
+const props = defineProps({
+  isPreviewMode: {
+    type: Boolean,
+    default: false,
+  },
+})
+
+const emits = defineEmits([
+  'sync-title',
+  'sync-content',
+  'sync-publish-status',
+  'sync-publish-update-status',
+])
+
 const route = useRoute()
+const router = useRouter()
 
 const noteId = ref()
 const noteLoading = ref(false)
@@ -105,12 +122,16 @@ watch(
 const titleRef = ref()
 const contentRef = ref()
 const titleFocus = defineModel('titleFocus')
+
 function handleGetNoteContent() {
   noteLoading.value = true
   return getNoteContent({ note_id: noteId.value })
     .then((res) => {
       note.value = res.data
-      contentRef.value.setSelectionRange(-1, -1)
+      if (props.isPreviewMode) {
+        emits('sync-title', note.value.note_title)
+        emits('sync-content', note.value.note_content)
+      }
       nextTick(() => {
         if (titleFocus.value) {
           titleRef.value.select()
@@ -144,13 +165,16 @@ function handleNoteChange() {
   }, 1000)
 }
 
-const emits = defineEmits(['sync-title', 'sync-publish-status', 'sync-publish-update-status'])
 function handleSaveNote() {
   savedStatus.value = false
   saveNote(note.value).then(() => {
     emits('sync-title', note.value.note_title)
     note.value.publish_update_status = 0
-    emits('sync-publish-update-status', 0)
+    if (props.isPreviewMode) {
+      emits('sync-content', note.value.note_content)
+    } else {
+      emits('sync-publish-update-status', 0)
+    }
     savedStatus.value = true
   })
 }
@@ -168,8 +192,10 @@ function hanldePublish(status) {
     note.value.publish_status = status
     note.value.publish_update_status = status
     publishLoading.value = false
-    emits('sync-publish-status', status)
-    emits('sync-publish-update-status', status)
+    if (!props.isPreviewMode) {
+      emits('sync-publish-status', status)
+      emits('sync-publish-update-status', status)
+    }
   })
 }
 
@@ -179,8 +205,8 @@ function handleImgInput() {
 }
 
 function handleImgFileChange(e) {
-  let start = contentRef.value.selectionStart
-  let end = contentRef.value.selectionEnd
+  const start = contentRef.value.selectionStart
+  const end = contentRef.value.selectionEnd
   let uploadingStr = ''
   const filePromiseArr = []
 
@@ -224,6 +250,35 @@ function handleUploadImg(file, uploadingStr, filePromiseArr) {
     })
 
   filePromiseArr.push(filePromise)
+}
+
+function handleKeyTab(e) {
+  e.preventDefault()
+  const start = contentRef.value.selectionStart
+  const end = contentRef.value.selectionEnd
+  const content = note.value.note_content
+  const tab = '  '
+
+  note.value.note_content = content.slice(0, start) + tab + content.slice(end)
+  nextTick(() => {
+    contentRef.value.setSelectionRange(start + tab.length, start + tab.length)
+  })
+}
+
+function handleKeyCtrl(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault()
+    handleSaveNote()
+  }
+}
+
+function handlePreview() {
+  if (props.isPreviewMode) {
+    const { noteId, categoryId } = route.params
+    router.push(`/category/${categoryId}/note/${noteId}`)
+  } else {
+    router.push(route.fullPath + '/preview')
+  }
 }
 </script>
 
