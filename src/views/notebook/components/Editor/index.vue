@@ -59,8 +59,8 @@
       </li>
     </ul>
     <textarea
-      ref="contentRef"
-      class="content-wrapper"
+      ref="sourceRef"
+      class="source-wrapper"
       placeholder="请输入内容"
       v-model="note.note_content"
       @keydown.tab.exact="handleKeyTab"
@@ -120,7 +120,7 @@ watch(
 )
 
 const titleRef = ref()
-const contentRef = ref()
+const sourceRef = ref()
 const titleFocus = defineModel('titleFocus')
 
 function handleGetNoteContent() {
@@ -205,8 +205,8 @@ function handleImgInput() {
 }
 
 function handleImgFileChange(e) {
-  const start = contentRef.value.selectionStart
-  const end = contentRef.value.selectionEnd
+  const start = sourceRef.value.selectionStart
+  const end = sourceRef.value.selectionEnd
   let uploadingStr = ''
   const filePromiseArr = []
 
@@ -254,14 +254,14 @@ function handleUploadImg(file, uploadingStr, filePromiseArr) {
 
 function handleKeyTab(e) {
   e.preventDefault()
-  const start = contentRef.value.selectionStart
-  const end = contentRef.value.selectionEnd
+  const start = sourceRef.value.selectionStart
+  const end = sourceRef.value.selectionEnd
   const content = note.value.note_content
   const tab = '  '
 
   note.value.note_content = content.slice(0, start) + tab + content.slice(end)
   nextTick(() => {
-    contentRef.value.setSelectionRange(start + tab.length, start + tab.length)
+    sourceRef.value.setSelectionRange(start + tab.length, start + tab.length)
   })
 }
 
@@ -280,6 +280,10 @@ function handlePreview() {
     router.push(route.fullPath + '/preview')
   }
 }
+
+defineExpose({
+  source: sourceRef,
+})
 </script>
 
 <style lang="scss" scoped>
@@ -364,7 +368,7 @@ function handlePreview() {
     }
   }
 
-  .content-wrapper {
+  .source-wrapper {
     flex: 1;
     width: 100%;
     border: none;
