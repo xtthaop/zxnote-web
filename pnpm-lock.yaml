@@ -35,6 +35,9 @@ dependencies:
   nprogress:
     specifier: ^0.2.0
     version: registry.npmmirror.com/nprogress@0.2.0
+  velocity-animate:
+    specifier: ^2.0.6
+    version: registry.npmmirror.com/velocity-animate@2.0.6
   vue:
     specifier: ^3.4.21
     version: registry.npmmirror.com/vue@3.4.21
@@ -3781,6 +3784,12 @@ packages:
     version: 1.1.2
     engines: {node: '>= 0.8'}
     dev: true
+
+  registry.npmmirror.com/velocity-animate@2.0.6:
+    resolution: {integrity: sha512-tU+/UtSo3GkIjEfk2KM4e24DvpgX0+FzfLr7XqNwm9BCvZUtbCHPq/AFutx/Mkp2bXlUS9EcX8yxu8XmzAv2Kw==, tarball: https://registry.npmmirror.com/velocity-animate/-/velocity-animate-2.0.6.tgz}
+    name: velocity-animate
+    version: 2.0.6
+    dev: false
 
   registry.npmmirror.com/vite-plugin-svg-icons@2.0.1(vite@4.5.2):
     resolution: {integrity: sha512-6ktD+DhV6Rz3VtedYvBKKVA2eXF+sAQVaKkKLDSqGUfnhqXl3bj5PPkVTl3VexfTuZy66PmINi8Q6eFnVfRUmA==, tarball: https://registry.npmmirror.com/vite-plugin-svg-icons/-/vite-plugin-svg-icons-2.0.1.tgz}

@@ -19,137 +19,21 @@
 </template>
 
 <script setup>
-import { nextTick, ref } from 'vue'
-import markdownit from 'markdown-it'
-import hljs from 'highlight.js'
-import 'highlight.js/styles/vs2015.css'
-import * as mk from '@xtthaop/markdown-it-katex'
+import { onMounted, ref } from 'vue'
 import { Editor } from '../notebook/components'
+import useMarkdown from './markdown'
+import velocity from 'velocity-animate'
 
 defineOptions({
   name: 'PreviewPage',
 })
 
+const { md } = useMarkdown()
+
 const noteTitle = ref()
 const noteContent = ref()
 const previewContent = ref()
-let md
-
-handleInitMarkdown()
-
-function handleInitMarkdown() {
-  // https://github.com/markdown-it/markdown-it?tab=readme-ov-file#usage-examples
-  md = markdownit({
-    html: false,
-    breaks: true,
-    highlight: function (str, lang) {
-      // https://github.com/highlightjs/highlight.js
-      if (lang && hljs.getLanguage(lang)) {
-        try {
-          return `<pre class="hljs"><code>${
-            hljs.highlight(str, { language: lang, ignoreIllegals: true }).value
-          }</code></pre>`
-        } catch (__) {
-          // continue regardless of error
-        }
-      }
-
-      return `<pre class="hljs"><code>${md.utils.escapeHtml(str)}</code></pre>`
-    },
-  })
-
-  handleLinkRenderer()
-  handleParagraphOpen()
-  handleHeadingOpen()
-  handleImgRenderer()
-
-  // https://github.com/xtthaop/markdown-it-katex
-  md.use(mk)
-}
-
-function handleLinkRenderer() {
-  const defaultRender =
-    md.renderer.rules.link_open ||
-    function (tokens, idx, options, env, self) {
-      return self.renderToken(tokens, idx, options)
-    }
-
-  md.renderer.rules.link_open = function (tokens, idx, options, env, self) {
-    const aIndex = tokens[idx].attrIndex('target')
-
-    if (aIndex < 0) {
-      tokens[idx].attrPush(['target', '_blank'])
-    } else {
-      tokens[idx].attrs[aIndex][1] = '_blank'
-    }
-
-    return defaultRender(tokens, idx, options, env, self)
-  }
-}
-
-function handleParagraphOpen() {
-  const defaultRender =
-    md.renderer.rules.paragraph_open ||
-    function (tokens, idx, options, env, self) {
-      return self.renderToken(tokens, idx, options)
-    }
-
-  md.renderer.rules.paragraph_open = function (tokens, idx, options, env, self) {
-    if (
-      tokens[idx + 1].type === 'inline' &&
-      tokens[idx + 1].children.some((child) => child.type === 'image')
-    ) {
-      tokens[idx].attrJoin('class', 'image-container')
-    }
-
-    injectLineNumbers(tokens, idx)
-
-    return defaultRender(tokens, idx, options, env, self)
-  }
-}
-
-function injectLineNumbers(tokens, idx) {
-  if (tokens[idx].map && tokens[idx].level === 0) {
-    const line = tokens[idx].map[0]
-    tokens[idx].attrJoin('class', 'line')
-    tokens[idx].attrSet('data-line', String(line))
-  }
-}
-
-function handleHeadingOpen() {
-  md.renderer.rules.heading_open = function (tokens, idx, options, env, self) {
-    injectLineNumbers(tokens, idx)
-    return self.renderToken(tokens, idx, options, env, self)
-  }
-}
-
-function handleImgRenderer() {
-  md.renderer.rules.image = (tokens, idx, options, env, self) => {
-    const token = tokens[idx]
-    token.attrs[token.attrIndex('alt')][1] = self.renderInlineAsText(token.children, options, env)
-    const imgSrcArr = token.attrs[token.attrIndex('src')][1].split('?')
-    const imgParams = imgSrcArr.length > 1 && imgSrcArr[1].split('/')
-
-    const imageAlt = (token.attrIndex('alt') > -1 && token.attrs[token.attrIndex('alt')][1]) || ''
-    const imageTitle =
-      (token.attrIndex('title') > -1 && token.attrs[token.attrIndex('title')][1]) || ''
-
-    const imgRealSrc = imgSrcArr[0]
-    const imgSuffix = '.' + imgRealSrc.split('.')[1]
-    const imgPlaceholderSrc =
-      imgRealSrc.replace(new RegExp(`${imgSuffix}$`), '') + '_low_ratio' + imgSuffix
-    const imgWidth = (imgParams && imgParams[1]) || '100%'
-
-    // TODO: 图片懒加载
-    return `<img
-              data-src="${imgRealSrc}"
-              src="${imgPlaceholderSrc}"
-              width="${imgWidth}"
-              alt="${imageAlt}"
-              title="${imageTitle}"
-            />`
-  }
-}
+let scrollMap = null
 
 function handleSyncTitle(title) {
   noteTitle.value = title
@@ -158,16 +42,103 @@ function handleSyncTitle(title) {
 function handleSyncContent(content) {
   noteContent.value = content
   previewContent.value = md.render(content)
-  nextTick(() => {
-    buildScrollMap()
-  })
+  scrollMap = null
 }
 
 const editorRef = ref()
 const previewerRef = ref()
-const mdResultRef = ref()
+const syncScrollStatus = ref(true)
+
+function handleToggleSyncScroll(status) {
+  if (status) {
+    syncScrollInit
+  } else {
+    destroySyncScroll()
+  }
+}
+
+onMounted(() => {
+  if (syncScrollStatus.value) {
+    syncScrollInit()
+  }
+  // TODO: 图片懒加载
+})
+
+function syncScrollInit() {
+  editorRef.value.source.addEventListener('mouseenter', handleMouseEnterInEditor)
+  previewerRef.value.addEventListener('mouseenter', handleMouseEnterInPreviewer)
+}
+
+function handleMouseEnterInEditor() {
+  editorRef.value.source.addEventListener('scroll', syncPreviewerScroll)
+  previewerRef.value.removeEventListener('scroll', syncEditorScroll)
+}
+
+function handleMouseEnterInPreviewer() {
+  editorRef.value.source.removeEventListener('scroll', syncPreviewerScroll)
+  previewerRef.value.addEventListener('scroll', syncEditorScroll)
+}
+
+let editorTimeoutId
+function syncEditorScroll() {
+  clearTimeout(editorTimeoutId)
+
+  editorTimeoutId = setTimeout(() => {
+    const scrollTop = previewerRef.value.scrollTop
+    const textarea = editorRef.value.source
+    const textareaStyle = getComputedStyle(textarea)
+    const lineHeight = parseFloat(textareaStyle.lineHeight)
+
+    if (!scrollMap) {
+      scrollMap = buildScrollMap()
+    }
+
+    const lines = Object.keys(scrollMap)
+
+    if (lines < 1) return
+
+    let line = lines[0]
+
+    for (let i = 1; i < lines.length; i++) {
+      if (scrollMap[lines[i]] < scrollTop) {
+        line = lines[i]
+        continue
+      }
+
+      break
+    }
+
+    velocity(textarea, 'stop', true)
+    velocity(textarea, { scrollTop: lineHeight * line + 'px' }, { duration: 100, easing: 'linear' })
+  }, 50)
+}
+
+let previewerTimeoutId
+function syncPreviewerScroll() {
+  clearTimeout(previewerTimeoutId)
+
+  previewerTimeoutId = setTimeout(() => {
+    const textarea = editorRef.value.source
+    const textareaStyle = getComputedStyle(textarea)
+    const lineHeight = parseFloat(textareaStyle.lineHeight)
+
+    const lineNo = Math.floor(textarea.scrollTop / lineHeight)
+
+    if (!scrollMap) {
+      scrollMap = buildScrollMap()
+    }
+
+    const posTo = scrollMap[lineNo]
+    velocity(previewerRef.value, 'stop', true)
+    velocity(previewerRef.value, { scrollTop: posTo + 'px' }, { duration: 100, easing: 'linear' })
+  }, 50)
+}
 
 function buildScrollMap() {
+  if (import.meta.env.DEV) {
+    // console.time('build-scroll-map')
+  }
+
   const textarea = editorRef.value.source
   const textareaStyle = getComputedStyle(textarea)
   const sourceLikeDiv = document.createElement('div')
@@ -220,7 +191,7 @@ function buildScrollMap() {
 
   const offset = 0
 
-  const lineEle = mdResultRef.value.getElementsByClassName('line')
+  const lineEle = previewerRef.value.getElementsByClassName('line')
   for (let n = 0; n < lineEle.length; n++) {
     const el = lineEle[n]
     // 获取元素行数
@@ -253,22 +224,13 @@ function buildScrollMap() {
     scrollMap[j] = Math.round((scrollMap[b] * (j - a) + scrollMap[a] * (b - j)) / (b - a))
   }
 
+  if (import.meta.env.DEV) {
+    // console.timeEnd('build-scroll-map')
+  }
+
   return scrollMap
 }
 
-const syncScrollStatus = ref(true)
-function handleToggleSyncScroll(status) {
-  if (status) {
-    handlePreviewMouseEnter()
-    startSyncScroll()
-  } else {
-    destroySyncScroll()
-  }
-}
-
-function handlePreviewMouseEnter() {}
-// function handleEditorMouseEnter() {}
-function startSyncScroll() {}
 function destroySyncScroll() {}
 </script>
 

@@ -30,6 +30,7 @@
     "markdown-it": "^14.0.0",
     "normalize.css": "^8.0.1",
     "nprogress": "^0.2.0",
+    "velocity-animate": "^2.0.6",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"
   },
