@@ -42,6 +42,7 @@ function handleSyncTitle(title) {
 function handleSyncContent(content) {
   noteContent.value = content
   previewContent.value = md.render(content)
+  handleImgLazyLoad()
   scrollMap = null
 }
 
@@ -51,7 +52,8 @@ const syncScrollStatus = ref(true)
 
 function handleToggleSyncScroll(status) {
   if (status) {
-    syncScrollInit
+    syncScrollInit()
+    handleMouseEnterInPreviewer()
   } else {
     destroySyncScroll()
   }
@@ -61,8 +63,35 @@ onMounted(() => {
   if (syncScrollStatus.value) {
     syncScrollInit()
   }
-  // TODO: 图片懒加载
+  previewerRef.value.addEventListener('scroll', handleImgLazyLoad)
 })
+
+let imgTimeoutId
+function handleImgLazyLoad() {
+  if (imgTimeoutId) return
+
+  imgTimeoutId = setTimeout(() => {
+    const imgs = previewerRef.value.getElementsByTagName('img')
+    const previewerRect = previewerRef.value.getBoundingClientRect()
+
+    for (let i = 0; i < imgs.length; i++) {
+      const distance =
+        previewerRect.top + previewerRect.height - imgs[i].getBoundingClientRect().top
+      if (distance >= 0) {
+        const imgSrc = imgs[i].getAttribute('data-src')
+        imgs[i].setAttribute('data-src', '')
+        if (!imgSrc) continue
+        const img = new Image()
+        img.src = imgSrc
+        img.onload = () => {
+          imgs[i].src = imgSrc
+        }
+      }
+    }
+
+    imgTimeoutId = undefined
+  }, 200)
+}
 
 function syncScrollInit() {
   editorRef.value.source.addEventListener('mouseenter', handleMouseEnterInEditor)
@@ -81,7 +110,7 @@ function handleMouseEnterInPreviewer() {
 
 let editorTimeoutId
 function syncEditorScroll() {
-  clearTimeout(editorTimeoutId)
+  if (editorTimeoutId) return
 
   editorTimeoutId = setTimeout(() => {
     const scrollTop = previewerRef.value.scrollTop
@@ -110,12 +139,14 @@ function syncEditorScroll() {
 
     velocity(textarea, 'stop', true)
     velocity(textarea, { scrollTop: lineHeight * line + 'px' }, { duration: 100, easing: 'linear' })
+
+    editorTimeoutId = undefined
   }, 50)
 }
 
 let previewerTimeoutId
 function syncPreviewerScroll() {
-  clearTimeout(previewerTimeoutId)
+  if (previewerTimeoutId) return
 
   previewerTimeoutId = setTimeout(() => {
     const textarea = editorRef.value.source
@@ -131,6 +162,8 @@ function syncPreviewerScroll() {
     const posTo = scrollMap[lineNo]
     velocity(previewerRef.value, 'stop', true)
     velocity(previewerRef.value, { scrollTop: posTo + 'px' }, { duration: 100, easing: 'linear' })
+
+    previewerTimeoutId = undefined
   }, 50)
 }
 
@@ -181,11 +214,11 @@ function buildScrollMap() {
   lineHeightMap.push(acc)
   const linesCount = acc
 
-  const scrollMap = []
+  const _scrollMap = []
   for (let i = 0; i < linesCount; i++) {
-    scrollMap.push(-1)
+    _scrollMap.push(-1)
   }
-  scrollMap[0] = 0
+  _scrollMap[0] = 0
   const nonEmptyList = []
   nonEmptyList.push(0)
 
@@ -201,17 +234,17 @@ function buildScrollMap() {
     t = lineHeightMap[t]
     // nonEmptyList: 收集实际行数
     if (t !== 0) nonEmptyList.push(t)
-    // scrollMap: [文本输入区实际行数: 预览区应滚动到的高度]
-    scrollMap[t] = Math.round(el.offsetTop + offset)
+    // _scrollMap: [文本输入区实际行数: 预览区应滚动到的高度]
+    _scrollMap[t] = Math.round(el.offsetTop + offset)
   }
 
   nonEmptyList.push(linesCount)
-  scrollMap[linesCount] = previewerRef.value.scrollHeight
+  _scrollMap[linesCount] = previewerRef.value.scrollHeight
 
   let pos = 0
   // 为文本区其他行添加对应预览区的滚动高度
   for (let j = 1; j < linesCount; j++) {
-    if (scrollMap[j] !== -1) {
+    if (_scrollMap[j] !== -1) {
       pos++
       continue
     }
@@ -221,17 +254,23 @@ function buildScrollMap() {
     // 有效行结束
     const b = nonEmptyList[pos + 1]
     // 计算高度：越靠前的行将大比例乘有效行开始的高度，越靠后的行将大比例乘有效行结束的高度
-    scrollMap[j] = Math.round((scrollMap[b] * (j - a) + scrollMap[a] * (b - j)) / (b - a))
+    _scrollMap[j] = Math.round((_scrollMap[b] * (j - a) + _scrollMap[a] * (b - j)) / (b - a))
   }
 
   if (import.meta.env.DEV) {
     // console.timeEnd('build-scroll-map')
   }
 
-  return scrollMap
+  return _scrollMap
 }
 
-function destroySyncScroll() {}
+function destroySyncScroll() {
+  scrollMap = null
+  editorRef.value.source.removeEventListener('scroll', syncPreviewerScroll)
+  previewerRef.value.removeEventListener('scroll', syncEditorScroll)
+  editorRef.value.source.removeEventListener('mouseenter', handleMouseEnterInEditor)
+  previewerRef.value.removeEventListener('mouseenter', handleMouseEnterInPreviewer)
+}
 </script>
 
 <style scoped lang="scss">
