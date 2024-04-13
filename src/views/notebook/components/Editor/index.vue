@@ -128,6 +128,9 @@ function handleGetNoteContent() {
   return getNoteContent({ note_id: noteId.value })
     .then((res) => {
       note.value = res.data
+      if (!note.value.note_content) {
+        note.value.note_content = ''
+      }
       if (props.isPreviewMode) {
         emits('sync-title', note.value.note_title)
         emits('sync-content', note.value.note_content)

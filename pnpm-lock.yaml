@@ -17,6 +17,9 @@ dependencies:
   element-plus:
     specifier: ^2.6.1
     version: registry.npmmirror.com/element-plus@2.6.1(vue@3.4.21)
+  filesize:
+    specifier: ^10.1.1
+    version: registry.npmmirror.com/filesize@10.1.1
   highlight.js:
     specifier: ^11.9.0
     version: registry.npmmirror.com/highlight.js@11.9.0
@@ -1812,6 +1815,13 @@ packages:
     dependencies:
       flat-cache: registry.npmmirror.com/flat-cache@3.2.0
     dev: true
+
+  registry.npmmirror.com/filesize@10.1.1:
+    resolution: {integrity: sha512-L0cdwZrKlwZQkMSFnCflJ6J2Y+5egO/p3vgRSDQGxQt++QbUZe5gMbRO6kg6gzwQDPvq2Fk9AmoxUNfZ5gdqaQ==, tarball: https://registry.npmmirror.com/filesize/-/filesize-10.1.1.tgz}
+    name: filesize
+    version: 10.1.1
+    engines: {node: '>= 10.4.0'}
+    dev: false
 
   registry.npmmirror.com/fill-range@4.0.0:
     resolution: {integrity: sha512-VcpLTWqWDiTerugjj8e3+esbg+skS3M9e54UuR3iCeIDMXCLTsAH8hTSzDQU/X6/6t3eYkOKoZSef2PlU6U1XQ==, tarball: https://registry.npmmirror.com/fill-range/-/fill-range-4.0.0.tgz}

@@ -45,7 +45,7 @@
               <svg-icon name="promotion" style="margin-right: 10px"></svg-icon>
               <span>推广配置</span>
             </el-dropdown-item>
-            <el-dropdown-item>
+            <el-dropdown-item @click="handleClearCache">
               <svg-icon name="clear" style="margin-right: 10px"></svg-icon>
               <span>清除缓存</span>
             </el-dropdown-item>
@@ -73,10 +73,12 @@ import { ref, reactive, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { removeToken } from '@/utils/auth'
 import { getCategoryList, deleteCategory } from '@/api/notebook/category'
+import { clearCache } from '@/api/upload'
 import { getUserInfo, logout } from '@/api/permission.js'
 import CategoryForm from './components/CategoryForm.vue'
 import ResetPwdForm from './components/ResetPwdForm.vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
+import { filesize } from 'filesize'
 
 defineOptions({
   name: 'SidebarComponent',
@@ -110,6 +112,8 @@ function handleGetCategoryList() {
 watch(activeId, (val) => {
   if (val) {
     router.push(`/category/${val}`)
+  } else {
+    router.push('/')
   }
 })
 
@@ -139,7 +143,7 @@ function handleDeleteCategory(category_id) {
     cancelButtonText: '取消',
     'show-close': false,
     'close-on-click-modal': false,
-    type: 'error',
+    type: 'warning',
   }).then(() => {
     listLoading.value = true
     deleteCategory({ category_id })
@@ -165,6 +169,34 @@ function handleGetUserInfo() {
   getUserInfo().then((res) => {
     userInfo.user_id = res.data.user_id
     userInfo.username = res.data.username
+  })
+}
+
+function handleClearCache() {
+  ElMessageBox.confirm('确认清除已不在笔记中引用的文件缓存', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    'show-close': false,
+    'close-on-click-modal': false,
+    type: 'warning',
+  }).then(() => {
+    const clearLoading = ElLoading.service({
+      lock: true,
+      text: '清除缓存中...',
+      background: 'rgba(0, 0, 0, 0.7)',
+    })
+    clearCache()
+      .then((res) => {
+        const size = filesize(res.data.deleted_imgs_size)
+        const num = res.data.deleted_imgs_num
+        ElMessage({
+          message: `已清除占用了 ${size} 的 ${num} 个文件`,
+          type: 'success',
+        })
+      })
+      .finally(() => {
+        clearLoading.close()
+      })
   })
 }
 

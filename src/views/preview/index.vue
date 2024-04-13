@@ -1,5 +1,6 @@
 <template>
   <div class="preview-wrapper">
+    <!-- TODO: 1. 报错不显示编辑区和预览区 2. 清除缓存功能 3. 验证码加载中状态显示 4. ctrl+s 保存成功提示 5. 工具用途提示 -->
     <Editor
       ref="editorRef"
       :isPreviewMode="true"
@@ -11,7 +12,12 @@
       <div class="title-wrapper">{{ noteTitle }}</div>
       <div class="sync-scroll-toggle">
         <span>同步滚动：</span>
-        <el-switch v-model="syncScrollStatus" label="同步滚动：" @change="handleToggleSyncScroll" />
+        <el-switch
+          size="small"
+          v-model="syncScrollStatus"
+          label="同步滚动："
+          @change="handleToggleSyncScroll"
+        />
       </div>
       <div class="md-result-wrapper" ref="mdResultRef" v-html="previewContent"></div>
     </div>
@@ -31,7 +37,6 @@ defineOptions({
 const { md } = useMarkdown()
 
 const noteTitle = ref()
-const noteContent = ref()
 const previewContent = ref()
 let scrollMap = null
 
@@ -40,7 +45,6 @@ function handleSyncTitle(title) {
 }
 
 function handleSyncContent(content) {
-  noteContent.value = content
   previewContent.value = md.render(content)
   handleImgLazyLoad()
   scrollMap = null
@@ -300,8 +304,9 @@ function destroySyncScroll() {
       align-items: center;
       position: absolute;
       top: 0px;
-      right: 20px;
+      right: 10px;
       font-size: 13px;
+      line-height: 30px;
       color: #6d6d6d;
     }
   }

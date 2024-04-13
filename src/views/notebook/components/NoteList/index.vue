@@ -114,6 +114,8 @@ function handleGetCategoryNote() {
 watch(activeId, (val) => {
   if (categoryId.value && val) {
     router.push(`/category/${categoryId.value}/note/${val}`)
+  } else {
+    router.push(`/category/${categoryId.value}`)
   }
 })
 
@@ -144,7 +146,7 @@ function handleDeleteNote(id) {
     cancelButtonText: '取消',
     'show-close': false,
     'close-on-click-modal': false,
-    type: 'error',
+    type: 'warning',
   }).then(() => {
     listLoading.value = true
     deleteNote({ note_id: id })
