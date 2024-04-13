@@ -21,7 +21,7 @@ export function getCategoryNote(params) {
 // 删除笔记
 export function deleteNote(data) {
   return request({
-    url: '/restful/note',
+    url: '/restful/note/delete_note',
     method: 'delete',
     data,
   })
@@ -60,5 +60,21 @@ export function publishNote(data) {
     url: '/restful/note/publish_note',
     method: 'post',
     data,
+  })
+}
+
+// 获取笔记中引用的文件信息
+export function getFilesInfo() {
+  return request({
+    url: '/restful/note/get_files_info',
+    method: 'get',
+  })
+}
+
+// 清除已不在笔记中引用的文件
+export function clearCache() {
+  return request({
+    url: '/restful/note/clear_files',
+    method: 'delete',
   })
 }
