@@ -213,10 +213,19 @@ function handleLogout() {
     'close-on-click-modal': false,
     type: 'warning',
   }).then(() => {
-    logout().then(() => {
-      removeToken()
-      router.push('/login')
+    const logoutLoading = ElLoading.service({
+      lock: true,
+      text: '退出登录中...',
+      background: 'rgba(0, 0, 0, 0.7)',
     })
+    logout()
+      .then(() => {
+        removeToken()
+        router.push('/login')
+      })
+      .finally(() => {
+        logoutLoading.close()
+      })
   })
 }
 </script>
