@@ -41,22 +41,28 @@
           <span class="publish-text">保存中...</span>
         </template>
       </li>
-      <li class="tool" @click="handleImgInput">
-        <input
-          ref="imgFileInputRef"
-          type="file"
-          accept="image/png, image/jpg, image/jpeg"
-          multiple="multiple"
-          @change="handleImgFileChange"
-        />
-        <svg-icon name="pic"></svg-icon>
-      </li>
-      <li class="tool right" @click="handleSaveNote">
-        <svg-icon name="save"></svg-icon>
-      </li>
-      <li class="tool right" @click="handlePreview">
-        <svg-icon name="square-split"></svg-icon>
-      </li>
+      <el-tooltip effect="dark" content="插入图片" placement="top" :hide-after="0">
+        <li class="tool" @click="handleImgInput">
+          <input
+            ref="imgFileInputRef"
+            type="file"
+            accept="image/png, image/jpg, image/jpeg"
+            multiple="multiple"
+            @change="handleImgFileChange"
+          />
+          <svg-icon name="pic"></svg-icon>
+        </li>
+      </el-tooltip>
+      <el-tooltip effect="dark" content="保存" placement="top" :hide-after="0">
+        <li class="tool right" @click="handleSaveNote">
+          <svg-icon name="save"></svg-icon>
+        </li>
+      </el-tooltip>
+      <el-tooltip effect="dark" content="预览模式" placement="top" :hide-after="0">
+        <li class="tool right" @click="handlePreview">
+          <svg-icon name="square-split"></svg-icon>
+        </li>
+      </el-tooltip>
     </ul>
     <textarea
       ref="sourceRef"
@@ -75,6 +81,7 @@ import { ref, computed, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import md5 from 'js-md5'
 import { getNoteContent, publishNote, saveNote } from '@/api/notebook/note'
+import { ElMessage } from 'element-plus'
 import { uploadFile } from '@/api/upload'
 
 defineOptions({
@@ -170,7 +177,7 @@ function handleNoteChange() {
 
 function handleSaveNote() {
   savedStatus.value = false
-  saveNote(note.value).then(() => {
+  return saveNote(note.value).then(() => {
     emits('sync-title', note.value.note_title)
     note.value.publish_update_status = 0
     if (props.isPreviewMode) {
@@ -271,7 +278,9 @@ function handleKeyTab(e) {
 function handleKeyCtrl(e) {
   if ((e.ctrlKey || e.metaKey) && e.key === 's') {
     e.preventDefault()
-    handleSaveNote()
+    handleSaveNote().then(() => {
+      ElMessage.success('保存成功')
+    })
   }
 }
 
