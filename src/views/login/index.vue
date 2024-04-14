@@ -120,8 +120,10 @@ function verify(x) {
       if (error.code === 4010) {
         // 用户名密码不匹配
         captchaVisible.value = false
+        captchaRef.value.handleVerifyFail(true)
+      } else {
+        captchaRef.value.handleVerifyFail()
       }
-      captchaRef.value.handleVerifyFail()
     })
 }
 

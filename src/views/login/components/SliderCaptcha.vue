@@ -14,11 +14,16 @@
         <Close />
       </el-icon>
     </div>
-    <div class="img-container">
+    <div class="img-container" v-loading="imgLoading">
       <canvas id="puzzle" width="320" height="170" :style="{ left: puzzleLeft }"></canvas>
       <canvas id="img" width="320" height="170"></canvas>
+      <div v-if="showImgError" class="img-error">加载失败！</div>
     </div>
-    <div class="slider-container" id="slider">
+    <div
+      class="slider-container"
+      id="slider"
+      :style="{ visibility: !showImgError && !imgLoading ? 'visible' : 'hidden' }"
+    >
       <div class="status" :style="status"><span v-show="!btnShow">拼接成功！</span></div>
       <div
         class="btn"
@@ -63,6 +68,9 @@ const status = ref({
   transition: '',
 })
 
+const imgLoading = ref(false)
+const showImgError = ref(false)
+
 watch(
   () => props.captchaVisible,
   (val) => {
@@ -77,9 +85,16 @@ watch(
 )
 
 function canvasInt() {
-  getCaptcha().then((res) => {
-    draw(res.data)
-  })
+  if (imgLoading.value) return
+  imgLoading.value = true
+  getCaptcha()
+    .then((res) => {
+      draw(res.data)
+    })
+    .catch(() => {
+      imgLoading.value = false
+      showImgError.value = true
+    })
 }
 
 function draw(imgInfo) {
@@ -99,19 +114,45 @@ function draw(imgInfo) {
   dstImg.src = imgInfo.dst_img
   jigsawImg.src = imgInfo.jigsaw_img
 
-  dstImg.onload = () => {
-    imgCtx.drawImage(dstImg, 0, 0, 320, 170)
-  }
+  const dstPromise = new Promise((resolve, reject) => {
+    dstImg.onload = () => {
+      imgCtx.drawImage(dstImg, 0, 0, 320, 170)
+      resolve('success')
+    }
 
-  jigsawImg.onload = () => {
-    puzzleCtx.drawImage(jigsawImg, 2, imgInfo.y, 50, 50)
-  }
+    dstImg.onerror = () => {
+      showImgError.value = true
+      reject('error')
+    }
+  })
+
+  const jigsawPromise = new Promise((resolve, reject) => {
+    jigsawImg.onload = () => {
+      puzzleCtx.drawImage(jigsawImg, 2, imgInfo.y, 50, 50)
+      resolve('success')
+    }
+
+    jigsawImg.onerror = () => {
+      showImgError.value = true
+      reject('error')
+    }
+  })
+
+  Promise.allSettled([dstPromise, jigsawPromise]).then(() => {
+    imgLoading.value = false
+  })
+
+  Promise.all([dstPromise, jigsawPromise]).then(() => {
+    showImgError.value = false
+  })
 }
 
 const downX = ref(0)
 const offset = ref(0)
+let verifying = false
 
 function drag(e) {
+  if (verifying) return
   downX.value = e.x || e.touches[0].pageX
 
   btnStyle.value.transition = ''
@@ -144,6 +185,7 @@ function up() {
   document.removeEventListener('touchend', up)
 
   emits('verify', offset.value)
+  verifying = true
 }
 
 function handleVerifySuccess() {
@@ -151,13 +193,15 @@ function handleVerifySuccess() {
   status.value.width = '100%'
 }
 
-function handleVerifyFail() {
+function handleVerifyFail(noNeedRefresh) {
   btnStyle.value.transition = 'left 1s'
   status.value.transition = 'width 1s'
   status.value.background = '#F56C6C'
   status.value.width = '50px'
   puzzleLeft.value = 0
   btnStyle.value.left = 0
+  verifying = false
+  if (noNeedRefresh) return
   canvasInt()
 }
 
@@ -195,6 +239,18 @@ defineExpose({
     #puzzle {
       position: absolute;
       top: 0;
+    }
+
+    .img-error {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: red;
     }
   }
 
