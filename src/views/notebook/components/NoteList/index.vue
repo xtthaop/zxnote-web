@@ -87,8 +87,7 @@ watch(
           activeId.value = noteId
           activeIndex = noteList.value.findIndex((item) => item.note_id === noteId)
         } else {
-          activeId.value = noteList.value[0]?.note_id
-          activeIndex = activeId.value ? 0 : -1
+          toFirstNote()
         }
       })
     } else {
@@ -104,6 +103,11 @@ function reset() {
   noteList.value = []
   activeId.value = undefined
   activeIndex = -1
+}
+
+function toFirstNote() {
+  activeId.value = noteList.value[0]?.note_id
+  activeIndex = activeId.value ? 0 : -1
 }
 
 function handleGetCategoryNote() {
@@ -163,8 +167,7 @@ function handleDeleteNote(id) {
     deleteNote({ note_id: id })
       .then(() => {
         handleGetCategoryNote().then(() => {
-          activeId.value = noteList.value[0]?.note_id
-          activeIndex = 0
+          toFirstNote()
         })
         ElMessage({
           message: '删除成功',
@@ -189,8 +192,7 @@ function handleMoveNote(noteId) {
 function handleMoveNoteRefresh(newCategoryId) {
   if (newCategoryId !== categoryId.value) {
     handleGetCategoryNote().then(() => {
-      activeId.value = noteList.value[0]?.note_id
-      activeIndex = 0
+      toFirstNote()
     })
   }
 }

@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    title="移动笔记"
+    title="选择笔记分类"
     v-model="dialogVisible"
     :close-on-click-modal="false"
     :draggable="true"
@@ -27,8 +27,10 @@
     </el-form>
 
     <template #footer>
-      <el-button @click="cancel" :disabled="loading">取 消</el-button>
-      <el-button type="primary" :loading="loading" @click="submitForm">确 定</el-button>
+      <el-button @click="cancel" :disabled="loading || formLoading">取 消</el-button>
+      <el-button type="primary" :loading="loading" :disabled="formLoading" @click="submitForm">
+        确 定
+      </el-button>
     </template>
   </el-dialog>
 </template>
