@@ -84,6 +84,13 @@ defineOptions({
   name: 'SidebarComponent',
 })
 
+const props = defineProps({
+  noteListLoading: {
+    type: Boolean,
+    required: true,
+  },
+})
+
 const router = useRouter()
 const route = useRoute()
 
@@ -118,6 +125,7 @@ watch(activeId, (val) => {
 })
 
 function handleItemClick(id) {
+  if (props.noteListLoading) return
   activeId.value = id
 }
 

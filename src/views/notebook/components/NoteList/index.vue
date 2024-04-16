@@ -71,6 +71,11 @@ let activeIndex = -1
 let noteId = Number(route.params.noteId)
 const activeId = ref(noteId)
 
+const noteListLoading = defineModel('noteListLoading')
+watch(listLoading, (val) => {
+  noteListLoading.value = val
+})
+
 watch(
   () => route.params.categoryId,
   (val) => {

@@ -1,7 +1,11 @@
 <template>
   <div class="notebook-wrapper">
-    <Sidebar></Sidebar>
-    <NoteList ref="noteListRef" v-model:title-focus="titleFocus"></NoteList>
+    <Sidebar :note-list-loading="noteListLoading"></Sidebar>
+    <NoteList
+      ref="noteListRef"
+      v-model:title-focus="titleFocus"
+      v-model:note-list-Loading="noteListLoading"
+    ></NoteList>
     <Editor
       v-model:title-focus="titleFocus"
       @sync-title="handleSyncTitle"
@@ -20,6 +24,7 @@ defineOptions({
 })
 
 const titleFocus = ref(false)
+const noteListLoading = ref(false)
 const noteListRef = ref()
 
 function handleSyncTitle(title) {
