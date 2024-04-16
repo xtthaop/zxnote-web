@@ -16,10 +16,9 @@
             <div class="note-info">
               <div class="title">{{ item.note_title }}</div>
               <div class="other-info">
-                <span
-                  class="publish-status"
-                  :style="{ backgroundColor: handlePublishStatus(item) }"
-                ></span>
+                <span class="publish-status" :style="{ color: handlePublishStatus(item).color }">
+                  {{ handlePublishStatus(item).content }}
+                </span>
                 <span class="create-time">
                   {{ dayjs(item.create_time).format('YYYY-MM-DD HH:mm:ss') }}
                 </span>
@@ -68,7 +67,7 @@ const router = useRouter()
 const categoryId = ref()
 const noteList = ref([])
 const listLoading = ref(false)
-let activeIndex = 0
+let activeIndex = -1
 let noteId = Number(route.params.noteId)
 const activeId = ref(noteId)
 
@@ -84,17 +83,23 @@ watch(
           activeIndex = noteList.value.findIndex((item) => item.note_id === noteId)
         } else {
           activeId.value = noteList.value[0]?.note_id
-          activeIndex = 0
+          activeIndex = activeId.value ? 0 : -1
         }
       })
     } else {
-      noteList.value = []
+      reset()
     }
   },
   {
     immediate: true,
   }
 )
+
+function reset() {
+  noteList.value = []
+  activeId.value = undefined
+  activeIndex = -1
+}
 
 function handleGetCategoryNote() {
   listLoading.value = true
@@ -103,8 +108,7 @@ function handleGetCategoryNote() {
       noteList.value = res.data.category_note_list
     })
     .catch(() => {
-      categoryId.value = undefined
-      noteList.value = []
+      reset()
     })
     .finally(() => {
       listLoading.value = false
@@ -115,7 +119,9 @@ watch(activeId, (val) => {
   if (categoryId.value && val) {
     router.push(`/category/${categoryId.value}/note/${val}`)
   } else {
-    router.push(`/category/${categoryId.value}`)
+    if (categoryId.value) {
+      router.push(`/category/${categoryId.value}`)
+    }
   }
 })
 
@@ -186,15 +192,29 @@ function handleMoveNoteRefresh(newCategoryId) {
 
 function handlePublishStatus(item) {
   if (item.publish_status && item.publish_update_status) {
-    return 'var(--base-primary-color)'
+    return {
+      content: '已发布',
+      color: 'var(--base-primary-color)',
+    }
   }
 
   if (item.publish_status && !item.publish_update_status) {
-    return '#E6A23C'
+    return {
+      content: '未发布更新',
+      color: '#E6A23C',
+    }
   }
 
   if (!item.publish_status && !item.publish_update_status) {
-    return '#ccc'
+    return {
+      content: '未发布',
+      color: '#ccc',
+    }
+  }
+
+  return {
+    content: '未发布',
+    color: '#ccc',
   }
 }
 
@@ -300,12 +320,8 @@ defineExpose({
             font-size: 12px;
 
             .publish-status {
-              display: inline-block;
-              width: 8px;
-              height: 8px;
               margin-right: 8px;
-              background-color: #ccc;
-              border-radius: 50%;
+              color: #ccc;
             }
           }
         }
