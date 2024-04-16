@@ -122,10 +122,10 @@ function handleGetCategoryNote() {
 
 watch(activeId, (val) => {
   if (categoryId.value && val) {
-    router.push(`/category/${categoryId.value}/note/${val}`)
+    router.replace(`/category/${categoryId.value}/note/${val}`)
   } else {
     if (categoryId.value) {
-      router.push(`/category/${categoryId.value}`)
+      router.replace(`/category/${categoryId.value}`)
     }
   }
 })

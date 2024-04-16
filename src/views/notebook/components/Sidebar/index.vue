@@ -118,9 +118,9 @@ function handleGetCategoryList() {
 
 watch(activeId, (val) => {
   if (val) {
-    router.push(`/category/${val}`)
+    router.replace(`/category/${val}`)
   } else {
-    router.push('/')
+    router.replace('/')
   }
 })
 
