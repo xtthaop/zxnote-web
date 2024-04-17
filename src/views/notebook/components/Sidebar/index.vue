@@ -89,6 +89,10 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  editorLoading: {
+    type: Boolean,
+    required: true,
+  },
 })
 
 const router = useRouter()
@@ -125,7 +129,7 @@ watch(activeId, (val) => {
 })
 
 function handleItemClick(id) {
-  if (props.noteListLoading) return
+  if (props.noteListLoading || props.editorLoading) return
   activeId.value = id
 }
 

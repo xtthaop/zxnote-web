@@ -1,5 +1,5 @@
 <template>
-  <div class="editor-wrapper" v-if="noteId" v-loading="noteLoading">
+  <div class="editor-wrapper" v-if="noteId" v-loading="noteLoading || noteListLoading">
     <div class="title-wrapper">
       <div className="save-status">{{ savedStatus ? '已保存' : '保存中...' }}</div>
       <input
@@ -93,6 +93,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  noteListLoading: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emits = defineEmits([
@@ -111,20 +115,31 @@ const savedStatus = ref(true)
 const publishLoading = ref(false)
 const note = ref({})
 
+const editorLoading = defineModel('editorLoading')
+watch(noteLoading, (val) => {
+  editorLoading.value = val
+})
+
 watch(
   () => route.params.noteId,
   (val) => {
     noteId.value = Number(val)
-    savedStatus.value = true
-    publishLoading.value = false
     if (noteId.value) {
       handleGetNoteContent()
+    } else {
+      reset()
     }
   },
   {
     immediate: true,
   }
 )
+
+function reset() {
+  savedStatus.value = true
+  publishLoading.value = false
+  note.value = {}
+}
 
 const titleRef = ref()
 const sourceRef = ref()
@@ -151,7 +166,7 @@ function handleGetNoteContent() {
     })
     .catch(() => {
       noteId.value = undefined
-      note.value = {}
+      reset()
     })
     .finally(() => {
       noteLoading.value = false

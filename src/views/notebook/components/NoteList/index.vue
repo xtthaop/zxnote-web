@@ -61,6 +61,13 @@ defineOptions({
   name: 'NoteListComponent',
 })
 
+const props = defineProps({
+  editorLoading: {
+    type: Boolean,
+    required: true,
+  },
+})
+
 const route = useRoute()
 const router = useRouter()
 
@@ -117,6 +124,7 @@ function handleGetCategoryNote() {
       noteList.value = res.data.category_note_list
     })
     .catch(() => {
+      categoryId.value = undefined
       reset()
     })
     .finally(() => {
@@ -135,6 +143,7 @@ watch(activeId, (val) => {
 })
 
 function handleNoteItemClick(id, index) {
+  if (props.editorLoading) return
   activeId.value = id
   activeIndex = index
 }
@@ -215,13 +224,13 @@ function handlePublishStatus(item) {
   if (!item.publish_status && !item.publish_update_status) {
     return {
       content: '未发布',
-      color: '#ccc',
+      color: '#696969',
     }
   }
 
   return {
     content: '未发布',
-    color: '#ccc',
+    color: '#696969',
   }
 }
 
@@ -329,6 +338,10 @@ defineExpose({
             .publish-status {
               margin-right: 8px;
               color: #ccc;
+            }
+
+            .create-time {
+              color: #696969;
             }
           }
         }
