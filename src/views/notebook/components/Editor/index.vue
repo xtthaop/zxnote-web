@@ -1,12 +1,15 @@
 <template>
   <div class="editor-wrapper" v-if="noteId" v-loading="noteLoading || noteListLoading">
     <div class="title-wrapper">
-      <div className="save-status">{{ savedStatus ? '已保存' : '保存中...' }}</div>
+      <div className="save-status">
+        {{ savedStatus ? '已保存' : saveError ? '保存出错' : '保存中...' }}
+      </div>
       <input
         ref="titleRef"
         v-model="note.note_title"
         className="custom-input"
         placeholder="请输入标题"
+        @keydown="handleKeyCtrl"
         @input="handleNoteChange"
       />
     </div>
@@ -23,8 +26,13 @@
               <span class="publish-text">取消中...</span>
             </span>
             <span v-else>
-              <svg-icon :name="publishCancel ? 'error' : 'success'"></svg-icon>
-              <span class="publish-text">{{ publishCancel ? '取消发布' : '已发布' }}</span>
+              <template v-if="publishError">
+                <span class="publish-text" style="color: red">点击重试</span>
+              </template>
+              <template v-else>
+                <svg-icon :name="publishCancel ? 'error' : 'success'"></svg-icon>
+                <span class="publish-text">{{ publishCancel ? '取消发布' : '已发布' }}</span>
+              </template>
             </span>
           </span>
           <span v-else>
@@ -32,13 +40,19 @@
               <span class="publish-text">发布中...</span>
             </span>
             <span v-else>
-              <svg-icon :name="publishUpdate ? 'update' : 'publish'"></svg-icon>
-              <span class="publish-text">{{ publishUpdate ? '发布更新' : '发布笔记' }}</span>
+              <template v-if="publishError">
+                <span class="publish-text" style="color: red">点击重试</span>
+              </template>
+              <template v-else>
+                <svg-icon :name="publishUpdate ? 'update' : 'publish'"></svg-icon>
+                <span class="publish-text">{{ publishUpdate ? '发布更新' : '发布笔记' }}</span>
+              </template>
             </span>
           </span>
         </template>
         <template v-else>
-          <span class="publish-text">保存中...</span>
+          <span class="publish-text" v-if="!saveError">保存中...</span>
+          <span class="publish-text" v-else>保存出错</span>
         </template>
       </li>
       <el-tooltip effect="dark" content="插入图片" placement="top" :hide-after="0">
@@ -54,7 +68,7 @@
         </li>
       </el-tooltip>
       <el-tooltip effect="dark" content="保存" placement="top" :hide-after="0">
-        <li class="tool right" @click="handleSaveNote">
+        <li class="tool right" @click="handleSaveNote(true)">
           <svg-icon name="save"></svg-icon>
         </li>
       </el-tooltip>
@@ -68,6 +82,7 @@
       ref="sourceRef"
       class="source-wrapper"
       placeholder="请输入内容"
+      spellcheck="false"
       v-model="note.note_content"
       @keydown.tab.exact="handleKeyTab"
       @keydown="handleKeyCtrl"
@@ -112,7 +127,9 @@ const router = useRouter()
 const noteId = ref()
 const noteLoading = ref(false)
 const savedStatus = ref(true)
+const saveError = ref(false)
 const publishLoading = ref(false)
+const publishError = ref(false)
 const note = ref({})
 
 const editorLoading = defineModel('editorLoading')
@@ -137,7 +154,9 @@ watch(
 
 function reset() {
   savedStatus.value = true
+  saveError.value = false
   publishLoading.value = false
+  publishError.value = false
   note.value = {}
 }
 
@@ -147,7 +166,7 @@ const titleFocus = defineModel('titleFocus')
 
 function handleGetNoteContent() {
   noteLoading.value = true
-  return getNoteContent({ note_id: noteId.value })
+  getNoteContent({ note_id: noteId.value })
     .then((res) => {
       note.value = res.data
       if (!note.value.note_content) {
@@ -190,18 +209,30 @@ function handleNoteChange() {
   }, 1000)
 }
 
-function handleSaveNote() {
+function handleSaveNote(withMessage) {
   savedStatus.value = false
-  return saveNote(note.value).then(() => {
-    emits('sync-title', note.value.note_title)
-    note.value.publish_update_status = 0
-    if (props.isPreviewMode) {
-      emits('sync-content', note.value.note_content)
-    } else {
-      emits('sync-publish-update-status', 0)
-    }
-    savedStatus.value = true
-  })
+  saveError.value = false
+  saveNote(note.value)
+    .then(() => {
+      emits('sync-title', note.value.note_title)
+      note.value.publish_update_status = 0
+      if (props.isPreviewMode) {
+        emits('sync-content', note.value.note_content)
+      } else {
+        emits('sync-publish-update-status', 0)
+      }
+      savedStatus.value = true
+
+      if (withMessage) {
+        ElMessage.success('保存成功')
+      }
+    })
+    .catch(() => {
+      saveError.value = true
+      if (withMessage) {
+        ElMessage.error('保存失败')
+      }
+    })
 }
 
 function hanldePublish(status) {
@@ -213,15 +244,28 @@ function hanldePublish(status) {
   }
 
   publishLoading.value = true
-  publishNote(data).then(() => {
-    note.value.publish_status = status
-    note.value.publish_update_status = status
-    publishLoading.value = false
-    if (!props.isPreviewMode) {
-      emits('sync-publish-status', status)
-      emits('sync-publish-update-status', status)
-    }
-  })
+  publishError.value = false
+  publishNote(data)
+    .then(() => {
+      setTimeout(() => {
+        note.value.publish_status = status
+        note.value.publish_update_status = status
+        publishLoading.value = false
+      }, 800)
+
+      if (!props.isPreviewMode) {
+        emits('sync-publish-status', status)
+        emits('sync-publish-update-status', status)
+      }
+
+      ElMessage.success(status ? '发布成功' : '已取消发布')
+    })
+    .catch(() => {
+      setTimeout(() => {
+        publishError.value = true
+        publishLoading.value = false
+      }, 800)
+    })
 }
 
 const imgFileInputRef = ref()
@@ -293,9 +337,7 @@ function handleKeyTab(e) {
 function handleKeyCtrl(e) {
   if ((e.ctrlKey || e.metaKey) && e.key === 's') {
     e.preventDefault()
-    handleSaveNote().then(() => {
-      ElMessage.success('保存成功')
-    })
+    handleSaveNote(true)
   }
 }
 
@@ -383,6 +425,7 @@ defineExpose({
       }
 
       &.publish {
+        width: 93px;
         text-align: center;
       }
 
