@@ -67,6 +67,11 @@
           <svg-icon name="pic"></svg-icon>
         </li>
       </el-tooltip>
+      <el-tooltip effect="dark" content="Markdown语法参考" placement="top" :hide-after="0">
+        <li class="tool" @click="fileMarkdownRef.open">
+          <svg-icon name="file-markdown"></svg-icon>
+        </li>
+      </el-tooltip>
       <el-tooltip effect="dark" content="保存" placement="top" :hide-after="0">
         <li class="tool right" @click="handleSaveNote(true)">
           <svg-icon name="save"></svg-icon>
@@ -88,6 +93,8 @@
       @keydown="handleKeyCtrl"
       @input="handleNoteChange"
     ></textarea>
+
+    <fileMarkdown ref="fileMarkdownRef"></fileMarkdown>
   </div>
 </template>
 
@@ -97,6 +104,7 @@ import { useRoute, useRouter } from 'vue-router'
 import md5 from 'js-md5'
 import { getNoteContent, publishNote, saveNote } from '@/api/notebook/note'
 import { ElMessage } from 'element-plus'
+import fileMarkdown from './components/fileMarkdown.vue'
 import { uploadFile } from '@/api/upload'
 
 defineOptions({
@@ -355,6 +363,8 @@ function handlePreview() {
     router.push(route.fullPath + '/preview')
   }
 }
+
+const fileMarkdownRef = ref()
 
 defineExpose({
   source: sourceRef,
