@@ -63,7 +63,7 @@
       <span className="username">{{ userInfo.username }}</span>
     </footer>
 
-    <CategoryForm ref="categoryForm" @refresh="handleRefreshCategoryList"></CategoryForm>
+    <CategoryForm ref="categoryForm" @refresh="handleGetCategoryList"></CategoryForm>
     <ResetPwdForm ref="resetPwdForm" @logout="handleLogout"></ResetPwdForm>
   </div>
 </template>
@@ -103,17 +103,18 @@ const categoryList = ref([])
 const categoryId = Number(route.params.categoryId)
 const activeId = ref(categoryId)
 
-handleGetCategoryList().then(() => {
-  if (!categoryId) {
-    activeId.value = categoryList.value[0]?.category_id
-  }
-})
+handleGetCategoryList(categoryId)
 
-function handleGetCategoryList() {
+function handleGetCategoryList(id) {
   listLoading.value = true
-  return getCategoryList()
+  getCategoryList()
     .then((res) => {
       categoryList.value = res.data.category_list
+      if (id) {
+        activeId.value = id
+      } else {
+        activeId.value = categoryList.value[0]?.category_id
+      }
     })
     .finally(() => {
       listLoading.value = false
@@ -141,14 +142,6 @@ function handleEditCategory(item) {
   categoryForm.value.open(item)
 }
 
-function handleRefreshCategoryList(id) {
-  handleGetCategoryList().then(() => {
-    if (id) {
-      activeId.value = id
-    }
-  })
-}
-
 function handleDeleteCategory(category_id) {
   ElMessageBox.confirm('确认删除分类及分类下所有笔记？', '提示', {
     confirmButtonText: '确定',
@@ -160,9 +153,7 @@ function handleDeleteCategory(category_id) {
     listLoading.value = true
     deleteCategory({ category_id })
       .then(() => {
-        handleGetCategoryList().then(() => {
-          activeId.value = categoryList.value[0]?.category_id
-        })
+        handleGetCategoryList()
         ElMessage({
           message: '删除成功',
           type: 'success',

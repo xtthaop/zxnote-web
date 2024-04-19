@@ -126,6 +126,7 @@ function handleGetCategoryNote() {
     .catch(() => {
       categoryId.value = undefined
       reset()
+      return Promise.reject('Failed to get notes under category')
     })
     .finally(() => {
       listLoading.value = false
