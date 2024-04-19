@@ -245,26 +245,32 @@ function hanldePublish(status) {
 
   publishLoading.value = true
   publishError.value = false
+
+  const delay = 200
   publishNote(data)
     .then(() => {
       setTimeout(() => {
         note.value.publish_status = status
         note.value.publish_update_status = status
         publishLoading.value = false
-      }, 800)
+      }, delay)
 
       if (!props.isPreviewMode) {
         emits('sync-publish-status', status)
         emits('sync-publish-update-status', status)
       }
 
-      ElMessage.success(status ? '发布成功' : '已取消发布')
+      if (status) {
+        ElMessage.success('发布成功')
+      } else {
+        ElMessage.warning('已取消发布')
+      }
     })
     .catch(() => {
       setTimeout(() => {
         publishError.value = true
         publishLoading.value = false
-      }, 800)
+      }, delay)
     })
 }
 
