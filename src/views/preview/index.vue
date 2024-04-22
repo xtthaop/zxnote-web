@@ -1,14 +1,13 @@
 <template>
   <div class="preview-wrapper">
-    <!-- TODO: 1. 报错不显示编辑区和预览区 2. 清除缓存功能 3. 验证码加载中状态显示 4. ctrl+s 保存成功提示 5. 工具用途提示 -->
     <Editor
       ref="editorRef"
-      :isPreviewMode="true"
+      :is-preview-mode="true"
       @sync-title="handleSyncTitle"
       @sync-content="handleSyncContent"
       style="width: 50%"
     ></Editor>
-    <div class="previewer" ref="previewerRef">
+    <div class="previewer" ref="previewerRef" v-if="previewContent !== undefined">
       <div class="title-wrapper">{{ noteTitle }}</div>
       <div class="sync-scroll-toggle">
         <span>同步滚动：</span>
@@ -25,7 +24,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import { Editor } from '../notebook/components'
 import useMarkdown from './markdown'
 import velocity from 'velocity-animate'
@@ -44,10 +43,22 @@ function handleSyncTitle(title) {
   noteTitle.value = title
 }
 
+let initialized = false
 function handleSyncContent(content) {
   previewContent.value = md.render(content)
-  handleImgLazyLoad()
   scrollMap = null
+
+  nextTick(() => {
+    if (!initialized) {
+      initialized = true
+      if (syncScrollStatus.value) {
+        syncScrollInit()
+      }
+      previewerRef.value.addEventListener('scroll', handleImgLazyLoad)
+    }
+
+    handleImgLazyLoad()
+  })
 }
 
 const editorRef = ref()
@@ -63,32 +74,67 @@ function handleToggleSyncScroll(status) {
   }
 }
 
-onMounted(() => {
-  if (syncScrollStatus.value) {
-    syncScrollInit()
-  }
-  previewerRef.value.addEventListener('scroll', handleImgLazyLoad)
-})
-
 let imgTimeoutId
+const imgMap = new Map()
 function handleImgLazyLoad() {
   if (imgTimeoutId) return
 
   imgTimeoutId = setTimeout(() => {
-    const imgs = previewerRef.value.getElementsByTagName('img')
     const previewerRect = previewerRef.value.getBoundingClientRect()
+    const imgs = previewerRef.value.getElementsByTagName('img')
 
     for (let i = 0; i < imgs.length; i++) {
-      const distance =
-        previewerRect.top + previewerRect.height - imgs[i].getBoundingClientRect().top
-      if (distance >= 0) {
-        const imgSrc = imgs[i].getAttribute('data-src')
-        imgs[i].setAttribute('data-src', '')
-        if (!imgSrc) continue
-        const img = new Image()
-        img.src = imgSrc
-        img.onload = () => {
-          imgs[i].src = imgSrc
+      const img = imgs[i]
+      const imgRect = img.getBoundingClientRect()
+
+      const distance1 = previewerRect.height - imgRect.top
+      const distance2 = imgRect.top + imgRect.height
+      const inView = distance1 >= 0 && distance2 >= 0
+
+      const imgSrc = img.getAttribute('data-src')
+
+      if (imgMap.has(imgSrc)) {
+        imgMap.get(imgSrc).imgs.add(img)
+        if (imgMap.get(imgSrc).status === 'loaded') {
+          if (img.getAttribute('src') !== imgSrc) img.src = imgSrc
+        }
+      } else {
+        const tempImg = new Image()
+        imgMap.set(imgSrc, {
+          target: tempImg,
+          status: 'start',
+          someInView: new Set(),
+          imgs: new Set([img]),
+        })
+      }
+
+      if (inView) {
+        imgMap.get(imgSrc).someInView.add(img)
+
+        if (imgMap.get(imgSrc).status !== 'start' && imgMap.get(imgSrc).status !== 'error') {
+          continue
+        }
+
+        imgMap.get(imgSrc).target.src = imgSrc
+        imgMap.get(imgSrc).status = 'loading'
+        imgMap.get(imgSrc).target.onload = () => {
+          for (let img of imgMap.get(imgSrc).imgs.values()) {
+            img.src = imgSrc
+          }
+          imgMap.get(imgSrc).status = 'loaded'
+        }
+        imgMap.get(imgSrc).target.onerror = () => {
+          imgMap.get(imgSrc).status = 'error'
+        }
+      } else {
+        imgMap.get(imgSrc).someInView.delete(img)
+
+        if (
+          imgMap.has(imgSrc) &&
+          imgMap.get(imgSrc).status === 'loading' &&
+          imgMap.get(imgSrc).someInView.size === 0
+        ) {
+          imgMap.get(imgSrc).target.src = ''
         }
       }
     }
@@ -282,6 +328,7 @@ function destroySyncScroll() {
   display: flex;
   width: 100%;
   height: 100%;
+  background: #fcfaf2;
 
   .previewer {
     position: relative;
