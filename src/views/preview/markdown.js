@@ -56,23 +56,9 @@ function handleLinkRenderer(md) {
 }
 
 function handleParagraphOpen(md) {
-  const defaultRender =
-    md.renderer.rules.paragraph_open ||
-    function (tokens, idx, options, env, self) {
-      return self.renderToken(tokens, idx, options)
-    }
-
   md.renderer.rules.paragraph_open = function (tokens, idx, options, env, self) {
-    if (
-      tokens[idx + 1].type === 'inline' &&
-      tokens[idx + 1].children.some((child) => child.type === 'image')
-    ) {
-      tokens[idx].attrJoin('class', 'image-container')
-    }
-
     injectLineNumbers(tokens, idx)
-
-    return defaultRender(tokens, idx, options, env, self)
+    return self.renderToken(tokens, idx, options, env, self)
   }
 }
 
@@ -108,12 +94,14 @@ function handleImgRenderer(md) {
       imgRealSrc.replace(new RegExp(`${imgSuffix}$`), '') + '_low_ratio' + imgSuffix
     const imgWidth = (imgParams && imgParams[1]) || '100%'
 
-    return `<img
-              data-src="${imgRealSrc}"
-              src="${imgPlaceholderSrc}"
-              width="${imgWidth}"
-              alt="${imageAlt}"
-              title="${imageTitle}"
-            />`
+    return `<div class="image-package">
+              <img
+                data-src="${imgRealSrc}"
+                src="${imgPlaceholderSrc}"
+                width="${imgWidth}"
+                alt="${imageAlt}"
+                title="${imageTitle}"
+              />
+            </div>`
   }
 }
