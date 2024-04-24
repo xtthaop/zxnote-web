@@ -77,7 +77,12 @@
           <svg-icon name="save"></svg-icon>
         </li>
       </el-tooltip>
-      <el-tooltip effect="dark" content="预览模式" placement="top" :hide-after="0">
+      <el-tooltip
+        effect="dark"
+        :content="props.isPreviewMode ? '返回' : '预览模式'"
+        placement="top"
+        :hide-after="0"
+      >
         <li class="tool right" @click="handlePreview">
           <svg-icon name="square-split"></svg-icon>
         </li>
