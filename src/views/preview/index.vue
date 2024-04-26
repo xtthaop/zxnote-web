@@ -45,7 +45,16 @@ function handleSyncTitle(title) {
 
 let initialized = false
 function handleSyncContent(content) {
+  if (import.meta.env.DEV) {
+    // console.time('markdown-render')
+  }
+
   previewContent.value = md.render(content)
+
+  if (import.meta.env.DEV) {
+    // console.timeEnd('markdown-render')
+  }
+
   scrollMap = null
 
   nextTick(() => {
@@ -217,6 +226,10 @@ function syncPreviewerScroll() {
   }, 50)
 }
 
+let textValueArrCache = []
+let lineHeightMapCache = []
+let scrollMapCache = []
+
 function buildScrollMap() {
   if (import.meta.env.DEV) {
     // console.time('build-scroll-map')
@@ -245,9 +258,21 @@ function buildScrollMap() {
   const textValueArr = textarea.value.split('\n')
 
   let acc = 0
-  textValueArr.forEach((str) => {
+  // 标记当前缓存命中的位置
+  // 认为从这行（包括这行）开始都与缓存不一致需要重新计算
+  let enableCacheAcc = -1
+  textValueArr.forEach((str, index) => {
     // lineHeightMap: [不自动换行行数: 自动换行实际行数]
     lineHeightMap.push(acc)
+
+    if (str === textValueArrCache[index] && enableCacheAcc === -1) {
+      acc = lineHeightMapCache[index + 1]
+      return
+    } else {
+      if (enableCacheAcc === -1) {
+        enableCacheAcc = acc
+      }
+    }
 
     if (str.length === 0) {
       acc++
@@ -260,20 +285,20 @@ function buildScrollMap() {
     const lh = parseFloat(sourceLikeDivStyle.lineHeight)
     acc += Math.round(h / lh)
   })
+
   document.body.removeChild(sourceLikeDiv)
   lineHeightMap.push(acc)
-  const linesCount = acc
 
-  const _scrollMap = []
-  for (let i = 0; i < linesCount; i++) {
-    _scrollMap.push(-1)
-  }
+  textValueArrCache = textValueArr
+  lineHeightMapCache = lineHeightMap
+
+  const linesCount = acc
+  const _scrollMap = new Array(linesCount).fill(-1)
   _scrollMap[0] = 0
   const nonEmptyList = []
   nonEmptyList.push(0)
 
   const offset = 0
-
   const lineEle = previewerRef.value.getElementsByClassName('line')
   for (let n = 0; n < lineEle.length; n++) {
     const el = lineEle[n]
@@ -284,6 +309,10 @@ function buildScrollMap() {
     t = lineHeightMap[t]
     // nonEmptyList: 收集实际行数
     if (t !== 0) nonEmptyList.push(t)
+    if (t < enableCacheAcc) {
+      _scrollMap[t] = scrollMapCache[t]
+      continue
+    }
     // _scrollMap: [文本输入区实际行数: 预览区应滚动到的高度]
     _scrollMap[t] = Math.round(el.offsetTop + offset)
   }
@@ -298,7 +327,10 @@ function buildScrollMap() {
       pos++
       continue
     }
-
+    if (j < enableCacheAcc) {
+      _scrollMap[j] = scrollMapCache[j]
+      continue
+    }
     // 有效行开始
     const a = nonEmptyList[pos]
     // 有效行结束
@@ -306,6 +338,8 @@ function buildScrollMap() {
     // 计算高度：越靠前的行将大比例乘有效行开始的高度，越靠后的行将大比例乘有效行结束的高度
     _scrollMap[j] = Math.round((_scrollMap[b] * (j - a) + _scrollMap[a] * (b - j)) / (b - a))
   }
+
+  scrollMapCache = _scrollMap
 
   if (import.meta.env.DEV) {
     // console.timeEnd('build-scroll-map')
