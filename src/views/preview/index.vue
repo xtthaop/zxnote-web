@@ -45,6 +45,8 @@ function handleSyncTitle(title) {
 
 let initialized = false
 function handleSyncContent(content) {
+  if (previewContent.value === content) return
+
   if (import.meta.env.DEV) {
     // console.time('markdown-render')
   }
@@ -84,7 +86,7 @@ function handleToggleSyncScroll(status) {
 }
 
 let imgTimeoutId
-const imgMap = new Map()
+const imgsCacheMap = new Map()
 function handleImgLazyLoad() {
   if (imgTimeoutId) return
 
@@ -102,48 +104,74 @@ function handleImgLazyLoad() {
 
       const imgSrc = img.getAttribute('data-src')
 
-      if (imgMap.has(imgSrc)) {
-        imgMap.get(imgSrc).imgs.add(img)
-        if (imgMap.get(imgSrc).status === 'loaded') {
+      // 判断缓存中是否有当前图片
+      if (imgsCacheMap.has(imgSrc)) {
+        // 是则判断图片是否已加载成功
+        if (imgsCacheMap.get(imgSrc).status === 'loaded') {
+          // 已加载成功则判断当前图片是否需要更新链接
+          // 是则更新链接
           if (img.getAttribute('src') !== imgSrc) img.src = imgSrc
+        } else {
+          // 未加载成功则将当前图片添加到待更新链接图片集合中
+          imgsCacheMap.get(imgSrc).needUpdateImgs.add(img)
         }
       } else {
-        const tempImg = new Image()
-        imgMap.set(imgSrc, {
-          target: tempImg,
+        // 否则新建图片加载器
+        const loader = new Image()
+        // 缓存图片对应的加载器、加载状态、在视口内的图片集合、需要更新链接的图片集合
+        imgsCacheMap.set(imgSrc, {
+          loader,
           status: 'start',
           someInView: new Set(),
-          imgs: new Set([img]),
+          needUpdateImgs: new Set([img]),
         })
       }
 
+      // 判断当前图片是否在视口内
       if (inView) {
-        imgMap.get(imgSrc).someInView.add(img)
+        // 是则将当前图片添加到在视口内的图片集合中
+        imgsCacheMap.get(imgSrc).someInView.add(img)
 
-        if (imgMap.get(imgSrc).status !== 'start' && imgMap.get(imgSrc).status !== 'error') {
+        // 判断当前图片是否正在加载或已加载成功
+        // 是则跳过加载操作
+        // 图片加载失败后滑动页面待图片重新出现在视口内会重新发起加载请求
+        if (
+          imgsCacheMap.get(imgSrc).status === 'loading' ||
+          imgsCacheMap.get(imgSrc).status === 'loaded'
+        ) {
           continue
         }
 
-        imgMap.get(imgSrc).target.src = imgSrc
-        imgMap.get(imgSrc).status = 'loading'
-        imgMap.get(imgSrc).target.onload = () => {
-          for (let img of imgMap.get(imgSrc).imgs.values()) {
+        imgsCacheMap.get(imgSrc).loader.src = imgSrc
+        imgsCacheMap.get(imgSrc).status = 'loading'
+        imgsCacheMap.get(imgSrc).loader.onload = () => {
+          // 图片加载成功后更新所有需要更新链接的图片然后立即从集合中删除该图片
+          for (let img of imgsCacheMap.get(imgSrc).needUpdateImgs.values()) {
             img.src = imgSrc
+            imgsCacheMap.get(imgSrc).needUpdateImgs.delete(img)
           }
-          imgMap.get(imgSrc).status = 'loaded'
+          // 将图片状态更新为加载成功
+          imgsCacheMap.get(imgSrc).status = 'loaded'
         }
-        imgMap.get(imgSrc).target.onerror = () => {
-          imgMap.get(imgSrc).status = 'error'
+        imgsCacheMap.get(imgSrc).loader.onerror = () => {
+          // 图片加载失败则将图片状态更新为加载失败
+          imgsCacheMap.get(imgSrc).status = 'error'
         }
       } else {
-        imgMap.get(imgSrc).someInView.delete(img)
+        // 当前图片不在视口内则将其从在视口内的图片集合中删除
+        imgsCacheMap.get(imgSrc).someInView.delete(img)
 
+        // 判断图片加载状态是否为加载中
+        // 及在视口内的图片集合是否为空
         if (
-          imgMap.has(imgSrc) &&
-          imgMap.get(imgSrc).status === 'loading' &&
-          imgMap.get(imgSrc).someInView.size === 0
+          imgsCacheMap.get(imgSrc).status === 'loading' &&
+          imgsCacheMap.get(imgSrc).someInView.size === 0
         ) {
-          imgMap.get(imgSrc).target.src = ''
+          // 是则将图片的加载器请求链接置为空
+          // 目的是取消图片加载从而加快后续进入视口图片的加载速度
+          // 此时图片的加载状态会变为加载失败
+          // 待图片回到视口内会重新加载
+          imgsCacheMap.get(imgSrc).loader.src = ''
         }
       }
     }
