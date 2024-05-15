@@ -67,6 +67,16 @@
           <svg-icon name="pic"></svg-icon>
         </li>
       </el-tooltip>
+      <el-tooltip effect="dark" content="撤销" placement="top" :hide-after="0">
+        <li class="tool">
+          <svg-icon name="revoke"></svg-icon>
+        </li>
+      </el-tooltip>
+      <el-tooltip effect="dark" content="重做" placement="top" :hide-after="0">
+        <li class="tool">
+          <svg-icon name="redo"></svg-icon>
+        </li>
+      </el-tooltip>
       <el-tooltip effect="dark" content="Markdown语法参考" placement="top" :hide-after="0">
         <li class="tool" @click="fileMarkdownRef.open">
           <svg-icon name="file-markdown"></svg-icon>
@@ -127,12 +137,7 @@ const props = defineProps({
   },
 })
 
-const emits = defineEmits([
-  'sync-title',
-  'sync-content',
-  'sync-publish-status',
-  'sync-publish-update-status',
-])
+const emits = defineEmits(['sync-title', 'sync-content', 'sync-status'])
 
 const route = useRoute()
 const router = useRouter()
@@ -207,10 +212,10 @@ function handleGetNoteContent() {
 
 const publishCancel = ref(false)
 const publishUpdate = computed(() => {
-  return note.value.publish_status && !note.value.publish_update_status
+  return note.value.status === 2
 })
 const published = computed(() => {
-  return note.value.publish_status && note.value.publish_update_status
+  return note.value.status === 1
 })
 
 let timeoutId
@@ -228,11 +233,11 @@ function handleSaveNote(withMessage) {
   saveNote(note.value)
     .then(() => {
       emits('sync-title', note.value.note_title)
-      note.value.publish_update_status = 0
+      if (note.value.status === 1) note.value.status = 2
       if (props.isPreviewMode) {
         emits('sync-content', note.value.note_content)
       } else {
-        emits('sync-publish-update-status', 0)
+        emits('sync-status', note.value.status)
       }
       savedStatus.value = true
 
@@ -253,7 +258,7 @@ function hanldePublish(status) {
 
   const data = {
     note_id: note.value.note_id,
-    publish_status: status,
+    status,
   }
 
   publishLoading.value = true
@@ -263,14 +268,12 @@ function hanldePublish(status) {
   publishNote(data)
     .then(() => {
       setTimeout(() => {
-        note.value.publish_status = status
-        note.value.publish_update_status = status
+        note.value.status = status
         publishLoading.value = false
       }, delay)
 
       if (!props.isPreviewMode) {
-        emits('sync-publish-status', status)
-        emits('sync-publish-update-status', status)
+        emits('sync-status', status)
       }
 
       if (status) {

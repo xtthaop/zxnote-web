@@ -12,8 +12,7 @@
       v-model:title-focus="titleFocus"
       v-model:editor-loading="editorLoading"
       @sync-title="handleSyncTitle"
-      @sync-publish-status="handleSyncPublishStatus"
-      @sync-publish-update-status="handleSyncPublishUpdateStatus"
+      @sync-status="handleSyncStatus"
     ></Editor>
   </div>
 </template>
@@ -35,12 +34,8 @@ function handleSyncTitle(title) {
   noteListRef.value.changeNoteTitle(title)
 }
 
-function handleSyncPublishStatus(status) {
-  noteListRef.value.changeNotePublishStatus(status)
-}
-
-function handleSyncPublishUpdateStatus(status) {
-  noteListRef.value.changeNotePublishUpdateStatus(status)
+function handleSyncStatus(status) {
+  noteListRef.value.changeNoteStatus(status)
 }
 </script>
 

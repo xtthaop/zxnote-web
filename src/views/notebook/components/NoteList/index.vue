@@ -208,30 +208,27 @@ function handleMoveNoteRefresh(newCategoryId) {
 }
 
 function handlePublishStatus(item) {
-  if (item.publish_status && item.publish_update_status) {
-    return {
-      content: '已发布',
-      color: 'var(--base-primary-color)',
-    }
-  }
-
-  if (item.publish_status && !item.publish_update_status) {
-    return {
-      content: '未发布更新',
-      color: '#E6A23C',
-    }
-  }
-
-  if (!item.publish_status && !item.publish_update_status) {
-    return {
-      content: '未发布',
-      color: '#696969',
-    }
-  }
-
-  return {
-    content: '未发布',
-    color: '#696969',
+  switch (item.status) {
+    case 0:
+      return {
+        content: '未发布',
+        color: '#696969',
+      }
+    case 1:
+      return {
+        content: '已发布',
+        color: 'var(--base-primary-color)',
+      }
+    case 2:
+      return {
+        content: '未发布更新',
+        color: '#E6A23C',
+      }
+    default:
+      return {
+        content: '未发布',
+        color: '#696969',
+      }
   }
 }
 
@@ -241,22 +238,15 @@ function changeNoteTitle(title) {
   }
 }
 
-function changeNotePublishStatus(status) {
+function changeNoteStatus(status) {
   if (noteList.value.length && noteList.value[activeIndex]) {
-    noteList.value[activeIndex].publish_status = status
-  }
-}
-
-function changeNotePublishUpdateStatus(status) {
-  if (noteList.value.length && noteList.value[activeIndex]) {
-    noteList.value[activeIndex].publish_update_status = status
+    noteList.value[activeIndex].status = status
   }
 }
 
 defineExpose({
   changeNoteTitle,
-  changeNotePublishStatus,
-  changeNotePublishUpdateStatus,
+  changeNoteStatus,
 })
 </script>
 
