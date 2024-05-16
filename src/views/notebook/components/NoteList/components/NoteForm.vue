@@ -39,10 +39,13 @@
 import { ref, reactive } from 'vue'
 import { getCategoryList } from '@/api/notebook/category'
 import { moveNote } from '@/api/notebook/note'
+import { useNoteStore } from '@/stores/note'
 
 defineOptions({
   name: 'NoteForm',
 })
+
+const store = useNoteStore()
 
 const emits = defineEmits(['refresh'])
 
@@ -58,12 +61,21 @@ const categoryList = ref([])
 
 function open(item) {
   dialogVisible.value = true
+  handleGetCategoryList().then(() => {
+    Object.assign(form, item)
+  })
+}
+
+function handleGetCategoryList() {
+  if (store.categoryList) {
+    categoryList.value = store.categoryList
+    return Promise.resolve()
+  }
+
   formLoading.value = true
   getCategoryList()
     .then((res) => {
-      formLoading.value = false
       categoryList.value = res.data.category_list
-      Object.assign(form, item)
     })
     .finally(() => {
       formLoading.value = false
@@ -79,7 +91,7 @@ async function submitForm() {
   loading.value = true
   try {
     await moveNote(form)
-    emits('refresh', form.category_id)
+    emits('refresh', { ...form })
     dialogVisible.value = false
   } finally {
     loading.value = false

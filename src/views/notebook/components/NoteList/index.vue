@@ -29,7 +29,7 @@
               <span class="handle-btn"><svg-icon name="setting"></svg-icon></span>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="handleMoveNote(item.note_id)">
+                  <el-dropdown-item @click="handleMoveNote(item)">
                     <svg-icon name="folder" style="margin-right: 10px"></svg-icon>
                     <span>移动笔记</span>
                   </el-dropdown-item>
@@ -56,10 +56,13 @@ import { dayjs } from 'element-plus'
 import { getCategoryNote, addNote, deleteNote } from '@/api/notebook/note'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import NoteForm from './components/NoteForm.vue'
+import { useNoteStore } from '@/stores/note'
 
 defineOptions({
   name: 'NoteListComponent',
 })
+
+const store = useNoteStore()
 
 const props = defineProps({
   editorLoading: {
@@ -118,10 +121,16 @@ function toFirstNote() {
 }
 
 function handleGetCategoryNote() {
+  if (store.categoryNoteMap.get(categoryId.value)) {
+    noteList.value = store.categoryNoteMap.get(categoryId.value)
+    return Promise.resolve()
+  }
+
   listLoading.value = true
   return getCategoryNote({ category_id: categoryId.value })
     .then((res) => {
       noteList.value = res.data.category_note_list
+      store.categoryNoteMap.set(categoryId.value, noteList.value)
     })
     .catch(() => {
       categoryId.value = undefined
@@ -154,13 +163,12 @@ function handleAddNote() {
   listLoading.value = true
   addNote({ category_id: categoryId.value })
     .then((res) => {
-      handleGetCategoryNote().then(() => {
-        titleFocus.value = true
-        activeId.value = res.data.note_id
-        activeIndex = 0
-      })
+      noteList.value.unshift(res.data)
+      titleFocus.value = true
+      activeId.value = res.data.note_id
+      activeIndex = 0
     })
-    .catch(() => {
+    .finally(() => {
       listLoading.value = false
     })
 }
@@ -176,34 +184,46 @@ function handleDeleteNote(id) {
     listLoading.value = true
     deleteNote({ note_id: id })
       .then(() => {
-        handleGetCategoryNote().then(() => {
-          toFirstNote()
-        })
+        noteList.value.splice(activeIndex, 1)
+        toFirstNote()
         ElMessage({
           message: '删除成功',
           type: 'success',
         })
       })
-      .catch(() => {
+      .finally(() => {
         listLoading.value = false
       })
   })
 }
 
 const noteFormRef = ref()
-function handleMoveNote(noteId) {
+function handleMoveNote(item) {
   const data = {
-    note_id: noteId,
+    ...item,
     category_id: categoryId.value,
   }
   noteFormRef.value.open(data)
 }
 
-function handleMoveNoteRefresh(newCategoryId) {
-  if (newCategoryId !== categoryId.value) {
-    handleGetCategoryNote().then(() => {
-      toFirstNote()
-    })
+function handleMoveNoteRefresh(val) {
+  if (val.category_id !== categoryId.value) {
+    noteList.value.splice(activeIndex, 1)
+    toFirstNote()
+    if (store.categoryNoteMap.has(val.category_id)) {
+      store.categoryNoteMap.get(val.category_id).unshift(val)
+      store.categoryNoteMap.get(val.category_id).sort((a, b) => {
+        const timeA = +new Date(a.create_time)
+        const timeB = +new Date(b.create_time)
+        if (timeA < timeB) {
+          return 1
+        } else if (timeA > timeB) {
+          return -1
+        } else {
+          return 0
+        }
+      })
+    }
   }
 }
 

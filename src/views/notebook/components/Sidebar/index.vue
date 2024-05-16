@@ -79,10 +79,13 @@ import CategoryForm from './components/CategoryForm.vue'
 import ResetPwdForm from './components/ResetPwdForm.vue'
 import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
 import { filesize } from 'filesize'
+import { useNoteStore } from '@/stores/note'
 
 defineOptions({
   name: 'SidebarComponent',
 })
+
+const store = useNoteStore()
 
 const props = defineProps({
   noteListLoading: {
@@ -111,6 +114,7 @@ function handleGetCategoryList(id) {
   getCategoryList()
     .then((res) => {
       categoryList.value = res.data.category_list
+      store.categoryList = categoryList.value
       if (id) {
         activeId.value = id
         activeIndex = categoryList.value.findIndex((item) => item.category_id === id)
