@@ -9,10 +9,10 @@
       <el-scrollbar style="height: calc(100% - 50px)">
         <ul class="category-list">
           <li
-            v-for="item in categoryList"
+            v-for="(item, index) in categoryList"
             :key="item.category_id"
             :class="[activeId === item.category_id ? 'active' : '']"
-            @click="handleItemClick(item.category_id)"
+            @click="handleItemClick(item.category_id, index)"
           >
             <span class="title">{{ item.category_name }}</span>
             <el-dropdown trigger="click">
@@ -63,13 +63,13 @@
       <span className="username">{{ userInfo.username }}</span>
     </footer>
 
-    <CategoryForm ref="categoryForm" @refresh="handleGetCategoryList"></CategoryForm>
+    <CategoryForm ref="categoryForm" @refresh="handleRefreshCategoryList"></CategoryForm>
     <ResetPwdForm ref="resetPwdForm" @logout="handleLogout"></ResetPwdForm>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, onActivated } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { removeToken } from '@/utils/auth'
 import { getCategoryList, deleteCategory } from '@/api/notebook/category'
@@ -101,6 +101,7 @@ const route = useRoute()
 const listLoading = ref(false)
 const categoryList = ref([])
 const categoryId = Number(route.params.categoryId)
+let activeIndex = -1
 const activeId = ref(categoryId)
 
 handleGetCategoryList(categoryId)
@@ -112,13 +113,29 @@ function handleGetCategoryList(id) {
       categoryList.value = res.data.category_list
       if (id) {
         activeId.value = id
+        activeIndex = categoryList.value.findIndex((item) => item.category_id === id)
       } else {
-        activeId.value = categoryList.value[0]?.category_id
+        toFirstCategory()
       }
     })
     .finally(() => {
       listLoading.value = false
     })
+}
+
+function handleRefreshCategoryList(val) {
+  if (val.type === 'add') {
+    categoryList.value.push(val)
+    activeIndex = categoryList.value.length - 1
+    activeId.value = val.category_id
+  } else {
+    categoryList.value[activeIndex].category_name = val.category_name
+  }
+}
+
+function toFirstCategory() {
+  activeId.value = categoryList.value[0]?.category_id
+  activeIndex = activeId.value ? 0 : -1
 }
 
 watch(activeId, (val) => {
@@ -129,8 +146,18 @@ watch(activeId, (val) => {
   }
 })
 
-function handleItemClick(id) {
+onActivated(() => {
+  if (!route.params.categoryId) {
+    categoryList.value = []
+    activeId.value = undefined
+    activeIndex = -1
+    handleGetCategoryList()
+  }
+})
+
+function handleItemClick(id, index) {
   if (props.noteListLoading || props.editorLoading) return
+  activeIndex = index
   activeId.value = id
 }
 
@@ -153,13 +180,14 @@ function handleDeleteCategory(category_id) {
     listLoading.value = true
     deleteCategory({ category_id })
       .then(() => {
-        handleGetCategoryList()
+        categoryList.value.splice(activeIndex, 1)
+        toFirstCategory()
         ElMessage({
           message: '删除成功',
           type: 'success',
         })
       })
-      .catch(() => {
+      .finally(() => {
         listLoading.value = false
       })
   })

@@ -63,8 +63,18 @@ async function submitForm() {
 
   loading.value = true
   try {
-    const { data } = form.category_id ? await updateCategory(form) : await addCategory(form)
-    emits('refresh', data?.category_id)
+    if (form.category_id) {
+      await updateCategory(form)
+      emits('refresh', { type: 'update', category_name: form.category_name })
+    } else {
+      const { data } = await addCategory(form)
+      emits('refresh', {
+        type: 'add',
+        category_id: data?.category_id,
+        category_name: form.category_name,
+      })
+    }
+
     dialogVisible.value = false
   } finally {
     loading.value = false
