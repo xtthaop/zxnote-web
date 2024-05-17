@@ -121,10 +121,13 @@ import { getNoteContent, publishNote, saveNote } from '@/api/notebook/note'
 import { ElMessage } from 'element-plus'
 import fileMarkdown from './components/fileMarkdown.vue'
 import { uploadFile } from '@/api/upload'
+import { useNoteStore } from '@/stores/note'
 
 defineOptions({
   name: 'EditorComponent',
 })
+
+const store = useNoteStore()
 
 const props = defineProps({
   isPreviewMode: {
@@ -160,7 +163,12 @@ watch(
   (val) => {
     noteId.value = Number(val)
     if (noteId.value) {
-      handleGetNoteContent()
+      handleGetNoteContent().then(() => {
+        if (props.isPreviewMode) {
+          emits('sync-title', note.value.note_title)
+          emits('sync-content', note.value.note_content)
+        }
+      })
     } else {
       reset()
     }
@@ -183,17 +191,20 @@ const sourceRef = ref()
 const titleFocus = defineModel('titleFocus')
 
 function handleGetNoteContent() {
+  if (store.noteContentMap.get(noteId.value)) {
+    note.value = store.noteContentMap.get(noteId.value)
+    return Promise.resolve()
+  }
+
   noteLoading.value = true
-  getNoteContent({ note_id: noteId.value })
+  return getNoteContent({ note_id: noteId.value })
     .then((res) => {
       note.value = res.data
       if (!note.value.note_content) {
         note.value.note_content = ''
       }
-      if (props.isPreviewMode) {
-        emits('sync-title', note.value.note_title)
-        emits('sync-content', note.value.note_content)
-      }
+      store.noteContentMap.set(noteId.value, note.value)
+
       nextTick(() => {
         if (titleFocus.value) {
           titleRef.value.select()
@@ -204,6 +215,7 @@ function handleGetNoteContent() {
     .catch(() => {
       noteId.value = undefined
       reset()
+      return Promise.reject('Failed to get note content under note')
     })
     .finally(() => {
       noteLoading.value = false

@@ -16,8 +16,11 @@
             <div class="note-info">
               <div class="title">{{ item.note_title }}</div>
               <div class="other-info">
-                <span class="publish-status" :style="{ color: handlePublishStatus(item).color }">
-                  {{ handlePublishStatus(item).content }}
+                <span
+                  class="publish-status"
+                  :style="{ color: handlePublishStatus(item.status).color }"
+                >
+                  {{ handlePublishStatus(item.status).content }}
                 </span>
                 <span class="create-time">
                   {{ dayjs(item.create_time).format('YYYY-MM-DD HH:mm:ss') }}
@@ -50,7 +53,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onActivated } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { dayjs } from 'element-plus'
 import { getCategoryNote, addNote, deleteNote } from '@/api/notebook/note'
@@ -227,8 +230,8 @@ function handleMoveNoteRefresh(val) {
   }
 }
 
-function handlePublishStatus(item) {
-  switch (item.status) {
+function handlePublishStatus(status) {
+  switch (status) {
     case 0:
       return {
         content: '未发布',
@@ -263,6 +266,13 @@ function changeNoteStatus(status) {
     noteList.value[activeIndex].status = status
   }
 }
+
+onActivated(() => {
+  if (store.noteContentMap.get(activeId.value)) {
+    noteList.value[activeIndex].status = store.noteContentMap.get(activeId.value).status
+    noteList.value[activeIndex].note_title = store.noteContentMap.get(activeId.value).note_title
+  }
+})
 
 defineExpose({
   changeNoteTitle,
