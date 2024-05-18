@@ -188,6 +188,7 @@ function handleDeleteNote(id) {
     deleteNote({ note_id: id })
       .then(() => {
         noteList.value.splice(activeIndex, 1)
+        store.noteContentMap.delete(activeId.value)
         toFirstNote()
         ElMessage({
           message: '删除成功',
