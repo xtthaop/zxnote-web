@@ -12,6 +12,7 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 
 import App from './App.vue'
 import router from './router/index'
+import { createPinia } from 'pinia'
 
 import SvgIcon from '@/components/SvgIcon/index.vue'
 import 'virtual:svg-icons-register'
@@ -19,8 +20,10 @@ import 'virtual:svg-icons-register'
 import { toHorizontalLine } from '@/utils/index'
 
 const app = createApp(App)
+const pinia = createPinia()
 
 app.use(router)
+app.use(pinia)
 app.use(ElementPlus, {
   locale: zhCn,
   size: 'default',

@@ -68,12 +68,20 @@
         </li>
       </el-tooltip>
       <el-tooltip effect="dark" content="撤销" placement="top" :hide-after="0">
-        <li class="tool">
+        <li
+          class="tool"
+          @click="handleUndo"
+          :style="{ color: store.undoStack.length < 2 ? '#999' : '' }"
+        >
           <svg-icon name="revoke"></svg-icon>
         </li>
       </el-tooltip>
       <el-tooltip effect="dark" content="重做" placement="top" :hide-after="0">
-        <li class="tool">
+        <li
+          class="tool"
+          @click="handleRedo"
+          :style="{ color: store.redoStack.length < 1 ? '#999' : '' }"
+        >
           <svg-icon name="redo"></svg-icon>
         </li>
       </el-tooltip>
@@ -109,17 +117,17 @@
       @input="handleNoteChange"
     ></textarea>
 
-    <fileMarkdown ref="fileMarkdownRef"></fileMarkdown>
+    <FileMarkdown ref="fileMarkdownRef"></FileMarkdown>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onActivated } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import md5 from 'js-md5'
 import { getNoteContent, publishNote, saveNote } from '@/api/notebook/note'
 import { ElMessage } from 'element-plus'
-import fileMarkdown from './components/fileMarkdown.vue'
+import FileMarkdown from './components/FileMarkdown.vue'
 import { uploadFile } from '@/api/upload'
 import { useNoteStore } from '@/stores/note'
 
@@ -168,6 +176,7 @@ watch(
           emits('sync-title', note.value.note_title)
           emits('sync-content', note.value.note_content)
         }
+        initStateStack()
       })
     } else {
       reset()
@@ -177,6 +186,14 @@ watch(
     immediate: true,
   }
 )
+
+function initStateStack() {
+  store.resetStateStack()
+  store.recordFirstState({
+    note_title: note.value.note_title,
+    note_content: note.value.note_content,
+  })
+}
 
 function reset() {
   savedStatus.value = true
@@ -239,7 +256,23 @@ function handleNoteChange() {
   }, 1000)
 }
 
-function handleSaveNote(withMessage) {
+function handleUndo() {
+  const state = store.undo()
+  state && applyState(state)
+}
+
+function handleRedo() {
+  const state = store.redo()
+  state && applyState(state)
+}
+
+function applyState(state) {
+  note.value.note_title = state.note_title
+  note.value.note_content = state.note_content
+  handleSaveNote(false, false)
+}
+
+function handleSaveNote(withMessage, recordState = true) {
   savedStatus.value = false
   saveError.value = false
   saveNote(note.value)
@@ -252,6 +285,13 @@ function handleSaveNote(withMessage) {
         emits('sync-status', note.value.status)
       }
       savedStatus.value = true
+
+      if (recordState) {
+        store.recordState({
+          note_title: note.value.note_title,
+          note_content: note.value.note_content,
+        })
+      }
 
       if (withMessage) {
         ElMessage.success('保存成功')
@@ -373,6 +413,10 @@ function handleKeyCtrl(e) {
     e.preventDefault()
     handleSaveNote(true)
   }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+    e.preventDefault()
+    handleUndo()
+  }
 }
 
 function handlePreview() {
@@ -385,6 +429,10 @@ function handlePreview() {
 }
 
 const fileMarkdownRef = ref()
+
+onActivated(() => {
+  initStateStack()
+})
 
 defineExpose({
   source: sourceRef,
