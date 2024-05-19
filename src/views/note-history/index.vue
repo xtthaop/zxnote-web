@@ -32,7 +32,7 @@
       </div>
 
       <div class="handle-wrapper">
-        <el-button type="primary">恢复到这个版本</el-button>
+        <el-button type="primary" @click="handleRecoveryNote">恢复到这个版本</el-button>
         <el-button type="info" plain @click="handleBack">返回</el-button>
       </div>
     </div>
@@ -41,14 +41,17 @@
 
 <script setup>
 import { nextTick, ref, watch } from 'vue'
-import { getNoteHistoryList, getNoteHistoryVersion } from '@/api/notebook/note'
+import { getNoteHistoryList, getNoteHistoryVersion, recoveryNote } from '@/api/notebook/note'
 import useMarkdown from '../preview/markdown'
 import useImgLazyLoad from '../preview/img-lazy-load'
 import { useRoute, useRouter } from 'vue-router'
+import { useNoteStore } from '@/stores/note'
 
 defineOptions({
   name: 'NoteHIstory',
 })
+
+const store = useNoteStore()
 
 const route = useRoute()
 const router = useRouter()
@@ -125,6 +128,17 @@ function handleGetCurrentVersion(id) {
     .finally(() => {
       versionLoading.value = false
     })
+}
+
+function handleRecoveryNote() {
+  recoveryNote({ id: activeId.value }).then((res) => {
+    const currentNote = store.noteContentMap.get(res.data.note_id)
+    if (currentNote) {
+      currentNote.note_title = currentVersion.value.note_title
+      currentNote.note_content = currentVersion.value.note_content
+    }
+    handleBack()
+  })
 }
 
 function handleBack() {

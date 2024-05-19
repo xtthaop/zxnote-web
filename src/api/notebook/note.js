@@ -36,6 +36,15 @@ export function getNoteHistoryVersion(params) {
   })
 }
 
+// 恢复笔记到某个历史版本
+export function recoveryNote(data) {
+  return request({
+    url: '/restful/note/recovery_note',
+    method: 'put',
+    data,
+  })
+}
+
 // 删除笔记
 export function deleteNote(data) {
   return request({
