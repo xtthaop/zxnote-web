@@ -85,6 +85,11 @@
           <svg-icon name="redo"></svg-icon>
         </li>
       </el-tooltip>
+      <el-tooltip effect="dark" content="历史版本" placement="top" :hide-after="0">
+        <li class="tool" @click="handleViewHistory">
+          <svg-icon name="time-history"></svg-icon>
+        </li>
+      </el-tooltip>
       <el-tooltip effect="dark" content="Markdown语法参考" placement="top" :hide-after="0">
         <li class="tool" @click="fileMarkdownRef.open">
           <svg-icon name="file-markdown"></svg-icon>
@@ -426,6 +431,10 @@ function handlePreview() {
   } else {
     router.push(route.fullPath + '/preview')
   }
+}
+
+function handleViewHistory() {
+  router.push(route.fullPath + '/history/0')
 }
 
 const fileMarkdownRef = ref()

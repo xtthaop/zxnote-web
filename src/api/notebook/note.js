@@ -18,6 +18,24 @@ export function getCategoryNote(params) {
   })
 }
 
+// 获取笔记历史列表
+export function getNoteHistoryList(params) {
+  return request({
+    url: '/restful/note/get_note_history_list',
+    method: 'get',
+    params,
+  })
+}
+
+// 获取笔记某个历史版本
+export function getNoteHistoryVersion(params) {
+  return request({
+    url: '/restful/note/get_note_history_version',
+    method: 'get',
+    params,
+  })
+}
+
 // 删除笔记
 export function deleteNote(data) {
   return request({

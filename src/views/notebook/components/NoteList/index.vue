@@ -269,7 +269,7 @@ function changeNoteStatus(status) {
 }
 
 onActivated(() => {
-  if (store.noteContentMap.get(activeId.value)) {
+  if (store.noteContentMap.get(activeId.value) && activeIndex > -1) {
     noteList.value[activeIndex].status = store.noteContentMap.get(activeId.value).status
     noteList.value[activeIndex].note_title = store.noteContentMap.get(activeId.value).note_title
   }
