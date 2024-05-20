@@ -52,6 +52,7 @@ import useMarkdown from '../preview/markdown'
 import useImgLazyLoad from '../preview/img-lazy-load'
 import { useRoute, useRouter } from 'vue-router'
 import { useNoteStore } from '@/stores/note'
+import { ElLoading } from 'element-plus'
 
 defineOptions({
   name: 'NoteHIstory',
@@ -137,14 +138,23 @@ function handleGetCurrentVersion(id) {
 }
 
 function handleRecoveryNote() {
-  recoveryNote({ id: activeId.value }).then((res) => {
-    const currentNote = store.noteContentMap.get(res.data.note_id)
-    if (currentNote) {
-      currentNote.note_title = currentVersion.value.note_title
-      currentNote.note_content = currentVersion.value.note_content
-    }
-    handleBack()
+  const loading = ElLoading.service({
+    lock: true,
+    text: '恢复中...',
+    background: 'rgba(0, 0, 0, 0.7)',
   })
+  recoveryNote({ id: activeId.value })
+    .then((res) => {
+      const currentNote = store.noteContentMap.get(res.data.note_id)
+      if (currentNote) {
+        currentNote.note_title = currentVersion.value.note_title
+        currentNote.note_content = currentVersion.value.note_content
+      }
+      handleBack()
+    })
+    .finally(() => {
+      loading.close()
+    })
 }
 
 function handleBack() {
