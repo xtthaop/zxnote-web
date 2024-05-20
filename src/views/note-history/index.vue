@@ -1,5 +1,16 @@
 <template>
   <div class="note-history-wrapper">
+    <div class="handle-wrapper">
+      <el-button
+        type="primary"
+        @click="handleRecoveryNote"
+        v-if="currentVersion.note_content !== undefined"
+      >
+        恢复到这个版本
+      </el-button>
+      <el-button type="info" plain @click="handleBack">返回</el-button>
+    </div>
+
     <div class="sidebar-wrapper">
       <header>
         <span>共</span>
@@ -29,11 +40,6 @@
         <div class="title">{{ currentVersion.note_title }}</div>
         <div class="info">{{ currentVersion.create_time }}</div>
         <div class="md-result-wrapper" v-html="md.render(currentVersion.note_content || '')"></div>
-      </div>
-
-      <div class="handle-wrapper">
-        <el-button type="primary" @click="handleRecoveryNote">恢复到这个版本</el-button>
-        <el-button type="info" plain @click="handleBack">返回</el-button>
       </div>
     </div>
   </div>
@@ -149,9 +155,20 @@ function handleBack() {
 
 <style scoped lang="scss">
 .note-history-wrapper {
+  position: relative;
   display: flex;
   width: 100%;
   height: 100%;
+
+  .handle-wrapper {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    z-index: 10;
+  }
 }
 
 .sidebar-wrapper {
@@ -193,7 +210,6 @@ function handleBack() {
 }
 
 .note-wrapper {
-  position: relative;
   width: calc(100% - 230px);
   height: 100%;
   overflow-y: auto;
@@ -217,14 +233,5 @@ function handleBack() {
       margin-bottom: 30px;
     }
   }
-}
-
-.handle-wrapper {
-  position: absolute;
-  right: 20px;
-  top: 20px;
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
 }
 </style>
