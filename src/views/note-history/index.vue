@@ -78,7 +78,7 @@ function handleGetNoteHistoryList() {
     .then((res) => {
       historyList.value = res.data.note_history_list
       if (!activeId.value) {
-        activeId.value = historyList.value[0].id
+        activeId.value = historyList.value.length ? historyList.value[0].id : 0
       }
     })
     .finally(() => {

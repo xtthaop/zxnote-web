@@ -18,6 +18,7 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  base: '/notebook',
   server: {
     port: 5173,
     host: '0.0.0.0',
