@@ -30,8 +30,8 @@ dependencies:
     specifier: ^0.8.3
     version: registry.npmmirror.com/js-md5@0.8.3
   markdown-it:
-    specifier: ^14.0.0
-    version: registry.npmmirror.com/markdown-it@14.0.0
+    specifier: ^14.1.0
+    version: registry.npmmirror.com/markdown-it@14.1.0
   normalize.css:
     specifier: ^8.0.1
     version: registry.npmmirror.com/normalize.css@8.0.1
@@ -2639,10 +2639,10 @@ packages:
       object-visit: registry.npmmirror.com/object-visit@1.0.1
     dev: true
 
-  registry.npmmirror.com/markdown-it@14.0.0:
-    resolution: {integrity: sha512-seFjF0FIcPt4P9U39Bq1JYblX0KZCjDLFFQPHpL5AzHpqPEKtosxmdq/LTVZnjfH7tjt9BxStm+wXcDBNuYmzw==, tarball: https://registry.npmmirror.com/markdown-it/-/markdown-it-14.0.0.tgz}
+  registry.npmmirror.com/markdown-it@14.1.0:
+    resolution: {integrity: sha512-a54IwgWPaeBCAAsv13YgmALOF1elABB08FxO9i+r4VFk5Vl4pKokRPeX8u5TCgSsPi6ec1otfLjdOpVcgbpshg==, tarball: https://registry.npmmirror.com/markdown-it/-/markdown-it-14.1.0.tgz}
     name: markdown-it
-    version: 14.0.0
+    version: 14.1.0
     hasBin: true
     dependencies:
       argparse: registry.npmmirror.com/argparse@2.0.1

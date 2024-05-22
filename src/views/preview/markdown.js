@@ -1,7 +1,7 @@
 import markdownit from 'markdown-it'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/vs2015.css'
-import * as mk from '@xtthaop/markdown-it-katex'
+import mk from '@xtthaop/markdown-it-katex'
 
 export default function useMarkdown() {
   // https://github.com/markdown-it/markdown-it?tab=readme-ov-file#usage-examples
