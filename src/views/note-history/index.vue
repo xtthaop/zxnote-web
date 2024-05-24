@@ -34,7 +34,7 @@
       class="note-wrapper"
       ref="previewerRef"
       v-loading="versionLoading"
-      v-if="currentVersion.note_content !== undefined"
+      v-show="currentVersion.note_content !== undefined"
     >
       <div class="note">
         <div class="title">{{ currentVersion.note_title }}</div>
@@ -46,7 +46,7 @@
 </template>
 
 <script setup>
-import { nextTick, ref, watch } from 'vue'
+import { nextTick, ref, watch, onMounted } from 'vue'
 import { getNoteHistoryList, getNoteHistoryVersion, recoveryNote } from '@/api/notebook/note'
 import useMarkdown from '../preview/markdown'
 import useImgLazyLoad from '../preview/img-lazy-load'
@@ -100,10 +100,7 @@ watch(
     if (!val) return
     handleGetCurrentVersion(val).then(() => {
       nextTick(() => {
-        const { loadImgFn } = useImgLazyLoad(previewerRef.value)
-        previewerRef.value.addEventListener('scroll', loadImgFn)
-        loadImgFn()
-
+        handleImgLazyLoad()
         previewerRef.value.scrollTop = 0
       })
       const { noteId, categoryId } = route.params
@@ -116,6 +113,14 @@ watch(
 )
 
 const previewerRef = ref()
+let handleImgLazyLoad = null
+
+onMounted(() => {
+  const { loadImgFn } = useImgLazyLoad(previewerRef.value)
+  handleImgLazyLoad = loadImgFn
+  previewerRef.value.addEventListener('scroll', handleImgLazyLoad)
+})
+
 function handleGetCurrentVersion(id) {
   if (historyVersionMap.get(id)) {
     currentVersion.value = historyVersionMap.get(id)

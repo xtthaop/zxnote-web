@@ -54,6 +54,41 @@ export function deleteNote(data) {
   })
 }
 
+// 获取已删除的笔记列表
+export function getDeletedNoteList() {
+  return request({
+    url: '/restful/note/get_deleted_note_list',
+    method: 'get',
+  })
+}
+
+// 获取已删除的笔记内容
+export function getDeletedNote(params) {
+  return request({
+    url: '/restful/note/get_deleted_note',
+    method: 'get',
+    params,
+  })
+}
+
+// 恢复删除的笔记
+export function restoreNote(data) {
+  return request({
+    url: '/restful/note/restore_note',
+    method: 'put',
+    data,
+  })
+}
+
+// 彻底删除笔记
+export function completelyDeleteNote(data) {
+  return request({
+    url: '/restful/note/completely_delete_note',
+    method: 'delete',
+    data,
+  })
+}
+
 // 移动笔记
 export function moveNote(data) {
   return request({

@@ -7,7 +7,7 @@
       @sync-content="handleSyncContent"
       style="width: 50%"
     ></Editor>
-    <div class="previewer" ref="previewerRef" v-if="previewContent !== undefined">
+    <div class="previewer" ref="previewerRef" v-show="previewContent !== undefined">
       <div class="title-wrapper">{{ noteTitle }}</div>
       <div class="sync-scroll-toggle">
         <span>同步滚动：</span>
@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { nextTick, ref } from 'vue'
+import { nextTick, ref, onMounted } from 'vue'
 import { Editor } from '../notebook/components'
 import useMarkdown from './markdown'
 import useImgLazyLoad from './img-lazy-load'
@@ -44,7 +44,6 @@ function handleSyncTitle(title) {
   noteTitle.value = title
 }
 
-let initialized = false
 function handleSyncContent(content) {
   if (previewContent.value === content) return
 
@@ -61,23 +60,26 @@ function handleSyncContent(content) {
   scrollMap = null
 
   nextTick(() => {
-    const { loadImgFn } = useImgLazyLoad(previewerRef.value)
-
-    if (!initialized) {
-      initialized = true
-      if (syncScrollStatus.value) {
-        syncScrollInit()
-      }
-      previewerRef.value.addEventListener('scroll', loadImgFn)
-    }
-
-    loadImgFn()
+    handleImgLazyLoad()
   })
 }
 
 const editorRef = ref()
 const previewerRef = ref()
+let handleImgLazyLoad = null
 const syncScrollStatus = ref(true)
+
+onMounted(() => {
+  const { loadImgFn } = useImgLazyLoad(previewerRef.value)
+  handleImgLazyLoad = loadImgFn
+  previewerRef.value.addEventListener('scroll', handleImgLazyLoad)
+
+  if (editorRef.value.source) {
+    if (syncScrollStatus.value) {
+      syncScrollInit()
+    }
+  }
+})
 
 function handleToggleSyncScroll(status) {
   if (status) {

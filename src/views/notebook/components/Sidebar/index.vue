@@ -41,13 +41,13 @@
         </div>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item>
-              <svg-icon name="promotion" style="margin-right: 10px"></svg-icon>
-              <span>推广配置</span>
+            <el-dropdown-item @click="router.push({ name: 'NoteRecycleBin' })">
+              <svg-icon name="recycle-bin" style="margin-right: 10px"></svg-icon>
+              <span>回收站</span>
             </el-dropdown-item>
             <el-dropdown-item @click="handleClearCache">
               <svg-icon name="clear" style="margin-right: 10px"></svg-icon>
-              <span>清除缓存</span>
+              <span>清理空间</span>
             </el-dropdown-item>
             <el-dropdown-item @click="handleChangePassword">
               <svg-icon name="change-password" style="margin-right: 10px"></svg-icon>
@@ -156,6 +156,7 @@ onActivated(() => {
     activeId.value = undefined
     activeIndex = -1
     handleGetCategoryList()
+    // TODO: 获取用户信息改造
   }
 })
 

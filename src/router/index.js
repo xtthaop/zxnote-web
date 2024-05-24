@@ -5,6 +5,9 @@ import Page404 from '@/views/error-page/404.vue'
 import Notebook from '@/views/notebook/index.vue'
 import Preview from '@/views/preview/index.vue'
 import NoteHistory from '@/views/note-history/index.vue'
+import RecycleBin from '@/views/recycle-bin/index.vue'
+import NoteRecycleBin from '@/views/recycle-bin/note.vue'
+import ImgRecycleBin from '@/views/recycle-bin/img.vue'
 
 export const constantRoutes = [
   {
@@ -36,6 +39,22 @@ export const constantRoutes = [
     path: '/category/:categoryId/note/:noteId/history/:historyId',
     name: 'NoteHistory',
     component: NoteHistory,
+  },
+  {
+    path: '/recycle-bin',
+    component: RecycleBin,
+    children: [
+      {
+        path: 'note',
+        name: 'NoteRecycleBin',
+        component: NoteRecycleBin,
+      },
+      {
+        path: 'img',
+        name: 'ImgRecycleBin',
+        component: ImgRecycleBin,
+      },
+    ],
   },
   {
     path: '/:pathMatch(.*)*',

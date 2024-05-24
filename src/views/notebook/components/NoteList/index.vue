@@ -216,17 +216,6 @@ function handleMoveNoteRefresh(val) {
     toFirstNote()
     if (store.categoryNoteMap.has(val.category_id)) {
       store.categoryNoteMap.get(val.category_id).unshift(val)
-      store.categoryNoteMap.get(val.category_id).sort((a, b) => {
-        const timeA = +new Date(a.create_time)
-        const timeB = +new Date(b.create_time)
-        if (timeA < timeB) {
-          return 1
-        } else if (timeA > timeB) {
-          return -1
-        } else {
-          return 0
-        }
-      })
     }
   }
 }
