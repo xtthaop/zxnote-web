@@ -55,7 +55,6 @@ defineOptions({
   name: 'NoteRecycleBin',
 })
 
-// TODO: 笔记缓存改造
 const store = useNoteStore()
 
 const route = useRoute()
@@ -90,6 +89,11 @@ function handleGetDeletedNoteList() {
     })
 }
 
+function reset() {
+  currentNote.value = {}
+  router.replace({ name: 'NoteRecycleBin' })
+}
+
 function toFirstNote() {
   activeId.value = noteList.value[0]?.note_id
   activeIndex = activeId.value ? 0 : -1
@@ -97,10 +101,15 @@ function toFirstNote() {
 
 watch(activeId, (val) => {
   if (val) {
-    handleGetDeletedNote(val)
+    handleGetDeletedNote(val).then(() => {
+      router.replace({ name: 'NoteRecycleBin', query: { noteId: val } })
+      nextTick(() => {
+        handleImgLazyLoad()
+        previewerRef.value.scrollTop = 0
+      })
+    })
   } else {
-    currentNote.value = {}
-    router.replace({ name: 'NoteRecycleBin' })
+    reset()
   }
 })
 
@@ -114,15 +123,20 @@ onMounted(() => {
 })
 
 function handleGetDeletedNote(id) {
+  if (store.noteContentMap.has(id)) {
+    currentNote.value = store.noteContentMap.get(id)
+    return Promise.resolve()
+  }
+
   noteLoading.value = true
-  getDeletedNote({ note_id: id })
+  return getDeletedNote({ note_id: id })
     .then((res) => {
       currentNote.value = res.data
-      router.replace({ name: 'NoteRecycleBin', query: { noteId: id } })
-      nextTick(() => {
-        handleImgLazyLoad()
-        previewerRef.value.scrollTop = 0
-      })
+      store.noteContentMap.set(id, currentNote.value)
+    })
+    .catch(() => {
+      reset()
+      return Promise.reject()
     })
     .finally(() => {
       noteLoading.value = false
