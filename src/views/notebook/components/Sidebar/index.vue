@@ -186,6 +186,7 @@ function handleDeleteCategory(category_id) {
     deleteCategory({ category_id })
       .then(() => {
         categoryList.value.splice(activeIndex, 1)
+        store.categoryNoteMap.delete(category_id)
         toFirstCategory()
         ElMessage({
           message: '删除成功',

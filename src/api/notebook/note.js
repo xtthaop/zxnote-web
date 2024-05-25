@@ -63,9 +63,9 @@ export function getDeletedNoteList() {
 }
 
 // 获取已删除的笔记内容
-export function getDeletedNote(params) {
+export function getDeletedNoteContent(params) {
   return request({
-    url: '/restful/note/get_deleted_note',
+    url: '/restful/note/get_deleted_note_content',
     method: 'get',
     params,
   })

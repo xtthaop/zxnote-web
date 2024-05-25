@@ -67,7 +67,8 @@ const { md } = useMarkdown()
 const listLoading = ref(false)
 const historyList = ref([])
 const historyId = Number(route.params.historyId)
-const activeId = ref(historyId)
+const activeId = ref()
+const currentVersion = ref({})
 
 handleGetNoteHistoryList()
 
@@ -77,16 +78,20 @@ function handleGetNoteHistoryList() {
   getNoteHistoryList({ note_id: Number(noteId) })
     .then((res) => {
       historyList.value = res.data.note_history_list
-      if (!activeId.value) {
-        activeId.value = historyList.value.length ? historyList.value[0].id : 0
+      if (historyId) {
+        activeId.value = historyId
+      } else {
+        activeId.value = historyList.value[0]?.id
       }
+    })
+    .catch(() => {
+      currentVersion.value = {}
     })
     .finally(() => {
       listLoading.value = false
     })
 }
 
-const currentVersion = ref({})
 const historyVersionMap = new Map()
 const versionLoading = ref(false)
 
@@ -94,23 +99,17 @@ function handleItemClick(id) {
   activeId.value = id
 }
 
-watch(
-  activeId,
-  (val) => {
-    if (!val) return
-    handleGetCurrentVersion(val).then(() => {
-      nextTick(() => {
-        handleImgLazyLoad()
-        previewerRef.value.scrollTop = 0
-      })
-      const { noteId, categoryId } = route.params
-      router.replace(`/category/${categoryId}/note/${noteId}/history/${val}`)
+watch(activeId, (val) => {
+  if (!val) return
+  handleGetCurrentVersion(val).then(() => {
+    nextTick(() => {
+      handleImgLazyLoad()
+      previewerRef.value.scrollTop = 0
     })
-  },
-  {
-    immediate: true,
-  }
-)
+    const { noteId, categoryId } = route.params
+    router.replace(`/category/${categoryId}/note/${noteId}/history/${val}`)
+  })
+})
 
 const previewerRef = ref()
 let handleImgLazyLoad = null

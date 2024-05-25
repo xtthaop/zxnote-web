@@ -17,10 +17,10 @@
       <ul class="note-list" v-loading="listLoading">
         <li
           class="note-item"
-          v-for="item in noteList"
+          v-for="(item, index) in noteList"
           :key="item.note_id"
           :class="[activeId === item.note_id ? 'active' : '']"
-          @click="handleItemClick(item.note_id)"
+          @click="handleItemClick(item.note_id, index)"
         >
           <span>{{ item.note_title }}</span>
         </li>
@@ -41,7 +41,7 @@
 import { ref, watch, nextTick, onMounted } from 'vue'
 import {
   getDeletedNoteList,
-  getDeletedNote,
+  getDeletedNoteContent,
   restoreNote,
   completelyDeleteNote,
 } from '@/api/notebook/note'
@@ -129,7 +129,7 @@ function handleGetDeletedNote(id) {
   }
 
   noteLoading.value = true
-  return getDeletedNote({ note_id: id })
+  return getDeletedNoteContent({ note_id: id })
     .then((res) => {
       currentNote.value = res.data
       store.noteContentMap.set(id, currentNote.value)
@@ -143,22 +143,25 @@ function handleGetDeletedNote(id) {
     })
 }
 
-function handleItemClick(id) {
+function handleItemClick(id, index) {
   activeId.value = id
+  activeIndex = index
 }
 
 function handleRestoreNote() {
-  // TODO: 恢复分类改造
   const restoreLoading = ElLoading.service({
     lock: true,
     text: '恢复中...',
     background: 'rgba(0, 0, 0, 0.7)',
   })
   restoreNote({ note_id: activeId.value })
-    .then(() => {
+    .then((res) => {
       const noteItem = noteList.value[activeIndex]
       if (store.categoryNoteMap.has(noteItem.category_id)) {
         store.categoryNoteMap.get(noteItem.category_id).unshift(noteItem)
+      }
+      if (res.data.restore_category) {
+        store.categoryList.unshift(res.data.restore_category)
       }
       router.go(-1)
     })
