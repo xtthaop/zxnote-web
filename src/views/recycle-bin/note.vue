@@ -49,7 +49,7 @@ import { useRoute, useRouter } from 'vue-router'
 import useMarkdown from '../preview/markdown'
 import useImgLazyLoad from '../preview/img-lazy-load'
 import { useNoteStore } from '@/stores/note'
-import { ElLoading } from 'element-plus'
+import { ElMessageBox, ElLoading } from 'element-plus'
 
 defineOptions({
   name: 'NoteRecycleBin',
@@ -66,7 +66,7 @@ const listLoading = ref(false)
 const noteLoading = ref(false)
 
 const noteId = Number(route.query.noteId)
-const activeId = ref(noteId)
+const activeId = ref()
 let activeIndex = -1
 
 const currentNote = ref({})
@@ -79,6 +79,7 @@ function handleGetDeletedNoteList() {
     .then((res) => {
       noteList.value = res.data.note_list
       if (noteId) {
+        activeId.value = noteId
         activeIndex = noteList.value.findIndex((item) => item.note_id === noteId)
       } else {
         toFirstNote()
@@ -173,16 +174,23 @@ function handleRestoreNote() {
 const deleteLoading = ref(false)
 
 function handleDeleteNote() {
-  // TODO: 删除分类改造
-  deleteLoading.value = true
-  completelyDeleteNote({ note_id: activeId.value })
-    .then(() => {
-      noteList.value.splice(activeIndex, 1)
-      toFirstNote()
-    })
-    .finally(() => {
-      deleteLoading.value = false
-    })
+  ElMessageBox.confirm('确认彻底删除笔记？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    'show-close': false,
+    'close-on-click-modal': false,
+    type: 'warning',
+  }).then(() => {
+    deleteLoading.value = true
+    completelyDeleteNote({ note_id: activeId.value })
+      .then(() => {
+        noteList.value.splice(activeIndex, 1)
+        toFirstNote()
+      })
+      .finally(() => {
+        deleteLoading.value = false
+      })
+  })
 }
 </script>
 
