@@ -12,7 +12,7 @@
       <header>
         <span>共</span>
         <span class="num">&nbsp;{{ noteList.length }}&nbsp;</span>
-        <span>条</span>
+        <span>条笔记</span>
       </header>
       <ul class="note-list" v-loading="listLoading">
         <li

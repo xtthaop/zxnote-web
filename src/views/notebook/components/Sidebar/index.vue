@@ -41,13 +41,13 @@
         </div>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item @click="router.push({ name: 'NoteRecycleBin' })">
-              <svg-icon name="recycle-bin" style="margin-right: 10px"></svg-icon>
-              <span>回收站</span>
-            </el-dropdown-item>
             <el-dropdown-item @click="handleClearCache">
               <svg-icon name="clear" style="margin-right: 10px"></svg-icon>
               <span>清理空间</span>
+            </el-dropdown-item>
+            <el-dropdown-item @click="router.push({ name: 'NoteRecycleBin' })">
+              <svg-icon name="recycle-bin" style="margin-right: 10px"></svg-icon>
+              <span>回收站</span>
             </el-dropdown-item>
             <el-dropdown-item @click="handleChangePassword">
               <svg-icon name="change-password" style="margin-right: 10px"></svg-icon>
