@@ -59,6 +59,7 @@ import { onMounted, ref } from 'vue'
 import { getBackupImgs, restoreImg, completelyDeleteImg } from '@/api/notebook/img'
 import { Select, DocumentCopy } from '@element-plus/icons-vue'
 import useImgLazyLoad from '../preview/img-lazy-load'
+import { ElMessageBox } from 'element-plus'
 
 defineOptions({
   name: 'ImgRecycleBin',
@@ -108,14 +109,22 @@ function handleCopy(item) {
 }
 
 function handleDeleteImg(url, index) {
-  listLoading.value = true
-  completelyDeleteImg({ img_path: url })
-    .then(() => {
-      imgList.value.splice(index, 1)
-    })
-    .finally(() => {
-      listLoading.value = false
-    })
+  ElMessageBox.confirm('确认彻底删除图片？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    'show-close': false,
+    'close-on-click-modal': false,
+    type: 'warning',
+  }).then(() => {
+    listLoading.value = true
+    completelyDeleteImg({ img_path: url })
+      .then(() => {
+        imgList.value.splice(index, 1)
+      })
+      .finally(() => {
+        listLoading.value = false
+      })
+  })
 }
 </script>
 

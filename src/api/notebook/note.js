@@ -133,10 +133,11 @@ export function getFilesInfo() {
   })
 }
 
-// 清除已不在笔记中引用的文件
-export function clearCache() {
+// 清理空间
+export function clearSpace(data) {
   return request({
-    url: '/restful/note/clear_files',
+    url: '/restful/note/clear_space',
     method: 'delete',
+    data,
   })
 }

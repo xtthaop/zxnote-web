@@ -41,7 +41,7 @@
         </div>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item @click="handleClearCache">
+            <el-dropdown-item @click="handleClearSpace">
               <svg-icon name="clear" style="margin-right: 10px"></svg-icon>
               <span>清理空间</span>
             </el-dropdown-item>
@@ -65,6 +65,7 @@
 
     <CategoryForm ref="categoryForm" @refresh="handleRefreshCategoryList"></CategoryForm>
     <ResetPwdForm ref="resetPwdForm" @logout="handleLogout"></ResetPwdForm>
+    <ClearSpaceForm ref="clearSpaceForm"></ClearSpaceForm>
   </div>
 </template>
 
@@ -73,12 +74,11 @@ import { ref, reactive, watch, onActivated } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { removeToken } from '@/utils/auth'
 import { getCategoryList, deleteCategory } from '@/api/notebook/category'
-import { clearCache } from '@/api/notebook/note'
 import { getUserInfo, logout } from '@/api/permission'
 import CategoryForm from './components/CategoryForm.vue'
 import ResetPwdForm from './components/ResetPwdForm.vue'
+import ClearSpaceForm from './components/ClearSpaceForm.vue'
 import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
-import { filesize } from 'filesize'
 import { useNoteStore } from '@/stores/note'
 
 defineOptions({
@@ -156,7 +156,8 @@ onActivated(() => {
     activeId.value = undefined
     activeIndex = -1
     handleGetCategoryList()
-    // TODO: 获取用户信息改造
+
+    handleGetUserInfo()
   }
 })
 
@@ -209,32 +210,9 @@ function handleGetUserInfo() {
   })
 }
 
-function handleClearCache() {
-  ElMessageBox.confirm('确认清除已不在笔记中引用的文件缓存', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    'show-close': false,
-    'close-on-click-modal': false,
-    type: 'warning',
-  }).then(() => {
-    const clearLoading = ElLoading.service({
-      lock: true,
-      text: '清除缓存中...',
-      background: 'rgba(0, 0, 0, 0.7)',
-    })
-    clearCache()
-      .then((res) => {
-        const size = filesize(res.data.deleted_imgs_size)
-        const num = res.data.deleted_imgs_num
-        ElMessage({
-          message: `已清除占用了 ${size} 的 ${num} 个文件`,
-          type: 'success',
-        })
-      })
-      .finally(() => {
-        clearLoading.close()
-      })
-  })
+const clearSpaceForm = ref()
+function handleClearSpace() {
+  clearSpaceForm.value.open()
 }
 
 const resetPwdForm = ref()
