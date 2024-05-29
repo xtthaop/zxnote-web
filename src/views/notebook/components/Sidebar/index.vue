@@ -64,7 +64,7 @@
     </footer>
 
     <CategoryForm ref="categoryForm" @refresh="handleRefreshCategoryList"></CategoryForm>
-    <ResetPwdForm ref="resetPwdForm" @logout="handleLogout"></ResetPwdForm>
+    <ResetPwdForm ref="resetPwdForm" @logout="handleLogoutImmediately"></ResetPwdForm>
     <ClearSpaceForm ref="clearSpaceForm"></ClearSpaceForm>
   </div>
 </template>
@@ -220,6 +220,22 @@ function handleChangePassword() {
   resetPwdForm.value.open()
 }
 
+function handleLogoutImmediately() {
+  const logoutLoading = ElLoading.service({
+    lock: true,
+    text: '退出登录中...',
+    background: 'rgba(0, 0, 0, 0.7)',
+  })
+  logout()
+    .then(() => {
+      removeToken()
+      router.push('/login')
+    })
+    .finally(() => {
+      logoutLoading.close()
+    })
+}
+
 function handleLogout() {
   ElMessageBox.confirm('确认退出登录？', '提示', {
     confirmButtonText: '确定',
@@ -228,19 +244,7 @@ function handleLogout() {
     'close-on-click-modal': false,
     type: 'warning',
   }).then(() => {
-    const logoutLoading = ElLoading.service({
-      lock: true,
-      text: '退出登录中...',
-      background: 'rgba(0, 0, 0, 0.7)',
-    })
-    logout()
-      .then(() => {
-        removeToken()
-        router.push('/login')
-      })
-      .finally(() => {
-        logoutLoading.close()
-      })
+    handleLogoutImmediately()
   })
 }
 </script>
