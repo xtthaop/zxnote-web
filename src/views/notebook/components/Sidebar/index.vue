@@ -1,8 +1,8 @@
 <template>
   <div class="sidebar-wrapper">
     <header>知行笔记</header>
-    <div class="handler-wrapper" v-loading="listLoading">
-      <div class="add-btn" @click="handleAddCategory">
+    <div class="main-wrapper" v-loading="listLoading">
+      <div class="add-btn" @click="handleAddOrEditCategory(null)">
         <svg-icon name="plus"></svg-icon>
         <span>新建分类</span>
       </div>
@@ -19,7 +19,7 @@
               <span class="handle-btn"><svg-icon name="setting"></svg-icon></span>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="handleEditCategory(item)">
+                  <el-dropdown-item @click="handleAddOrEditCategory(item)">
                     <svg-icon name="rename" style="margin-right: 10px"></svg-icon>
                     <span>重命名</span>
                   </el-dropdown-item>
@@ -34,7 +34,7 @@
         </ul>
       </el-scrollbar>
     </div>
-    <footer v-if="userInfo.username">
+    <footer v-if="userInfo?.username">
       <el-dropdown trigger="click">
         <div>
           <div className="icon">{{ userInfo.username?.substring(0, 1).toUpperCase() }}</div>
@@ -70,22 +70,25 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, onActivated } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { removeToken } from '@/utils/auth'
 import { getCategoryList, deleteCategory } from '@/api/notebook/category'
-import { getUserInfo, logout } from '@/api/permission'
+import { logout } from '@/api/permission'
 import CategoryForm from './components/CategoryForm.vue'
 import ResetPwdForm from './components/ResetPwdForm.vue'
 import ClearSpaceForm from './components/ClearSpaceForm.vue'
 import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
 import { useNoteStore } from '@/stores/note'
+import { useUserStore } from '@/stores/user'
 
 defineOptions({
   name: 'SidebarComponent',
 })
 
-const store = useNoteStore()
+const noteStore = useNoteStore()
+const userStore = useUserStore()
+const userInfo = userStore.userInfo
 
 const props = defineProps({
   noteListLoading: {
@@ -103,44 +106,10 @@ const route = useRoute()
 
 const listLoading = ref(false)
 const categoryList = ref([])
-const categoryId = Number(route.params.categoryId)
+
+const categoryId = Number(route.params.categoryId) || undefined
 let activeIndex = -1
 const activeId = ref(categoryId)
-
-handleGetCategoryList(categoryId)
-
-function handleGetCategoryList(id) {
-  listLoading.value = true
-  getCategoryList()
-    .then((res) => {
-      categoryList.value = res.data.category_list
-      store.categoryList = categoryList.value
-      if (id) {
-        activeId.value = id
-        activeIndex = categoryList.value.findIndex((item) => item.category_id === id)
-      } else {
-        toFirstCategory()
-      }
-    })
-    .finally(() => {
-      listLoading.value = false
-    })
-}
-
-function handleRefreshCategoryList(val) {
-  if (val.type === 'add') {
-    categoryList.value.push(val)
-    activeIndex = categoryList.value.length - 1
-    activeId.value = val.category_id
-  } else {
-    categoryList.value[activeIndex].category_name = val.category_name
-  }
-}
-
-function toFirstCategory() {
-  activeId.value = categoryList.value[0]?.category_id
-  activeIndex = activeId.value ? 0 : -1
-}
 
 watch(activeId, (val) => {
   if (val) {
@@ -150,16 +119,35 @@ watch(activeId, (val) => {
   }
 })
 
-onActivated(() => {
-  if (!route.params.categoryId) {
-    categoryList.value = []
-    activeId.value = undefined
-    activeIndex = -1
-    handleGetCategoryList()
-
-    handleGetUserInfo()
+handleGetCategoryList().then(() => {
+  if (activeId.value) {
+    activeIndex = categoryList.value.findIndex((item) => item.category_id === activeId.value)
+  } else {
+    toFirstCategory()
   }
 })
+
+function handleGetCategoryList() {
+  if (noteStore.categoryList) {
+    categoryList.value = noteStore.categoryList
+    return Promise.resolve()
+  }
+
+  listLoading.value = true
+  return getCategoryList()
+    .then((res) => {
+      categoryList.value = res.data
+      noteStore.categoryList = categoryList.value
+    })
+    .finally(() => {
+      listLoading.value = false
+    })
+}
+
+function toFirstCategory() {
+  activeId.value = categoryList.value[0]?.category_id
+  activeIndex = activeId.value ? 0 : -1
+}
 
 function handleItemClick(id, index) {
   if (props.noteListLoading || props.editorLoading) return
@@ -168,11 +156,18 @@ function handleItemClick(id, index) {
 }
 
 const categoryForm = ref(null)
-function handleAddCategory() {
-  categoryForm.value.open()
-}
-function handleEditCategory(item) {
+function handleAddOrEditCategory(item) {
   categoryForm.value.open(item)
+}
+
+function handleRefreshCategoryList(val) {
+  if (val.category_id) {
+    categoryList.value.unshift(val)
+    activeIndex = 0
+    activeId.value = val.category_id
+  } else {
+    categoryList.value[activeIndex].category_name = val.category_name
+  }
 }
 
 function handleDeleteCategory(category_id) {
@@ -187,7 +182,7 @@ function handleDeleteCategory(category_id) {
     deleteCategory({ category_id })
       .then(() => {
         categoryList.value.splice(activeIndex, 1)
-        store.categoryNoteMap.delete(category_id)
+        noteStore.categoryNoteMap.delete(category_id)
         toFirstCategory()
         ElMessage({
           message: '删除成功',
@@ -197,16 +192,6 @@ function handleDeleteCategory(category_id) {
       .finally(() => {
         listLoading.value = false
       })
-  })
-}
-
-handleGetUserInfo()
-
-const userInfo = reactive({})
-function handleGetUserInfo() {
-  getUserInfo().then((res) => {
-    userInfo.user_id = res.data.user_id
-    userInfo.username = res.data.username
   })
 }
 
@@ -267,9 +252,9 @@ function handleLogout() {
     text-align: center;
   }
 
-  .handler-wrapper {
+  .main-wrapper {
     width: 100%;
-    // header: 70px footer: 50px
+    /* header: 70px; footer: 50px */
     height: calc(100% - 70px - 50px);
 
     :deep(.el-loading-mask) {

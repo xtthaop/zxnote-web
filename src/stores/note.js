@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useNoteStore = defineStore('note', {
   state: () => ({
-    categoryList: [],
+    categoryList: null,
     categoryNoteMap: new Map(),
     noteContentMap: new Map(),
     undoStack: [],

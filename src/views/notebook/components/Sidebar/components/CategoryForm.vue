@@ -65,11 +65,10 @@ async function submitForm() {
   try {
     if (form.category_id) {
       await updateCategory(form)
-      emits('refresh', { type: 'update', category_name: form.category_name })
+      emits('refresh', { category_name: form.category_name })
     } else {
       const { data } = await addCategory(form)
       emits('refresh', {
-        type: 'add',
         category_id: data?.category_id,
         category_name: form.category_name,
       })
