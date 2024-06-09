@@ -9,7 +9,12 @@
   >
     <el-form ref="formRef" :model="form" :rules="rules" :show-message="false">
       <el-form-item label="" prop="category_name">
-        <el-input v-model="form.category_name" placeholder="请输入分类名称" maxlength="40" />
+        <el-input
+          v-model="form.category_name"
+          :disabled="loading"
+          placeholder="请输入分类名称"
+          maxlength="40"
+        />
       </el-form-item>
     </el-form>
 
