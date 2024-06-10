@@ -53,10 +53,10 @@
 </template>
 
 <script setup>
-import { ref, watch, onActivated } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { dayjs } from 'element-plus'
-import { getCategoryNote, addNote, deleteNote } from '@/api/notebook/note'
+import { getCategoryNote, addNote, softDeleteNote } from '@/api/notebook/note'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import NoteForm from './components/NoteForm.vue'
 import { useNoteStore } from '@/stores/note'
@@ -66,45 +66,38 @@ defineOptions({
 })
 
 const store = useNoteStore()
-
-const props = defineProps({
-  editorLoading: {
-    type: Boolean,
-    required: true,
-  },
-})
+let abortController
 
 const route = useRoute()
 const router = useRouter()
 
-const categoryId = ref()
 const noteList = ref([])
 const listLoading = ref(false)
-let activeIndex = -1
-let noteId = Number(route.params.noteId)
-const activeId = ref(noteId)
 
-const noteListLoading = defineModel('noteListLoading')
-watch(listLoading, (val) => {
-  noteListLoading.value = val
-})
+const categoryId = ref()
+let activeIndex = -1
+const activeId = ref()
 
 watch(
   () => route.params.categoryId,
   (val) => {
-    categoryId.value = Number(val)
+    categoryId.value = Number(val) || undefined
     if (categoryId.value) {
-      noteId = Number(route.params.noteId)
+      const noteId = Number(route.params.noteId) || undefined
+      activeId.value = noteId
       handleGetCategoryNote().then(() => {
-        if (noteId) {
-          activeId.value = noteId
-          activeIndex = noteList.value.findIndex((item) => item.note_id === noteId)
+        if (activeId.value) {
+          activeIndex = noteList.value.findIndex((item) => item.note_id === activeId.value)
+          if (store.noteContentMap.has(activeId.value) && activeIndex > -1) {
+            noteList.value[activeIndex].status = store.noteContentMap.get(activeId.value).status
+            noteList.value[activeIndex].note_title = store.noteContentMap.get(
+              activeId.value
+            ).note_title
+          }
         } else {
           toFirstNote()
         }
       })
-    } else {
-      reset()
     }
   },
   {
@@ -112,56 +105,62 @@ watch(
   }
 )
 
-function reset() {
-  noteList.value = []
-  activeId.value = undefined
-  activeIndex = -1
-}
-
 function toFirstNote() {
   activeId.value = noteList.value[0]?.note_id
   activeIndex = activeId.value ? 0 : -1
 }
 
 function handleGetCategoryNote() {
-  if (store.categoryNoteMap.get(categoryId.value)) {
+  if (store.categoryNoteMap.has(categoryId.value)) {
     noteList.value = store.categoryNoteMap.get(categoryId.value)
     return Promise.resolve()
   }
 
+  if (abortController) {
+    abortController.abort()
+  }
+
+  abortController = new AbortController()
+  const signal = abortController.signal
+
   listLoading.value = true
-  return getCategoryNote({ category_id: categoryId.value })
+  return getCategoryNote({ category_id: categoryId.value }, signal)
     .then((res) => {
       noteList.value = res.data.category_note_list
       store.categoryNoteMap.set(categoryId.value, noteList.value)
-    })
-    .catch(() => {
-      categoryId.value = undefined
-      reset()
-      return Promise.reject('Failed to get notes under category')
-    })
-    .finally(() => {
       listLoading.value = false
+    })
+    .catch((err) => {
+      // 主动取消请求则保持列表的加载中状态
+      if (err.code === 'ERR_CANCELED') {
+        return Promise.reject()
+      }
+
+      listLoading.value = false
+
+      // 如果后端报错比如记录不存在则重置路由地址达到隐藏笔记列表和笔记内容的目的
+      router.replace('/')
+      return Promise.reject()
     })
 }
 
 watch(activeId, (val) => {
-  if (categoryId.value && val) {
+  if (!categoryId.value) return
+
+  if (val) {
     router.replace(`/category/${categoryId.value}/note/${val}`)
   } else {
-    if (categoryId.value) {
-      router.replace(`/category/${categoryId.value}`)
-    }
+    router.replace(`/category/${categoryId.value}`)
   }
 })
 
 function handleNoteItemClick(id, index) {
-  if (props.editorLoading) return
   activeId.value = id
   activeIndex = index
 }
 
 const titleFocus = defineModel('titleFocus')
+
 function handleAddNote() {
   listLoading.value = true
   addNote({ category_id: categoryId.value })
@@ -185,10 +184,9 @@ function handleDeleteNote(id) {
     type: 'warning',
   }).then(() => {
     listLoading.value = true
-    deleteNote({ note_id: id })
+    softDeleteNote({ note_id: id })
       .then(() => {
         noteList.value.splice(activeIndex, 1)
-        store.noteContentMap.delete(activeId.value)
         toFirstNote()
         ElMessage({
           message: '删除成功',
@@ -202,6 +200,7 @@ function handleDeleteNote(id) {
 }
 
 const noteFormRef = ref()
+
 function handleMoveNote(item) {
   const data = {
     ...item,
@@ -215,7 +214,14 @@ function handleMoveNoteRefresh(val) {
     noteList.value.splice(activeIndex, 1)
     toFirstNote()
     if (store.categoryNoteMap.has(val.category_id)) {
-      store.categoryNoteMap.get(val.category_id).unshift(val)
+      const findIndex = store.categoryNoteMap
+        .get(val.category_id)
+        .findIndex((item) => new Date(item.create_time) <= new Date(val.create_time))
+      if (findIndex > -1) {
+        store.categoryNoteMap.get(val.category_id).splice(findIndex, 0, val)
+      } else {
+        store.categoryNoteMap.get(val.category_id).push(val)
+      }
     }
   }
 }
@@ -256,13 +262,6 @@ function changeNoteStatus(status) {
     noteList.value[activeIndex].status = status
   }
 }
-
-onActivated(() => {
-  if (store.noteContentMap.get(activeId.value) && activeIndex > -1) {
-    noteList.value[activeIndex].status = store.noteContentMap.get(activeId.value).status
-    noteList.value[activeIndex].note_title = store.noteContentMap.get(activeId.value).note_title
-  }
-})
 
 defineExpose({
   changeNoteTitle,

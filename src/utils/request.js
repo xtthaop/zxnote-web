@@ -45,6 +45,11 @@ service.interceptors.response.use(
     }
   },
   (error) => {
+    if (!error.response) {
+      // 被取消的请求没有响应体
+      return Promise.reject(error)
+    }
+
     if (error.response.status === 401) {
       if (messageBoxFlag === 0) {
         messageBoxFlag = 1
@@ -72,6 +77,7 @@ service.interceptors.response.use(
         showClose: true,
       })
     }
+
     return Promise.reject(error)
   }
 )

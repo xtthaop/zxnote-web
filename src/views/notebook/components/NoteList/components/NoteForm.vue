@@ -13,6 +13,7 @@
       :rules="rules"
       :show-message="false"
       v-loading="formLoading"
+      :disabled="loading"
     >
       <el-form-item label="" prop="category_id">
         <el-select v-model="form.category_id" placeholder="请选择分类">

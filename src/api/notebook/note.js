@@ -10,11 +10,12 @@ export function addNote(data) {
 }
 
 // 获取分类下笔记
-export function getCategoryNote(params) {
+export function getCategoryNote(params, signal) {
   return request({
     url: '/restful/note/get_category_note',
     method: 'get',
     params,
+    signal,
   })
 }
 
@@ -46,9 +47,9 @@ export function recoveryNote(data) {
 }
 
 // 删除笔记
-export function deleteNote(data) {
+export function softDeleteNote(data) {
   return request({
-    url: '/restful/note/delete_note',
+    url: '/restful/note/soft_delete_note',
     method: 'delete',
     data,
   })

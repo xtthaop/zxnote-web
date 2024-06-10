@@ -90,17 +90,6 @@ const noteStore = useNoteStore()
 const userStore = useUserStore()
 const userInfo = userStore.userInfo
 
-const props = defineProps({
-  noteListLoading: {
-    type: Boolean,
-    required: true,
-  },
-  editorLoading: {
-    type: Boolean,
-    required: true,
-  },
-})
-
 const router = useRouter()
 const route = useRoute()
 
@@ -136,7 +125,7 @@ function handleGetCategoryList() {
   listLoading.value = true
   return getCategoryList()
     .then((res) => {
-      categoryList.value = res.data
+      categoryList.value = res.data.category_list
       noteStore.categoryList = categoryList.value
     })
     .finally(() => {
@@ -150,7 +139,6 @@ function toFirstCategory() {
 }
 
 function handleItemClick(id, index) {
-  if (props.noteListLoading || props.editorLoading) return
   activeIndex = index
   activeId.value = id
 }
