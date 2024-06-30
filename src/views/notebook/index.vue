@@ -21,12 +21,12 @@ defineOptions({
 const titleFocus = ref(false)
 const noteListRef = ref()
 
-function handleSyncTitle(title) {
-  noteListRef.value.changeNoteTitle(title)
+function handleSyncTitle({ noteId, noteTitle }) {
+  noteListRef.value.changeNoteTitle(noteId, noteTitle)
 }
 
-function handleSyncStatus(status) {
-  noteListRef.value.changeNoteStatus(status)
+function handleSyncStatus({ noteId, status }) {
+  noteListRef.value.changeNoteStatus(noteId, status)
 }
 </script>
 

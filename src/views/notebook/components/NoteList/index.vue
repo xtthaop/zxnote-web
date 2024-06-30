@@ -251,15 +251,17 @@ function handlePublishStatus(status) {
   }
 }
 
-function changeNoteTitle(title) {
-  if (noteList.value.length && noteList.value[activeIndex]) {
-    noteList.value[activeIndex].note_title = title
+function changeNoteTitle(id, title) {
+  const index = noteList.value.findIndex((item) => item.note_id === id)
+  if (index > -1) {
+    noteList.value[index].note_title = title
   }
 }
 
-function changeNoteStatus(status) {
-  if (noteList.value.length && noteList.value[activeIndex]) {
-    noteList.value[activeIndex].status = status
+function changeNoteStatus(id, status) {
+  const index = noteList.value.findIndex((item) => item.note_id === id)
+  if (index > -1) {
+    noteList.value[index].status = status
   }
 }
 

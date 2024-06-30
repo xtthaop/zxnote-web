@@ -19,6 +19,43 @@ export function getCategoryNote(params, signal) {
   })
 }
 
+// 逻辑删除笔记
+export function softDeleteNote(data) {
+  return request({
+    url: '/restful/note/soft_delete_note',
+    method: 'delete',
+    data,
+  })
+}
+
+// 移动笔记
+export function moveNote(data) {
+  return request({
+    url: '/restful/note/move_note',
+    method: 'post',
+    data,
+  })
+}
+
+// 获取笔记内容
+export function getNoteContent(params, signal) {
+  return request({
+    url: '/restful/note/get_note_content',
+    method: 'get',
+    params,
+    signal,
+  })
+}
+
+// 保存笔记
+export function saveNote(data) {
+  return request({
+    url: '/restful/note/save_note',
+    method: 'post',
+    data,
+  })
+}
+
 // 获取笔记历史列表
 export function getNoteHistoryList(params) {
   return request({
@@ -42,15 +79,6 @@ export function recoveryNote(data) {
   return request({
     url: '/restful/note/recovery_note',
     method: 'put',
-    data,
-  })
-}
-
-// 删除笔记
-export function softDeleteNote(data) {
-  return request({
-    url: '/restful/note/soft_delete_note',
-    method: 'delete',
     data,
   })
 }
@@ -86,33 +114,6 @@ export function completelyDeleteNote(data) {
   return request({
     url: '/restful/note/completely_delete_note',
     method: 'delete',
-    data,
-  })
-}
-
-// 移动笔记
-export function moveNote(data) {
-  return request({
-    url: '/restful/note/move_note',
-    method: 'post',
-    data,
-  })
-}
-
-// 获取笔记内容
-export function getNoteContent(params) {
-  return request({
-    url: '/restful/note/get_note_content',
-    method: 'get',
-    params,
-  })
-}
-
-// 保存笔记
-export function saveNote(data) {
-  return request({
-    url: '/restful/note/save_note',
-    method: 'post',
     data,
   })
 }
