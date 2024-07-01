@@ -69,20 +69,12 @@
         </li>
       </el-tooltip>
       <el-tooltip effect="dark" content="撤销" placement="top" :hide-after="0">
-        <li
-          class="tool"
-          @click="handleUndo"
-          :style="{ color: store.undoStack.length < 2 ? '#999' : '' }"
-        >
+        <li class="tool" @click="handleUndo" :style="{ color: undoStack.length < 2 ? '#999' : '' }">
           <svg-icon name="revoke"></svg-icon>
         </li>
       </el-tooltip>
       <el-tooltip effect="dark" content="重做" placement="top" :hide-after="0">
-        <li
-          class="tool"
-          @click="handleRedo"
-          :style="{ color: store.redoStack.length < 1 ? '#999' : '' }"
-        >
+        <li class="tool" @click="handleRedo" :style="{ color: redoStack.length < 1 ? '#999' : '' }">
           <svg-icon name="redo"></svg-icon>
         </li>
       </el-tooltip>
@@ -136,12 +128,15 @@ import { ElMessage } from 'element-plus'
 import FileMarkdown from './components/FileMarkdown.vue'
 import { uploadFile } from '@/api/upload'
 import { useNoteStore } from '@/stores/note'
+import useHistoryStack from './useHistoryStack'
 
 defineOptions({
   name: 'EditorComponent',
 })
 
 const store = useNoteStore()
+const { undoStack, redoStack, recordFirstState, recordState, resetStateStack, undo, redo } =
+  useHistoryStack()
 let abortController
 
 const props = defineProps({
@@ -161,13 +156,6 @@ const saveError = ref(false)
 
 const publishLoading = ref(false)
 const publishError = ref(false)
-
-function resetStatus() {
-  saveLoading.value = false
-  saveError.value = false
-  publishLoading.value = false
-  publishError.value = false
-}
 
 const noteId = ref()
 const noteLoading = ref(false)
@@ -193,14 +181,6 @@ watch(
     immediate: true,
   }
 )
-
-function initStateStack() {
-  store.resetStateStack()
-  store.recordFirstState({
-    note_title: note.value.note_title,
-    note_content: note.value.note_content,
-  })
-}
 
 const titleRef = ref()
 const sourceRef = ref()
@@ -250,13 +230,21 @@ function handleGetNoteContent() {
     })
 }
 
-const publishCancel = ref(false)
-const publishUpdate = computed(() => {
-  return note.value.status === 2
-})
-const published = computed(() => {
-  return note.value.status === 1
-})
+function resetStatus() {
+  saveLoading.value = false
+  saveError.value = false
+  publishLoading.value = false
+  publishError.value = false
+}
+
+function initStateStack() {
+  resetStateStack()
+  const { note_title, note_content } = note.value
+  recordFirstState({
+    note_title,
+    note_content,
+  })
+}
 
 let timeoutId
 function handleNoteChange() {
@@ -268,7 +256,7 @@ function handleNoteChange() {
   }, 1000)
 }
 
-function handleSaveNote(withMessage = false, recordState = true, data = null) {
+function handleSaveNote(withMessage = false, enableRecordState = true, data = null) {
   saveLoading.value = true
   saveError.value = false
   if (!data) data = Object.assign({}, note.value)
@@ -286,8 +274,8 @@ function handleSaveNote(withMessage = false, recordState = true, data = null) {
 
       saveLoading.value = false
 
-      if (recordState) {
-        store.recordState({
+      if (enableRecordState) {
+        recordState({
           note_title: data.note_title,
           note_content: data.note_content,
         })
@@ -306,12 +294,12 @@ function handleSaveNote(withMessage = false, recordState = true, data = null) {
 }
 
 function handleUndo() {
-  const state = store.undo()
+  const state = undo()
   state && applyState(state)
 }
 
 function handleRedo() {
-  const state = store.redo()
+  const state = redo()
   state && applyState(state)
 }
 
@@ -320,6 +308,27 @@ function applyState(state) {
   note.value.note_content = state.note_content
   handleSaveNote(false, false)
 }
+
+function handleKeyCtrl(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault()
+    handleSaveNote(true)
+  } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'z') {
+    e.preventDefault()
+    handleRedo()
+  } else if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+    e.preventDefault()
+    handleUndo()
+  }
+}
+
+const publishCancel = ref(false)
+const publishUpdate = computed(() => {
+  return note.value.status === 2
+})
+const published = computed(() => {
+  return note.value.status === 1
+})
 
 function hanldePublish(status) {
   if (publishLoading.value || saveLoading.value) return
@@ -422,17 +431,6 @@ function handleKeyTab(e) {
   nextTick(() => {
     sourceRef.value.setSelectionRange(start + tab.length, start + tab.length)
   })
-}
-
-function handleKeyCtrl(e) {
-  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-    e.preventDefault()
-    handleSaveNote(true)
-  }
-  if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-    e.preventDefault()
-    handleUndo()
-  }
 }
 
 function handlePreview() {
