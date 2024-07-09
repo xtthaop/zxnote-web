@@ -433,50 +433,50 @@ function handleKeyTab(e) {
 
   if (selectedText.split('\n').length === 1 && !e.shiftKey) {
     note.value.note_content = content.slice(0, start) + tab + content.slice(end)
-    handleSaveNote()
     nextTick(() => {
       sourceRef.value.setSelectionRange(start + tab.length, start + tab.length)
     })
-    return
+  } else {
+    const startLine = textBeforeCursor.split('\n').length - 1
+    const endLine = startLine + selectedText.split('\n').length
+
+    let firstCursorChangedNum = 0
+    let endCursorChangedNum = 0
+
+    const newText = content
+      .split('\n')
+      .map((line, index) => {
+        if (index >= startLine && index < endLine) {
+          const leadingSpaces = line.match(/^\s*/)[0]
+          const remainder = leadingSpaces.length % tab.length
+          const num = leadingSpaces.length === 0 && e.shiftKey ? 0 : tab.length - remainder
+
+          if (index === startLine) firstCursorChangedNum = num
+          endCursorChangedNum += num
+
+          if (e.shiftKey) {
+            return leadingSpaces.slice(0, -num) + line.substring(leadingSpaces.length)
+          } else {
+            return leadingSpaces + ' '.repeat(num) + line.substring(leadingSpaces.length)
+          }
+        } else {
+          return line
+        }
+      })
+      .join('\n')
+
+    note.value.note_content = newText
+
+    nextTick(() => {
+      if (e.shiftKey) {
+        firstCursorChangedNum = -firstCursorChangedNum
+        endCursorChangedNum = -endCursorChangedNum
+      }
+      sourceRef.value.setSelectionRange(start + firstCursorChangedNum, end + endCursorChangedNum)
+    })
   }
 
-  const startLine = textBeforeCursor.split('\n').length - 1
-  const endLine = startLine + selectedText.split('\n').length
-
-  let firstCursorChangedNum = 0
-  let endCursorChangedNum = 0
-
-  const newText = content
-    .split('\n')
-    .map((line, index) => {
-      if (index >= startLine && index < endLine) {
-        const leadingSpaces = line.match(/^\s*/)[0]
-        const remainder = leadingSpaces.length % tab.length
-        const num = leadingSpaces.length === 0 && e.shiftKey ? 0 : tab.length - remainder
-
-        if (index === startLine) firstCursorChangedNum = num
-        endCursorChangedNum += num
-
-        if (e.shiftKey) {
-          return leadingSpaces.slice(0, -num) + line.substring(leadingSpaces.length)
-        } else {
-          return leadingSpaces + ' '.repeat(num) + line.substring(leadingSpaces.length)
-        }
-      } else {
-        return line
-      }
-    })
-    .join('\n')
-
-  note.value.note_content = newText
   handleSaveNote()
-  nextTick(() => {
-    if (e.shiftKey) {
-      firstCursorChangedNum = -firstCursorChangedNum
-      endCursorChangedNum = -endCursorChangedNum
-    }
-    sourceRef.value.setSelectionRange(start + firstCursorChangedNum, end + endCursorChangedNum)
-  })
 }
 
 function handlePreview() {
