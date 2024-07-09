@@ -433,6 +433,7 @@ function handleKeyTab(e) {
 
   if (selectedText.split('\n').length === 1 && !e.shiftKey) {
     note.value.note_content = content.slice(0, start) + tab + content.slice(end)
+    handleSaveNote()
     nextTick(() => {
       sourceRef.value.setSelectionRange(start + tab.length, start + tab.length)
     })
@@ -469,7 +470,6 @@ function handleKeyTab(e) {
 
   note.value.note_content = newText
   handleSaveNote()
-
   nextTick(() => {
     if (e.shiftKey) {
       firstCursorChangedNum = -firstCursorChangedNum
