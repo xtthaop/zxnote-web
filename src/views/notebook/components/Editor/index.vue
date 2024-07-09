@@ -379,9 +379,10 @@ function handleImgFileChange(e) {
   const filePromiseArr = []
 
   for (let i = 0; i < e.target.files.length; i++) {
-    const tmpStr = `[图片正在上传...(${e.target.files[i].name}-${+new Date()})]\n`
+    const timestamp = +new Date()
+    const tmpStr = `[图片正在上传...(${e.target.files[i].name}-${timestamp})]\n`
     uploadingStr += tmpStr
-    handleUploadImg(e.target.files[i], tmpStr, filePromiseArr)
+    filePromiseArr.push(handleUploadImg(e.target.files[i], tmpStr, timestamp))
   }
 
   const content = note.value.note_content
@@ -393,15 +394,16 @@ function handleImgFileChange(e) {
   })
 }
 
-function handleUploadImg(file, uploadingStr, filePromiseArr) {
+function handleUploadImg(file, uploadingStr, timestamp) {
   const fileNameArr = file.name.split('.')
-  const newFileName = +new Date() + '-' + md5(file.name) + '.' + fileNameArr[fileNameArr.length - 1]
+  const suffix = fileNameArr[fileNameArr.length - 1]
+  const newFileName = timestamp + '-' + md5(file.name) + '.' + suffix
 
   const data = new FormData()
   data.append('key', `images/${newFileName}`)
   data.append('file', file)
 
-  const filePromise = uploadFile(data)
+  return uploadFile(data)
     .then((res) => {
       const imgUrl = res.data.url
       const content = note.value.note_content
@@ -416,8 +418,6 @@ function handleUploadImg(file, uploadingStr, filePromiseArr) {
       const end = start + uploadingStr.length
       note.value.note_content = content.slice(0, start) + '' + content.slice(end)
     })
-
-  filePromiseArr.push(filePromise)
 }
 
 function handleKeyTab(e) {
