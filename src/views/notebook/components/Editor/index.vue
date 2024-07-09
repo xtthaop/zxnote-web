@@ -110,7 +110,7 @@
       placeholder="请输入内容"
       spellcheck="false"
       v-model="note.note_content"
-      @keydown.tab.exact="handleKeyTab"
+      @keydown.tab="handleKeyTab"
       @keydown="handleKeyCtrl"
       @input="handleNoteChange"
     ></textarea>
@@ -422,14 +422,60 @@ function handleUploadImg(file, uploadingStr, filePromiseArr) {
 
 function handleKeyTab(e) {
   e.preventDefault()
+
+  const tab = '  '
   const start = sourceRef.value.selectionStart
   const end = sourceRef.value.selectionEnd
   const content = note.value.note_content
-  const tab = '  '
 
-  note.value.note_content = content.slice(0, start) + tab + content.slice(end)
+  const textBeforeCursor = content.substring(0, start)
+  const selectedText = content.substring(start, end)
+
+  if (selectedText.split('\n').length === 1 && !e.shiftKey) {
+    note.value.note_content = content.slice(0, start) + tab + content.slice(end)
+    nextTick(() => {
+      sourceRef.value.setSelectionRange(start + tab.length, start + tab.length)
+    })
+    return
+  }
+
+  const startLine = textBeforeCursor.split('\n').length - 1
+  const endLine = startLine + selectedText.split('\n').length
+
+  let firstCursorChangedNum = 0
+  let endCursorChangedNum = 0
+
+  const newText = content
+    .split('\n')
+    .map((line, index) => {
+      if (index >= startLine && index < endLine) {
+        const leadingSpaces = line.match(/^\s*/)[0]
+        const remainder = leadingSpaces.length % tab.length
+        const num = leadingSpaces.length === 0 && e.shiftKey ? 0 : tab.length - remainder
+
+        if (index === startLine) firstCursorChangedNum = num
+        endCursorChangedNum += num
+
+        if (e.shiftKey) {
+          return leadingSpaces.slice(0, -num) + line.substring(leadingSpaces.length)
+        } else {
+          return leadingSpaces + ' '.repeat(num) + line.substring(leadingSpaces.length)
+        }
+      } else {
+        return line
+      }
+    })
+    .join('\n')
+
+  note.value.note_content = newText
+  handleSaveNote()
+
   nextTick(() => {
-    sourceRef.value.setSelectionRange(start + tab.length, start + tab.length)
+    if (e.shiftKey) {
+      firstCursorChangedNum = -firstCursorChangedNum
+      endCursorChangedNum = -endCursorChangedNum
+    }
+    sourceRef.value.setSelectionRange(start + firstCursorChangedNum, end + endCursorChangedNum)
   })
 }
 
