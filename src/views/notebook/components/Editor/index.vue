@@ -263,7 +263,7 @@ function handleSaveNote(withMessage = false, enableRecordState = true, data = nu
   saveNote(data)
     .then(() => {
       if (data.status === 1) data.status = 2
-      if (data.status === 1 && data.note_id === note.value.note_id) note.value.status = 2
+      if (data.status === 2 && data.note_id === note.value.note_id) note.value.status = 2
       if (props.isPreviewMode) {
         emits('sync-title', data.note_title)
         emits('sync-content', data.note_content)
@@ -320,51 +320,6 @@ function handleKeyCtrl(e) {
     e.preventDefault()
     handleUndo()
   }
-}
-
-const publishCancel = ref(false)
-const publishUpdate = computed(() => {
-  return note.value.status === 2
-})
-const published = computed(() => {
-  return note.value.status === 1
-})
-
-function hanldePublish(status) {
-  if (publishLoading.value || saveLoading.value) return
-
-  const data = {
-    note_id: note.value.note_id,
-    status,
-  }
-
-  publishLoading.value = true
-  publishError.value = false
-
-  const delay = 200
-  publishNote(data)
-    .then(() => {
-      setTimeout(() => {
-        note.value.status = status
-        publishLoading.value = false
-      }, delay)
-
-      if (!props.isPreviewMode) {
-        emits('sync-status', status)
-      }
-
-      if (status) {
-        ElMessage.success('发布成功')
-      } else {
-        ElMessage.warning('已取消发布')
-      }
-    })
-    .catch(() => {
-      setTimeout(() => {
-        publishError.value = true
-        publishLoading.value = false
-      }, delay)
-    })
 }
 
 const imgFileInputRef = ref()
@@ -476,7 +431,52 @@ function handleKeyTab(e) {
     })
   }
 
-  handleSaveNote()
+  handleNoteChange()
+}
+
+const publishCancel = ref(false)
+const publishUpdate = computed(() => {
+  return note.value.status === 2
+})
+const published = computed(() => {
+  return note.value.status === 1
+})
+
+function hanldePublish(status) {
+  if (publishLoading.value || saveLoading.value) return
+
+  const data = {
+    note_id: note.value.note_id,
+    status,
+  }
+
+  publishLoading.value = true
+  publishError.value = false
+
+  const delay = 200
+  publishNote(data)
+    .then(() => {
+      setTimeout(() => {
+        note.value.status = status
+        publishLoading.value = false
+      }, delay)
+
+      if (!props.isPreviewMode) {
+        emits('sync-status', { noteId: data.note_id, status: data.status })
+      }
+
+      if (status) {
+        ElMessage.success('发布成功')
+      } else {
+        ElMessage.warning('已取消发布')
+      }
+    })
+    .catch(() => {
+      setTimeout(() => {
+        publishError.value = true
+        publishLoading.value = false
+      }, delay)
+    })
 }
 
 function handlePreview() {
