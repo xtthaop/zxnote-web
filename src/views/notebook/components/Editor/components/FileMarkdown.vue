@@ -7,7 +7,7 @@
     :show-close="true"
     width="500px"
   >
-    <el-scrollbar style="height: 600px">
+    <el-scrollbar style="height: 390px">
       <pre v-html="content"></pre>
     </el-scrollbar>
   </el-dialog>

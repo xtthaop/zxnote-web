@@ -6,6 +6,7 @@ export default function useHistoryStack() {
 
   function recordFirstState(state) {
     undoStack.value.length = 0
+    redoStack.value.length = 0
     undoStack.value.push(state)
   }
 
@@ -13,11 +14,6 @@ export default function useHistoryStack() {
     if (JSON.stringify(state) === JSON.stringify(undoStack.value[undoStack.value.length - 1]))
       return
     undoStack.value.push(state)
-  }
-
-  function resetStateStack() {
-    undoStack.value.length = 0
-    redoStack.value.length = 0
   }
 
   function undo() {
@@ -41,7 +37,6 @@ export default function useHistoryStack() {
     redoStack,
     recordFirstState,
     recordState,
-    resetStateStack,
     undo,
     redo,
   }

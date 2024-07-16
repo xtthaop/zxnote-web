@@ -135,8 +135,8 @@ defineOptions({
 })
 
 const store = useNoteStore()
-const { undoStack, redoStack, recordFirstState, recordState, resetStateStack, undo, redo } =
-  useHistoryStack()
+const { undoStack, redoStack, recordFirstState, recordState, undo, redo } = useHistoryStack()
+const fileMarkdownRef = ref()
 let abortController
 
 const props = defineProps({
@@ -238,7 +238,6 @@ function resetStatus() {
 }
 
 function initStateStack() {
-  resetStateStack()
   const { note_title, note_content } = note.value
   recordFirstState({
     note_title,
@@ -491,8 +490,6 @@ function handlePreview() {
 function handleViewHistory() {
   router.push(route.fullPath + '/history/0')
 }
-
-const fileMarkdownRef = ref()
 
 defineExpose({
   source: sourceRef,
