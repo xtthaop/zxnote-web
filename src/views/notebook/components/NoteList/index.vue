@@ -88,12 +88,6 @@ watch(
       handleGetCategoryNote().then(() => {
         if (activeId.value) {
           activeIndex = noteList.value.findIndex((item) => item.note_id === activeId.value)
-          if (store.noteContentMap.has(activeId.value) && activeIndex > -1) {
-            noteList.value[activeIndex].status = store.noteContentMap.get(activeId.value).status
-            noteList.value[activeIndex].note_title = store.noteContentMap.get(
-              activeId.value
-            ).note_title
-          }
         } else {
           toFirstNote()
         }
@@ -250,25 +244,6 @@ function handlePublishStatus(status) {
       }
   }
 }
-
-function changeNoteTitle(id, title) {
-  const index = noteList.value.findIndex((item) => item.note_id === id)
-  if (index > -1) {
-    noteList.value[index].note_title = title
-  }
-}
-
-function changeNoteStatus(id, status) {
-  const index = noteList.value.findIndex((item) => item.note_id === id)
-  if (index > -1) {
-    noteList.value[index].status = status
-  }
-}
-
-defineExpose({
-  changeNoteTitle,
-  changeNoteStatus,
-})
 </script>
 
 <style lang="scss" scoped>

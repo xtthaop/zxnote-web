@@ -2,7 +2,7 @@
   <div class="editor-wrapper" v-if="noteId" v-loading="noteLoading">
     <div class="title-wrapper">
       <div className="save-status">
-        {{ saveLoading ? (saveError ? '保存出错' : '保存中...') : '已保存' }}
+        {{ note.saveLoading ? (note.saveError ? '保存出错' : '保存中...') : '已保存' }}
       </div>
       <input
         ref="titleRef"
@@ -21,13 +21,13 @@
         @mouseleave="publishCancel = false"
         @click="hanldePublish(published ? 0 : 1)"
       >
-        <template v-if="!saveLoading">
+        <template v-if="!note.saveLoading">
           <span v-if="published">
-            <span v-if="publishLoading">
+            <span v-if="note.publishLoading">
               <span class="publish-text">取消中...</span>
             </span>
             <span v-else>
-              <template v-if="publishError">
+              <template v-if="note.publishError">
                 <span class="publish-text" style="color: red">点击重试</span>
               </template>
               <template v-else>
@@ -37,11 +37,11 @@
             </span>
           </span>
           <span v-else>
-            <span v-if="publishLoading">
+            <span v-if="note.publishLoading">
               <span class="publish-text">发布中...</span>
             </span>
             <span v-else>
-              <template v-if="publishError">
+              <template v-if="note.publishError">
                 <span class="publish-text" style="color: red">点击重试</span>
               </template>
               <template v-else>
@@ -52,7 +52,7 @@
           </span>
         </template>
         <template v-else>
-          <span class="publish-text" v-if="!saveError">保存中...</span>
+          <span class="publish-text" v-if="!note.saveError">保存中...</span>
           <span class="publish-text" v-else>保存出错</span>
         </template>
       </li>
@@ -151,30 +151,46 @@ const emits = defineEmits(['sync-title', 'sync-content', 'sync-status'])
 const route = useRoute()
 const router = useRouter()
 
-const saveLoading = ref(false)
-const saveError = ref(false)
-
-const publishLoading = ref(false)
-const publishError = ref(false)
-
+let noteIndex = undefined
+const categoryId = computed(() => Number(route.params.categoryId))
 const noteId = ref()
 const noteLoading = ref(false)
 const note = ref({})
 
+function syncStoreNoteListTitle(title, noteId) {
+  const noteList = store.categoryNoteMap.get(categoryId.value)
+  if (!noteIndex) noteIndex = noteList.findIndex((item) => item.note_id === noteId)
+  if (noteIndex > -1) noteList[noteIndex].note_title = title
+}
+
+function syncStoreNoteListStatus(status, noteId) {
+  const noteList = store.categoryNoteMap.get(categoryId.value)
+  if (!noteIndex) noteIndex = noteList.findIndex((item) => item.note_id === noteId)
+  if (noteIndex > -1) noteList[noteIndex].status = status
+}
+
 watch(
   () => route.params.noteId,
   (val) => {
+    noteIndex = undefined
     noteId.value = Number(val) || undefined
     if (noteId.value) {
-      handleGetNoteContent().then(() => {
-        resetStatus()
-        initStateStack()
+      handleGetNoteContent()
+        .then(() => {
+          initStateStack()
 
-        if (props.isPreviewMode) {
-          emits('sync-title', note.value.note_title)
-          emits('sync-content', note.value.note_content)
-        }
-      })
+          if (props.isPreviewMode) {
+            emits('sync-title', note.value.note_title)
+            emits('sync-content', note.value.note_content)
+          }
+        })
+        .catch(() => {
+          // 预览时如果后端报错比如记录不存在则重置笔记内容达到隐藏笔记的目的
+          if (props.isPreviewMode) {
+            emits('sync-title', undefined)
+            emits('sync-content', undefined)
+          }
+        })
     }
   },
   {
@@ -203,9 +219,6 @@ function handleGetNoteContent() {
   return getNoteContent({ note_id: noteId.value }, signal)
     .then((res) => {
       note.value = res.data
-      if (!note.value.note_content) {
-        note.value.note_content = ''
-      }
       store.noteContentMap.set(noteId.value, note.value)
       noteLoading.value = false
 
@@ -224,17 +237,13 @@ function handleGetNoteContent() {
 
       noteLoading.value = false
 
-      // 如果后端报错比如记录不存在则重置路由地址达到隐藏笔记内容的目的
-      router.replace(`/category/${route.params.categoryId}`)
+      // 非预览时如果后端报错比如记录不存在则重置路由地址达到隐藏笔记内容的目的
+      if (!props.isPreviewMode) {
+        router.replace(`/category/${route.params.categoryId}`)
+      }
+
       return Promise.reject()
     })
-}
-
-function resetStatus() {
-  saveLoading.value = false
-  saveError.value = false
-  publishLoading.value = false
-  publishError.value = false
 }
 
 function initStateStack() {
@@ -248,7 +257,8 @@ function initStateStack() {
 let timeoutId
 function handleNoteChange() {
   clearTimeout(timeoutId)
-  const data = Object.assign({}, note.value)
+  const { note_id, note_title, note_content, status } = note.value
+  const data = { note_id, note_title, note_content, status }
 
   timeoutId = setTimeout(() => {
     handleSaveNote(false, true, data)
@@ -256,22 +266,31 @@ function handleNoteChange() {
 }
 
 function handleSaveNote(withMessage = false, enableRecordState = true, data = null) {
-  saveLoading.value = true
-  saveError.value = false
-  if (!data) data = Object.assign({}, note.value)
+  if (!data) {
+    const { note_id, note_title, note_content, status } = note.value
+    data = { note_id, note_title, note_content, status }
+  }
+
+  const storeNote = store.noteContentMap.get(data.note_id)
+  storeNote.saveLoading = true
+  storeNote.saveError = false
+
   saveNote(data)
     .then(() => {
-      if (data.status === 1) data.status = 2
-      if (data.status === 2 && data.note_id === note.value.note_id) note.value.status = 2
+      if (data.note_id === noteId.value && note.value.status === 1) note.value.status = 2
+
+      syncStoreNoteListTitle(data.note_title, data.note_id)
+      if (data.status === 1) {
+        storeNote.status = 2
+        syncStoreNoteListStatus(2, data.note_id)
+      }
+
       if (props.isPreviewMode) {
         emits('sync-title', data.note_title)
         emits('sync-content', data.note_content)
-      } else {
-        emits('sync-status', { noteId: data.note_id, status: data.status })
-        emits('sync-title', { noteId: data.note_id, noteTitle: data.note_title })
       }
 
-      saveLoading.value = false
+      storeNote.saveLoading = false
 
       if (enableRecordState) {
         recordState({
@@ -285,7 +304,7 @@ function handleSaveNote(withMessage = false, enableRecordState = true, data = nu
       }
     })
     .catch(() => {
-      saveError.value = true
+      storeNote.saveError = true
       if (withMessage) {
         ElMessage.error('保存失败')
       }
@@ -442,27 +461,27 @@ const published = computed(() => {
 })
 
 function hanldePublish(status) {
-  if (publishLoading.value || saveLoading.value) return
+  if (note.value.publishLoading || note.value.saveLoading) return
 
   const data = {
-    note_id: note.value.note_id,
+    note_id: noteId.value,
     status,
   }
 
-  publishLoading.value = true
-  publishError.value = false
+  const storeNote = store.noteContentMap.get(data.note_id)
+  storeNote.publishLoading = true
+  storeNote.publishError = false
 
   const delay = 200
   publishNote(data)
     .then(() => {
       setTimeout(() => {
-        note.value.status = status
-        publishLoading.value = false
+        if (data.note_id === note.value.note_id) note.value.status = status
+        storeNote.status = status
+        storeNote.publishLoading = false
       }, delay)
 
-      if (!props.isPreviewMode) {
-        emits('sync-status', { noteId: data.note_id, status: data.status })
-      }
+      syncStoreNoteListStatus(status, data.note_id)
 
       if (status) {
         ElMessage.success('发布成功')
@@ -472,8 +491,8 @@ function hanldePublish(status) {
     })
     .catch(() => {
       setTimeout(() => {
-        publishError.value = true
-        publishLoading.value = false
+        storeNote.publishError = true
+        storeNote.publishLoading = false
       }, delay)
     })
 }

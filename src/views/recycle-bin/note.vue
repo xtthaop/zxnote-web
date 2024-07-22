@@ -46,7 +46,7 @@ import {
   completelyDeleteNote,
 } from '@/api/notebook/note'
 import { useRoute, useRouter } from 'vue-router'
-import useMarkdown from '../preview/markdown'
+import useMarkdown from '../preview/useMarkdown'
 import useImgLazyLoad from '../preview/img-lazy-load'
 import { useNoteStore } from '@/stores/note'
 import { ElMessageBox, ElLoading } from 'element-plus'

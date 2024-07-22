@@ -48,7 +48,7 @@
 <script setup>
 import { nextTick, ref, watch, onMounted } from 'vue'
 import { getNoteHistoryList, getNoteHistoryVersion, recoveryNote } from '@/api/notebook/note'
-import useMarkdown from '../preview/markdown'
+import useMarkdown from '../preview/useMarkdown'
 import useImgLazyLoad from '../preview/img-lazy-load'
 import { useRoute, useRouter } from 'vue-router'
 import { useNoteStore } from '@/stores/note'

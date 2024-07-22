@@ -1,5 +1,5 @@
 <template>
-  <div class="preview-wrapper">
+  <div class="preview-wrapper" v-show="noteTitle !== undefined">
     <Editor
       ref="editorRef"
       :is-preview-mode="true"
@@ -7,7 +7,7 @@
       @sync-content="handleSyncContent"
       style="width: 50%"
     ></Editor>
-    <div class="previewer" ref="previewerRef" v-show="previewContent !== undefined">
+    <div class="previewer" ref="previewerRef">
       <div class="title-wrapper">{{ noteTitle }}</div>
       <div class="sync-scroll-toggle">
         <span>同步滚动：</span>
@@ -26,7 +26,7 @@
 <script setup>
 import { nextTick, ref, onMounted } from 'vue'
 import { Editor } from '../notebook/components'
-import useMarkdown from './markdown'
+import useMarkdown from './useMarkdown'
 import useImgLazyLoad from './img-lazy-load'
 import velocity from 'velocity-animate'
 
@@ -48,13 +48,15 @@ function handleSyncContent(content) {
   if (previewContent.value === content) return
 
   if (import.meta.env.DEV) {
-    // console.time('markdown-render')
+    // eslint-disable-next-line no-console
+    console.time('markdown-render')
   }
 
-  previewContent.value = md.render(content)
+  previewContent.value = md.render(content || '')
 
   if (import.meta.env.DEV) {
-    // console.timeEnd('markdown-render')
+    // eslint-disable-next-line no-console
+    console.timeEnd('markdown-render')
   }
 
   scrollMap = null
