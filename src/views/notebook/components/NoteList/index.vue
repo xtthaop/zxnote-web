@@ -18,9 +18,9 @@
               <div class="other-info">
                 <span
                   class="publish-status"
-                  :style="{ color: handlePublishStatus(item.status).color }"
+                  :style="{ color: publicStatusColor[item.status] || '#ccc' }"
                 >
-                  {{ handlePublishStatus(item.status).content }}
+                  {{ publicStatusText[item.status] || '未知' }}
                 </span>
                 <span class="create-time">
                   {{ dayjs(item.create_time).format('YYYY-MM-DD HH:mm:ss') }}
@@ -220,29 +220,15 @@ function handleMoveNoteRefresh(val) {
   }
 }
 
-function handlePublishStatus(status) {
-  switch (status) {
-    case 0:
-      return {
-        content: '未发布',
-        color: '#696969',
-      }
-    case 1:
-      return {
-        content: '已发布',
-        color: 'var(--base-primary-color)',
-      }
-    case 2:
-      return {
-        content: '未发布更新',
-        color: '#E6A23C',
-      }
-    default:
-      return {
-        content: '未发布',
-        color: '#696969',
-      }
-  }
+const publicStatusText = {
+  0: '未发布',
+  1: '已发布',
+  2: '未发布更新',
+}
+const publicStatusColor = {
+  0: '#696969',
+  1: 'var(--base-primary-color)',
+  2: '#E6A23C',
 }
 </script>
 

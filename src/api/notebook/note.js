@@ -38,9 +38,9 @@ export function moveNote(data) {
 }
 
 // 获取笔记内容
-export function getNoteContent(params, signal) {
+export function getNote(params, signal) {
   return request({
-    url: '/restful/note/get_note_content',
+    url: '/restful/note/get_note',
     method: 'get',
     params,
     signal,

@@ -123,7 +123,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import md5 from 'js-md5'
-import { getNoteContent, publishNote, saveNote } from '@/api/notebook/note'
+import { getNote, publishNote, saveNote } from '@/api/notebook/note'
 import { ElMessage } from 'element-plus'
 import FileMarkdown from './components/FileMarkdown.vue'
 import { uploadFile } from '@/api/upload'
@@ -175,7 +175,7 @@ watch(
     noteIndex = undefined
     noteId.value = Number(val) || undefined
     if (noteId.value) {
-      handleGetNoteContent()
+      handleGetNote()
         .then(() => {
           initStateStack()
 
@@ -184,11 +184,15 @@ watch(
             emits('sync-content', note.value.note_content)
           }
         })
-        .catch(() => {
-          // 预览时如果后端报错比如记录不存在则重置笔记内容达到隐藏笔记的目的
+        .catch((err) => {
+          if (err === 'canceled') return
           if (props.isPreviewMode) {
+            // 预览时如果后端报错比如记录不存在则重置笔记内容达到隐藏笔记的目的
             emits('sync-title', undefined)
-            emits('sync-content', undefined)
+            emits('sync-content', '')
+          } else {
+            // 非预览时如果后端报错比如记录不存在则重置路由地址达到隐藏笔记内容的目的
+            router.replace(`/category/${route.params.categoryId}`)
           }
         })
     }
@@ -202,7 +206,7 @@ const titleRef = ref()
 const sourceRef = ref()
 const titleFocus = defineModel('titleFocus')
 
-function handleGetNoteContent() {
+function handleGetNote() {
   if (store.noteContentMap.has(noteId.value)) {
     note.value = store.noteContentMap.get(noteId.value)
     return Promise.resolve()
@@ -216,11 +220,18 @@ function handleGetNoteContent() {
   const signal = abortController.signal
 
   noteLoading.value = true
-  return getNoteContent({ note_id: noteId.value }, signal)
+  return getNote({ note_id: noteId.value }, signal)
     .then((res) => {
-      note.value = res.data
-      store.noteContentMap.set(noteId.value, note.value)
       noteLoading.value = false
+      note.value = res.data
+
+      if (note.value.category_id !== categoryId.value) {
+        ElMessage.error('记录不存在')
+        return Promise.reject()
+      }
+
+      if (!note.value.note_content) note.value.note_content = ''
+      store.noteContentMap.set(noteId.value, note.value)
 
       nextTick(() => {
         if (titleFocus.value) {
@@ -230,18 +241,9 @@ function handleGetNoteContent() {
       })
     })
     .catch((err) => {
-      // 主动取消请求则保持内容的加载中状态
-      if (err.code === 'ERR_CANCELED') {
-        return Promise.reject()
-      }
-
+      // 主动取消请求保持内容的加载中状态
+      if (err.code === 'ERR_CANCELED') return Promise.reject('canceled')
       noteLoading.value = false
-
-      // 非预览时如果后端报错比如记录不存在则重置路由地址达到隐藏笔记内容的目的
-      if (!props.isPreviewMode) {
-        router.replace(`/category/${route.params.categoryId}`)
-      }
-
       return Promise.reject()
     })
 }
