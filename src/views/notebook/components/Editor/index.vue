@@ -510,7 +510,7 @@ function handlePreview() {
 }
 
 function handleViewHistory() {
-  router.push(route.fullPath + '/history/0')
+  router.push(`/category/${categoryId.value}/note/${noteId.value}/history/0`)
 }
 
 defineExpose({

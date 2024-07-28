@@ -46,10 +46,10 @@
 </template>
 
 <script setup>
-import { nextTick, ref, watch, onMounted } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import { getNoteHistoryList, getNoteHistoryVersion, recoveryNote } from '@/api/notebook/note'
 import useMarkdown from '../preview/useMarkdown'
-import useImgLazyLoad from '../preview/img-lazy-load'
+import useImgLazyLoad from '../preview/useImgLazyLoad'
 import { useRoute, useRouter } from 'vue-router'
 import { useNoteStore } from '@/stores/note'
 import { ElLoading } from 'element-plus'
@@ -99,6 +99,9 @@ function handleItemClick(id) {
   activeId.value = id
 }
 
+const previewerRef = ref()
+const { loadImgFn: handleImgLazyLoad } = useImgLazyLoad(previewerRef)
+
 watch(activeId, (val) => {
   if (!val) return
   handleGetCurrentVersion(val).then(() => {
@@ -109,15 +112,6 @@ watch(activeId, (val) => {
     const { noteId, categoryId } = route.params
     router.replace(`/category/${categoryId}/note/${noteId}/history/${val}`)
   })
-})
-
-const previewerRef = ref()
-let handleImgLazyLoad = null
-
-onMounted(() => {
-  const { loadImgFn } = useImgLazyLoad(previewerRef.value)
-  handleImgLazyLoad = loadImgFn
-  previewerRef.value.addEventListener('scroll', handleImgLazyLoad)
 })
 
 function handleGetCurrentVersion(id) {

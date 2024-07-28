@@ -27,17 +27,23 @@
 import { nextTick, ref, onMounted } from 'vue'
 import { Editor } from '../notebook/components'
 import useMarkdown from './useMarkdown'
-import useImgLazyLoad from './img-lazy-load'
+import useImgLazyLoad from './useImgLazyLoad'
 import velocity from 'velocity-animate'
 
 defineOptions({
   name: 'PreviewPage',
 })
 
-const { md } = useMarkdown()
-
 const noteTitle = ref()
 const previewContent = ref()
+
+const editorRef = ref()
+const previewerRef = ref()
+
+const { md } = useMarkdown()
+const { loadImgFn: handleImgLazyLoad } = useImgLazyLoad(previewerRef)
+
+const syncScrollStatus = ref(true)
 let scrollMap = null
 
 function handleSyncTitle(title) {
@@ -66,16 +72,8 @@ function handleSyncContent(content) {
   })
 }
 
-const editorRef = ref()
-const previewerRef = ref()
-let handleImgLazyLoad = null
-const syncScrollStatus = ref(true)
-
 onMounted(() => {
-  const { loadImgFn } = useImgLazyLoad(previewerRef.value)
-  handleImgLazyLoad = loadImgFn
-  previewerRef.value.addEventListener('scroll', handleImgLazyLoad)
-
+  handleImgLazyLoad()
   if (editorRef.value.source) {
     if (syncScrollStatus.value) {
       syncScrollInit()

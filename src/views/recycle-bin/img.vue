@@ -58,7 +58,7 @@
 import { onMounted, ref } from 'vue'
 import { getBackupImgs, restoreImg, completelyDeleteImg } from '@/api/notebook/img'
 import { Select, DocumentCopy } from '@element-plus/icons-vue'
-import useImgLazyLoad from '../preview/img-lazy-load'
+import useImgLazyLoad from '../preview/useImgLazyLoad'
 import { ElMessageBox } from 'element-plus'
 
 defineOptions({
@@ -68,11 +68,10 @@ defineOptions({
 const imgList = ref([])
 const listLoading = ref(false)
 const imgRef = ref()
+const { loadImgFn: handleImgLazyLoad } = useImgLazyLoad(imgRef)
 
 onMounted(() => {
-  const { loadImgFn } = useImgLazyLoad(imgRef.value)
-  imgRef.value.addEventListener('scroll', loadImgFn)
-  loadImgFn()
+  handleImgLazyLoad()
 })
 
 handleGetBackupImgs()

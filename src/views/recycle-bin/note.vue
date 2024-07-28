@@ -38,7 +38,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, onMounted } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import {
   getDeletedNoteList,
   getDeletedNoteContent,
@@ -47,7 +47,7 @@ import {
 } from '@/api/notebook/note'
 import { useRoute, useRouter } from 'vue-router'
 import useMarkdown from '../preview/useMarkdown'
-import useImgLazyLoad from '../preview/img-lazy-load'
+import useImgLazyLoad from '../preview/useImgLazyLoad'
 import { useNoteStore } from '@/stores/note'
 import { ElMessageBox, ElLoading } from 'element-plus'
 
@@ -100,6 +100,9 @@ function toFirstNote() {
   activeIndex = activeId.value ? 0 : -1
 }
 
+const previewerRef = ref()
+const { loadImgFn: handleImgLazyLoad } = useImgLazyLoad(previewerRef)
+
 watch(activeId, (val) => {
   if (val) {
     handleGetDeletedNote(val).then(() => {
@@ -112,15 +115,6 @@ watch(activeId, (val) => {
   } else {
     reset()
   }
-})
-
-const previewerRef = ref()
-let handleImgLazyLoad = null
-
-onMounted(() => {
-  const { loadImgFn } = useImgLazyLoad(previewerRef.value)
-  handleImgLazyLoad = loadImgFn
-  previewerRef.value.addEventListener('scroll', handleImgLazyLoad)
 })
 
 function handleGetDeletedNote(id) {
