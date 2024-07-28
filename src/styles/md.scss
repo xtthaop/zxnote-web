@@ -121,6 +121,7 @@
 
     td,
     th {
+      min-width: 100px;
       padding: 8px;
       border: 1px solid #d9d9d9;
       line-height: 20px;
@@ -165,7 +166,8 @@
   }
 
   .image-container {
-    margin-bottom: 20px;
+    width: 100%;
+    margin-bottom: 15px;
 
     img {
       display: block;

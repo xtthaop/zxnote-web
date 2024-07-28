@@ -26,6 +26,9 @@ export default function useMarkdown() {
 
   handleLinkRenderer(md)
   handleParagraphOpen(md)
+  handleParagraphClose(md)
+  handleText(md)
+  handleSoftbreak(md)
   handleHeadingOpen(md)
   handleImgRenderer(md)
 
@@ -39,7 +42,7 @@ function handleLinkRenderer(md) {
   const defaultRender =
     md.renderer.rules.link_open ||
     function (tokens, idx, options, env, self) {
-      return self.renderToken(tokens, idx, options)
+      return self.renderToken(tokens, idx, options, env, self)
     }
 
   md.renderer.rules.link_open = function (tokens, idx, options, env, self) {
@@ -59,7 +62,7 @@ function handleParagraphOpen(md) {
   const defaultRender =
     md.renderer.rules.paragraph_open ||
     function (tokens, idx, options, env, self) {
-      return self.renderToken(tokens, idx, options)
+      return self.renderToken(tokens, idx, options, env, self)
     }
 
   md.renderer.rules.paragraph_open = function (tokens, idx, options, env, self) {
@@ -67,12 +70,71 @@ function handleParagraphOpen(md) {
       tokens[idx + 1].type === 'inline' &&
       tokens[idx + 1].children.some((child) => child.type === 'image')
     ) {
-      tokens[idx].attrJoin('class', 'image-container')
+      const children = tokens[idx + 1].children
+      children.forEach((child) => {
+        if (child.type === 'text') {
+          child.renderAsParagraph = true
+        }
+        if (child.type === 'softbreak') {
+          child.ignore = true
+        }
+      })
+      return ''
+    } else {
+      injectLineNumbers(tokens, idx)
+      return defaultRender(tokens, idx, options, env, self)
+    }
+  }
+}
+
+function handleParagraphClose(md) {
+  const defaultRender =
+    md.renderer.rules.paragraph_close ||
+    function (tokens, idx, options, env, self) {
+      return self.renderToken(tokens, idx, options, env, self)
     }
 
-    injectLineNumbers(tokens, idx)
+  md.renderer.rules.paragraph_close = function (tokens, idx, options, env, self) {
+    if (
+      tokens[idx - 1].type === 'inline' &&
+      tokens[idx - 1].children.some((child) => child.type === 'image')
+    ) {
+      return ''
+    } else {
+      return defaultRender(tokens, idx, options, env, self)
+    }
+  }
+}
 
-    return defaultRender(tokens, idx, options, env, self)
+function handleText(md) {
+  const defaultRender =
+    md.renderer.rules.text ||
+    function (tokens, idx, options, env, self) {
+      return self.renderToken(tokens, idx, options, env, self)
+    }
+
+  md.renderer.rules.text = function (tokens, idx, options, env, self) {
+    if (tokens[idx].renderAsParagraph) {
+      return `<p>${md.utils.escapeHtml(tokens[idx].content)}</p>`
+    } else {
+      return defaultRender(tokens, idx, options, env, self)
+    }
+  }
+}
+
+function handleSoftbreak(md) {
+  const defaultRender =
+    md.renderer.rules.softbreak ||
+    function (tokens, idx, options, env, self) {
+      return self.renderToken(tokens, idx, options, env, self)
+    }
+
+  md.renderer.rules.softbreak = function (tokens, idx, options, env, self) {
+    if (tokens[idx].ignore) {
+      return ''
+    } else {
+      return defaultRender(tokens, idx, options, env, self)
+    }
   }
 }
 
@@ -108,12 +170,12 @@ function handleImgRenderer(md) {
       imgRealSrc.replace(new RegExp(`${imgSuffix}$`), '') + '_low_ratio' + imgSuffix
     const imgWidth = (imgParams && imgParams[1]) || '100%'
 
-    return `<img
+    return `<div class="image-container"><img
               data-src="${imgRealSrc}"
               src="${imgPlaceholderSrc}"
               width="${imgWidth}"
               alt="${imageAlt}"
               title="${imageTitle}"
-            />`
+            /></div>`
   }
 }

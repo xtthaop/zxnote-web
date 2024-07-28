@@ -105,13 +105,14 @@ function toFirstNote() {
 }
 
 function handleGetCategoryNote() {
-  if (store.categoryNoteMap.has(categoryId.value)) {
-    noteList.value = store.categoryNoteMap.get(categoryId.value)
-    return Promise.resolve()
-  }
-
   if (abortController) {
     abortController.abort()
+  }
+
+  if (store.categoryNoteMap.has(categoryId.value)) {
+    listLoading.value = false
+    noteList.value = store.categoryNoteMap.get(categoryId.value)
+    return Promise.resolve()
   }
 
   abortController = new AbortController()
@@ -120,9 +121,9 @@ function handleGetCategoryNote() {
   listLoading.value = true
   return getCategoryNote({ category_id: categoryId.value }, signal)
     .then((res) => {
+      listLoading.value = false
       noteList.value = res.data.category_note_list
       store.categoryNoteMap.set(categoryId.value, noteList.value)
-      listLoading.value = false
     })
     .catch((err) => {
       // 主动取消请求则保持列表的加载中状态

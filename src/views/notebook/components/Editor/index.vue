@@ -159,13 +159,13 @@ const note = ref({})
 
 function syncStoreNoteListTitle(title, noteId) {
   const noteList = store.categoryNoteMap.get(categoryId.value)
-  if (!noteIndex) noteIndex = noteList.findIndex((item) => item.note_id === noteId)
+  if (!noteIndex) noteIndex = noteList?.findIndex((item) => item.note_id === noteId)
   if (noteIndex > -1) noteList[noteIndex].note_title = title
 }
 
 function syncStoreNoteListStatus(status, noteId) {
   const noteList = store.categoryNoteMap.get(categoryId.value)
-  if (!noteIndex) noteIndex = noteList.findIndex((item) => item.note_id === noteId)
+  if (!noteIndex) noteIndex = noteList?.findIndex((item) => item.note_id === noteId)
   if (noteIndex > -1) noteList[noteIndex].status = status
 }
 
@@ -207,13 +207,14 @@ const sourceRef = ref()
 const titleFocus = defineModel('titleFocus')
 
 function handleGetNote() {
-  if (store.noteContentMap.has(noteId.value)) {
-    note.value = store.noteContentMap.get(noteId.value)
-    return Promise.resolve()
-  }
-
   if (abortController) {
     abortController.abort()
+  }
+
+  if (store.noteContentMap.has(noteId.value)) {
+    noteLoading.value = false
+    note.value = store.noteContentMap.get(noteId.value)
+    return Promise.resolve()
   }
 
   abortController = new AbortController()
