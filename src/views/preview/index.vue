@@ -74,10 +74,8 @@ function handleSyncContent(content) {
 
 onMounted(() => {
   handleImgLazyLoad()
-  if (editorRef.value.source) {
-    if (syncScrollStatus.value) {
-      syncScrollInit()
-    }
+  if (syncScrollStatus.value) {
+    syncScrollInit()
   }
 })
 
@@ -121,7 +119,7 @@ function syncEditorScroll() {
 
     const lines = Object.keys(scrollMap)
 
-    if (lines < 1) return
+    if (lines.length < 1) return
 
     let line = lines[0]
 
@@ -170,7 +168,8 @@ let scrollMapCache = []
 
 function buildScrollMap() {
   if (import.meta.env.DEV) {
-    // console.time('build-scroll-map')
+    // eslint-disable-next-line no-console
+    console.time('build-scroll-map')
   }
 
   const textarea = editorRef.value.source
@@ -280,7 +279,8 @@ function buildScrollMap() {
   scrollMapCache = _scrollMap
 
   if (import.meta.env.DEV) {
-    // console.timeEnd('build-scroll-map')
+    // eslint-disable-next-line no-console
+    console.timeEnd('build-scroll-map')
   }
 
   return _scrollMap
