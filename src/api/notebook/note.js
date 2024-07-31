@@ -130,7 +130,7 @@ export function publishNote(data) {
 // 获取笔记中引用的文件信息
 export function getFilesInfo() {
   return request({
-    url: '/restful/note/get_files_info',
+    url: '/restful/note/get_note_files_info',
     method: 'get',
   })
 }

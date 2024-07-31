@@ -56,13 +56,6 @@ defineOptions({
 })
 
 const dialogVisible = ref(false)
-
-function open() {
-  checkList.value = []
-  time.value = 1
-  dialogVisible.value = true
-}
-
 const checkList = ref([])
 const timeOpts = [
   {
@@ -80,6 +73,12 @@ const timeOpts = [
 ]
 const time = ref(1)
 const loading = ref(false)
+
+function open() {
+  checkList.value = []
+  time.value = 1
+  dialogVisible.value = true
+}
 
 function submitForm() {
   if (!checkList.value.length) return
@@ -104,11 +103,14 @@ function submitForm() {
 
       ElNotification({
         type: 'success',
+        customClass: 'clear-detail',
         duration: 0,
         title: '清理完成',
         dangerouslyUseHTMLString: true,
-        message: `彻底删除了 ${deleted_history_notes_num} 条笔记历史版本；
-        将 ${soft_deleted_imgs_num / 2}(${filesize(soft_deleted_imgs_size)}) 张图片放到了回收站；
+        message: `彻底删除了 ${deleted_history_notes_num} 条笔记历史版本；<br>
+        将 ${soft_deleted_imgs_num / 2}(${filesize(
+          soft_deleted_imgs_size
+        )}) 张图片放到了回收站；<br>
         彻底删除了 ${deleted_notes_num} 条笔记和 ${deleted_imgs_num / 2}(${filesize(
           deleted_imgs_size
         )}) 张图片。`,
