@@ -10,7 +10,7 @@
           <router-link :to="{ name: 'ImgRecycleBin', replace: true }">图片</router-link>
         </nav>
       </div>
-      <el-icon class="close-btn" @click="router.go(-1)"><Close /></el-icon>
+      <el-icon class="close-btn" @click="router.push('/')"><Close /></el-icon>
     </header>
     <router-view></router-view>
   </div>

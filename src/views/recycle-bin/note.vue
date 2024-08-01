@@ -1,10 +1,10 @@
 <template>
   <div class="note-container">
-    <div class="handle-wrapper" v-if="currentNote.note_content !== undefined">
-      <el-button type="primary" @click="handleRestoreNote" :disabled="deleteLoading">
+    <div class="handle-wrapper" v-if="currentNote.note_title !== undefined">
+      <el-button type="primary" @click="handleRestoreNote" :disabled="currentNote.deleteLoading">
         恢复笔记
       </el-button>
-      <el-button type="danger" @click="handleDeleteNote" :loading="deleteLoading">
+      <el-button type="danger" @click="handleDeleteNote" :loading="currentNote.deleteLoading">
         彻底删除
       </el-button>
     </div>
@@ -14,7 +14,7 @@
         <span class="num">&nbsp;{{ noteList.length }}&nbsp;</span>
         <span>条笔记</span>
       </header>
-      <ul class="note-list" v-loading="listLoading">
+      <ul class="note-list">
         <li
           class="note-item"
           v-for="(item, index) in noteList"
@@ -56,25 +56,26 @@ defineOptions({
 })
 
 const store = useNoteStore()
+const { md } = useMarkdown()
+let abortController
 
 const route = useRoute()
 const router = useRouter()
-const { md } = useMarkdown()
 
 const noteList = ref([])
 const listLoading = ref(false)
-const noteLoading = ref(false)
 
-const noteId = Number(route.query.noteId)
 const activeId = ref()
 let activeIndex = -1
 
 const currentNote = ref({})
+const noteLoading = ref(false)
 
 handleGetDeletedNoteList()
 
 function handleGetDeletedNoteList() {
   listLoading.value = true
+  const noteId = Number(route.query.noteId) || undefined
   getDeletedNoteList()
     .then((res) => {
       noteList.value = res.data.note_list
@@ -106,11 +107,11 @@ const { loadImgFn: handleImgLazyLoad } = useImgLazyLoad(previewerRef)
 watch(activeId, (val) => {
   if (val) {
     handleGetDeletedNote(val).then(() => {
-      router.replace({ name: 'NoteRecycleBin', query: { noteId: val } })
       nextTick(() => {
         handleImgLazyLoad()
         previewerRef.value.scrollTop = 0
       })
+      router.replace({ name: 'NoteRecycleBin', query: { noteId: val } })
     })
   } else {
     reset()
@@ -118,23 +119,30 @@ watch(activeId, (val) => {
 })
 
 function handleGetDeletedNote(id) {
+  if (abortController) {
+    abortController.abort()
+  }
+
   if (store.noteContentMap.has(id)) {
     currentNote.value = store.noteContentMap.get(id)
     return Promise.resolve()
   }
 
+  abortController = new AbortController()
+  const signal = abortController.signal
+
   noteLoading.value = true
-  return getDeletedNoteContent({ note_id: id })
+  return getDeletedNoteContent({ note_id: id }, signal)
     .then((res) => {
+      noteLoading.value = false
       currentNote.value = res.data
       store.noteContentMap.set(id, currentNote.value)
     })
-    .catch(() => {
+    .catch((err) => {
+      if (err.code === 'ERR_CANCELED') return Promise.reject('canceled')
+      noteLoading.value = false
       reset()
       return Promise.reject()
-    })
-    .finally(() => {
-      noteLoading.value = false
     })
 }
 
@@ -155,17 +163,15 @@ function handleRestoreNote() {
       if (store.categoryNoteMap.has(noteItem.category_id)) {
         store.categoryNoteMap.get(noteItem.category_id).unshift(noteItem)
       }
-      if (res.data.restore_category) {
+      if (res.data.restore_category && store.categoryList) {
         store.categoryList.unshift(res.data.restore_category)
       }
-      router.go(-1)
+      router.push(`/category/${noteItem.category_id}/note/${activeId.value}`)
     })
     .finally(() => {
       restoreLoading.close()
     })
 }
-
-const deleteLoading = ref(false)
 
 function handleDeleteNote() {
   ElMessageBox.confirm('确认彻底删除笔记？', '提示', {
@@ -175,14 +181,18 @@ function handleDeleteNote() {
     'close-on-click-modal': false,
     type: 'warning',
   }).then(() => {
-    deleteLoading.value = true
+    const storeNote = store.noteContentMap.get(activeId.value)
+    storeNote.deleteLoading = true
+    const deleteIndex = activeIndex
     completelyDeleteNote({ note_id: activeId.value })
       .then(() => {
-        noteList.value.splice(activeIndex, 1)
-        toFirstNote()
+        noteList.value.splice(deleteIndex, 1)
+        if (activeIndex === deleteIndex) {
+          toFirstNote()
+        }
       })
       .finally(() => {
-        deleteLoading.value = false
+        storeNote.deleteLoading = false
       })
   })
 }
@@ -255,7 +265,7 @@ function handleDeleteNote() {
     padding: 20px;
 
     .note {
-      max-width: 800px;
+      max-width: 720px;
       margin: 0 auto;
 
       .title {

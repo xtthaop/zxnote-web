@@ -66,11 +66,12 @@ export function getNoteHistoryList(params) {
 }
 
 // 获取笔记某个历史版本
-export function getNoteHistoryVersion(params) {
+export function getNoteHistoryVersion(params, signal) {
   return request({
     url: '/restful/note/get_note_history_version',
     method: 'get',
     params,
+    signal,
   })
 }
 
@@ -92,11 +93,12 @@ export function getDeletedNoteList() {
 }
 
 // 获取已删除的笔记内容
-export function getDeletedNoteContent(params) {
+export function getDeletedNoteContent(params, signal) {
   return request({
     url: '/restful/note/get_deleted_note_content',
     method: 'get',
     params,
+    signal,
   })
 }
 

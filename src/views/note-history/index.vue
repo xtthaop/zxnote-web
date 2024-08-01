@@ -55,6 +55,7 @@ defineOptions({
 })
 
 const store = useNoteStore()
+let abortController
 
 const route = useRoute()
 const router = useRouter()
@@ -117,15 +118,23 @@ watch(activeId, (val) => {
 })
 
 function handleGetCurrentVersion(id) {
+  if (abortController) {
+    abortController.abort()
+  }
+
   if (historyVersionMap.get(id)) {
     currentVersion.value = historyVersionMap.get(id)
     return Promise.resolve()
   }
 
+  abortController = new AbortController()
+  const signal = abortController.signal
+
   versionLoading.value = true
   const { noteId } = route.params
-  return getNoteHistoryVersion({ id })
+  return getNoteHistoryVersion({ id }, signal)
     .then((res) => {
+      versionLoading.value = false
       if (res.data.note_id !== Number(noteId)) {
         ElMessage.error('记录不存在')
         return Promise.reject()
@@ -133,12 +142,11 @@ function handleGetCurrentVersion(id) {
       currentVersion.value = res.data
       historyVersionMap.set(id, currentVersion.value)
     })
-    .catch(() => {
+    .catch((err) => {
+      if (err.code === 'ERR_CANCELED') return Promise.reject('canceled')
+      versionLoading.value = false
       currentVersion.value = {}
       return Promise.reject()
-    })
-    .finally(() => {
-      versionLoading.value = false
     })
 }
 
