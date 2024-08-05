@@ -144,6 +144,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  activeNoteIndex: {
+    type: Number,
+    default: -1,
+  },
 })
 
 const emits = defineEmits(['sync-title', 'sync-content', 'sync-status'])
@@ -151,28 +155,25 @@ const emits = defineEmits(['sync-title', 'sync-content', 'sync-status'])
 const route = useRoute()
 const router = useRouter()
 
-let noteIndex = undefined
 const categoryId = computed(() => Number(route.params.categoryId))
 const noteId = ref()
 const noteLoading = ref(false)
 const note = ref({})
 
-function syncStoreNoteListTitle(title, noteId) {
+function syncToStoreNoteList(type, val, noteIndex) {
   const noteList = store.categoryNoteMap.get(categoryId.value)
-  if (!noteIndex) noteIndex = noteList?.findIndex((item) => item.note_id === noteId)
-  if (noteIndex > -1) noteList[noteIndex].note_title = title
-}
-
-function syncStoreNoteListStatus(status, noteId) {
-  const noteList = store.categoryNoteMap.get(categoryId.value)
-  if (!noteIndex) noteIndex = noteList?.findIndex((item) => item.note_id === noteId)
-  if (noteIndex > -1) noteList[noteIndex].status = status
+  if (noteIndex > -1) {
+    if (type === 'title') {
+      noteList[noteIndex].note_title = val
+    } else if (type === 'status') {
+      noteList[noteIndex].status = val
+    }
+  }
 }
 
 watch(
   () => route.params.noteId,
   (val) => {
-    noteIndex = undefined
     noteId.value = Number(val) || undefined
     if (noteId.value) {
       handleGetNote()
@@ -261,31 +262,31 @@ let timeoutId
 function handleNoteChange() {
   clearTimeout(timeoutId)
   const { note_id, note_title, note_content, status } = note.value
-  const data = { note_id, note_title, note_content, status }
+  const data = { note_id, note_title, note_content, status, index: props.activeNoteIndex }
 
   timeoutId = setTimeout(() => {
     handleSaveNote(false, true, data)
-  }, 1000)
+  }, 800)
 }
 
 function handleSaveNote(withMessage = false, enableRecordState = true, data = null) {
   if (!data) {
     const { note_id, note_title, note_content, status } = note.value
-    data = { note_id, note_title, note_content, status }
+    data = { note_id, note_title, note_content, status, index: props.activeNoteIndex }
   }
 
   const storeNote = store.noteContentMap.get(data.note_id)
   storeNote.saveLoading = true
   storeNote.saveError = false
 
-  saveNote(data)
+  saveNote({ note_id: data.note_id, note_title: data.note_title, note_content: data.note_content })
     .then(() => {
       if (data.note_id === noteId.value && note.value.status === 1) note.value.status = 2
 
-      syncStoreNoteListTitle(data.note_title, data.note_id)
+      syncToStoreNoteList('title', data.note_title, data.index)
       if (data.status === 1) {
         storeNote.status = 2
-        syncStoreNoteListStatus(2, data.note_id)
+        syncToStoreNoteList('status', 2, data.index)
       }
 
       if (props.isPreviewMode) {
@@ -470,6 +471,7 @@ function hanldePublish(status) {
     note_id: noteId.value,
     status,
   }
+  const index = props.activeNoteIndex
 
   const storeNote = store.noteContentMap.get(data.note_id)
   storeNote.publishLoading = true
@@ -484,7 +486,7 @@ function hanldePublish(status) {
         storeNote.publishLoading = false
       }, delay)
 
-      syncStoreNoteListStatus(status, data.note_id)
+      syncToStoreNoteList('status', status, index)
 
       if (status) {
         ElMessage.success('发布成功')

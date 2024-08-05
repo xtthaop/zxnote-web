@@ -53,7 +53,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { dayjs } from 'element-plus'
 import { getCategoryNote, addNote, softDeleteNote } from '@/api/notebook/note'
@@ -75,7 +75,7 @@ const noteList = ref([])
 const listLoading = ref(false)
 
 const categoryId = ref()
-let activeIndex = -1
+let activeIndex = defineModel('activeNoteIndex')
 const activeId = ref()
 
 watch(
@@ -87,9 +87,19 @@ watch(
       activeId.value = noteId
       handleGetCategoryNote().then(() => {
         if (activeId.value) {
-          activeIndex = noteList.value.findIndex((item) => item.note_id === activeId.value)
+          activeIndex.value = noteList.value.findIndex((item) => item.note_id === activeId.value)
         } else {
           toFirstNote()
+        }
+        if (store.noteContentMap.has(activeId.value)) {
+          nextTick(() => {
+            noteList.value[activeIndex.value].note_title = store.noteContentMap.get(
+              activeId.value
+            ).note_title
+            noteList.value[activeIndex.value].status = store.noteContentMap.get(
+              activeId.value
+            ).status
+          })
         }
       })
     }
@@ -101,7 +111,7 @@ watch(
 
 function toFirstNote() {
   activeId.value = noteList.value[0]?.note_id
-  activeIndex = activeId.value ? 0 : -1
+  activeIndex.value = activeId.value ? 0 : -1
 }
 
 function handleGetCategoryNote() {
@@ -151,7 +161,7 @@ watch(activeId, (val) => {
 
 function handleNoteItemClick(id, index) {
   activeId.value = id
-  activeIndex = index
+  activeIndex.value = index
 }
 
 const titleFocus = defineModel('titleFocus')
@@ -163,7 +173,7 @@ function handleAddNote() {
       noteList.value.unshift(res.data)
       titleFocus.value = true
       activeId.value = res.data.note_id
-      activeIndex = 0
+      activeIndex.value = 0
     })
     .finally(() => {
       listLoading.value = false
@@ -181,7 +191,7 @@ function handleDeleteNote(id) {
     listLoading.value = true
     softDeleteNote({ note_id: id })
       .then(() => {
-        noteList.value.splice(activeIndex, 1)
+        noteList.value.splice(activeIndex.value, 1)
         toFirstNote()
         ElMessage({
           message: '删除成功',
@@ -206,7 +216,7 @@ function handleMoveNote(item) {
 
 function handleMoveNoteRefresh(val) {
   if (val.category_id !== categoryId.value) {
-    noteList.value.splice(activeIndex, 1)
+    noteList.value.splice(activeIndex.value, 1)
     toFirstNote()
     if (store.categoryNoteMap.has(val.category_id)) {
       const findIndex = store.categoryNoteMap
