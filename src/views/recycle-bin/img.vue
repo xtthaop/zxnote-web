@@ -9,7 +9,7 @@
       <div>
         <div
           class="img-item"
-          :class="{ restored: item.restored }"
+          :class="{ restored: item.restored, loading: item.restoreLoading || item.deleteLoading }"
           v-for="(item, index) in imgList"
           :key="item"
         >
@@ -20,14 +20,20 @@
 
           <div class="handle-wrapper">
             <div>
-              <el-button type="primary" @click="handleRestoreImg(item)" :loading="restoreLoading">
+              <el-button
+                type="primary"
+                @click="handleRestoreImg(item.url, item)"
+                :loading="item.restoreLoading"
+                :disabled="item.deleteLoading"
+              >
                 恢复图片
               </el-button>
               <br />
               <el-button
                 type="danger"
-                @click="handleDeleteImg(item.url, index)"
-                :disabled="restoreLoading"
+                @click="handleDeleteImg(item.url, index, item)"
+                :disabled="item.restoreLoading"
+                :loading="item.deleteLoading"
                 style="margin-top: 10px"
               >
                 彻底删除
@@ -55,7 +61,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import { getBackupImgs, restoreImg, completelyDeleteImg } from '@/api/notebook/img'
 import { Select, DocumentCopy } from '@element-plus/icons-vue'
 import useImgLazyLoad from '../preview/useImgLazyLoad'
@@ -70,10 +76,6 @@ const listLoading = ref(false)
 const imgRef = ref()
 const { loadImgFn: handleImgLazyLoad } = useImgLazyLoad(imgRef)
 
-onMounted(() => {
-  handleImgLazyLoad()
-})
-
 handleGetBackupImgs()
 
 function handleGetBackupImgs() {
@@ -81,22 +83,23 @@ function handleGetBackupImgs() {
   getBackupImgs()
     .then((res) => {
       imgList.value = res.data
+      nextTick(() => {
+        handleImgLazyLoad()
+      })
     })
     .finally(() => {
       listLoading.value = false
     })
 }
 
-const restoreLoading = ref(false)
-
-function handleRestoreImg(item) {
-  restoreLoading.value = true
-  restoreImg({ img_path: item.url })
+function handleRestoreImg(path, item) {
+  item.restoreLoading = true
+  restoreImg({ img_path: path })
     .then(() => {
       item.restored = true
     })
     .finally(() => {
-      restoreLoading.value = false
+      item.restoreLoading = false
     })
 }
 
@@ -107,7 +110,7 @@ function handleCopy(item) {
   })
 }
 
-function handleDeleteImg(url, index) {
+function handleDeleteImg(url, index, item) {
   ElMessageBox.confirm('确认彻底删除图片？', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -115,13 +118,13 @@ function handleDeleteImg(url, index) {
     'close-on-click-modal': false,
     type: 'warning',
   }).then(() => {
-    listLoading.value = true
+    item.deleteLoading = true
     completelyDeleteImg({ img_path: url })
       .then(() => {
         imgList.value.splice(index, 1)
       })
       .finally(() => {
-        listLoading.value = false
+        item.deleteLoading = false
       })
   })
 }
@@ -168,7 +171,8 @@ function handleDeleteImg(url, index) {
       display: flex;
     }
 
-    &.restored .restored-info {
+    &.restored .restored-info,
+    &.loading .handle-wrapper {
       display: flex;
     }
 
@@ -185,6 +189,7 @@ function handleDeleteImg(url, index) {
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      text-align: center;
       position: absolute;
       top: 0;
       left: 0;
