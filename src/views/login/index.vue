@@ -13,6 +13,7 @@
             tabindex="1"
             v-model="loginForm.username"
             placeholder="请输入用户名"
+            maxlength="50"
             prefix-icon="el-icon-user"
             clearable
           ></el-input>
@@ -21,10 +22,10 @@
         <el-tooltip :visible="capsTootip" content="已开启大写锁定" placement="top">
           <el-form-item prop="password">
             <el-input
-              ref="passwordRef"
               tabindex="2"
               v-model="loginForm.password"
               placeholder="请输入密码"
+              maxlength="20"
               show-password
               prefix-icon="el-icon-lock"
               clearable
@@ -71,14 +72,9 @@ const loginForm = ref({
   password: '',
 })
 const usernameRef = ref(null)
-const passwordRef = ref(null)
 
 onMounted(() => {
-  if (loginForm.value.username === '') {
-    usernameRef.value.focus()
-  } else if (loginForm.value.password === '') {
-    passwordRef.value.focus()
-  }
+  usernameRef.value.focus()
 })
 
 const loginFormRef = ref(null)

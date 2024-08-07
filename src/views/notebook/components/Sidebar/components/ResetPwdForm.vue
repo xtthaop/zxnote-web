@@ -13,6 +13,7 @@
           v-model="form.old_password"
           show-password
           placeholder="请输入旧密码"
+          maxlength="20"
           type="password"
         />
       </el-form-item>
