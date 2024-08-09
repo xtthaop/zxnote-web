@@ -7,7 +7,14 @@
     :show-close="false"
     width="390px"
   >
-    <el-form ref="formRef" :model="form" :rules="rules" :disabled="loading" :show-message="false">
+    <el-form
+      ref="formRef"
+      :model="form"
+      :rules="rules"
+      :disabled="loading"
+      :show-message="false"
+      @submit.prevent
+    >
       <el-form-item label="" prop="category_name">
         <el-input v-model="form.category_name" placeholder="请输入分类名称" maxlength="50" />
       </el-form-item>

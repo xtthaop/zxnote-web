@@ -35,6 +35,7 @@ defineOptions({
       .home {
         display: inline-block;
         margin-top: 20px;
+        margin-bottom: 20px;
         color: #6d6d6d;
         font-size: 14px;
       }

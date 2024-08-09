@@ -15,8 +15,8 @@ dependencies:
     specifier: ^1.6.8
     version: registry.npmmirror.com/axios@1.6.8
   element-plus:
-    specifier: ^2.6.1
-    version: registry.npmmirror.com/element-plus@2.6.1(vue@3.4.21)
+    specifier: ^2.8.0
+    version: registry.npmmirror.com/element-plus@2.8.0(vue@3.4.21)
   filesize:
     specifier: ^10.1.1
     version: registry.npmmirror.com/filesize@10.1.1
@@ -1403,11 +1403,11 @@ packages:
       domhandler: registry.npmmirror.com/domhandler@4.3.1
     dev: true
 
-  registry.npmmirror.com/element-plus@2.6.1(vue@3.4.21):
-    resolution: {integrity: sha512-6VRpLjwtIVdtUuITJPPKtpOH1NM6nuAkRE3q5O4Lrx0N1bYMhTkiqb2Jy7zfQuDPbOIkkF2OABTzegpNnzgsnQ==, tarball: https://registry.npmmirror.com/element-plus/-/element-plus-2.6.1.tgz}
-    id: registry.npmmirror.com/element-plus/2.6.1
+  registry.npmmirror.com/element-plus@2.8.0(vue@3.4.21):
+    resolution: {integrity: sha512-7ngapVlVlQAjocVqD4MUKvKXlBneT9DSDk2mmBOSLRFWNm/HLDT15ozmsvUBfy18sajnyUeSIHTtINE8gfrGMg==, tarball: https://registry.npmmirror.com/element-plus/-/element-plus-2.8.0.tgz}
+    id: registry.npmmirror.com/element-plus/2.8.0
     name: element-plus
-    version: 2.6.1
+    version: 2.8.0
     peerDependencies:
       vue: ^3.2.0
     dependencies:

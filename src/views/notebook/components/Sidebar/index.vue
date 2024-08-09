@@ -162,24 +162,37 @@ function handleDeleteCategory(category_id) {
   ElMessageBox.confirm('确认删除分类及分类下所有笔记？', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
-    'show-close': false,
-    'close-on-click-modal': false,
+    showClose: false,
+    closeOnClickModal: false,
+    closeOnPressEscape: false,
+    closeOnHashChange: false,
+    draggable: true,
     type: 'warning',
+    beforeClose: (action, instance, done) => {
+      if (action === 'confirm') {
+        instance.cancelButtonClass = 'is-disabled'
+        instance.confirmButtonLoading = true
+        deleteCategory({ category_id })
+          .then(() => {
+            categoryList.value.splice(activeIndex, 1)
+            noteStore.categoryNoteMap.delete(category_id)
+            toFirstCategory()
+            done()
+          })
+          .finally(() => {
+            instance.cancelButtonClass = ''
+            instance.confirmButtonLoading = false
+          })
+      } else {
+        if (instance.confirmButtonLoading === true) return
+        done()
+      }
+    },
   }).then(() => {
-    listLoading.value = true
-    deleteCategory({ category_id })
-      .then(() => {
-        categoryList.value.splice(activeIndex, 1)
-        noteStore.categoryNoteMap.delete(category_id)
-        toFirstCategory()
-        ElMessage({
-          message: '删除成功',
-          type: 'success',
-        })
-      })
-      .finally(() => {
-        listLoading.value = false
-      })
+    ElMessage({
+      message: '删除成功',
+      type: 'success',
+    })
   })
 }
 

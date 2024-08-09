@@ -74,7 +74,7 @@ const showImgError = ref(false)
 watch(
   () => props.captchaVisible,
   (val) => {
-    if (val) {
+    if (val && !verifying) {
       btnShow.value = true
       puzzleLeft.value = 0
       btnStyle.value.left = 0
@@ -85,7 +85,7 @@ watch(
 )
 
 function canvasInt() {
-  if (imgLoading.value) return
+  if (imgLoading.value || verifying) return
   imgLoading.value = true
   getCaptcha()
     .then((res) => {
