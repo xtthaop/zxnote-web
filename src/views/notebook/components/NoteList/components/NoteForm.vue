@@ -3,6 +3,7 @@
     title="选择笔记分类"
     v-model="dialogVisible"
     :close-on-click-modal="false"
+    :close-on-press-escape="false"
     :draggable="true"
     :show-close="false"
     width="390px"
@@ -12,8 +13,8 @@
       :model="form"
       :rules="rules"
       :show-message="false"
-      v-loading="formLoading"
       :disabled="loading"
+      @submit.prevent
     >
       <el-form-item label="" prop="category_id">
         <el-select v-model="form.category_id" placeholder="请选择分类">
@@ -28,17 +29,14 @@
     </el-form>
 
     <template #footer>
-      <el-button @click="cancel" :disabled="loading || formLoading">取 消</el-button>
-      <el-button type="primary" :loading="loading" :disabled="formLoading" @click="submitForm">
-        确 定
-      </el-button>
+      <el-button @click="cancel" :disabled="loading">取 消</el-button>
+      <el-button type="primary" :loading="loading" @click="submitForm">确 定</el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { getCategoryList } from '@/api/notebook/category'
 import { moveNote } from '@/api/notebook/note'
 import { useNoteStore } from '@/stores/note'
 
@@ -57,7 +55,6 @@ const form = reactive({})
 const rules = ref({
   category_id: [{ required: true, message: '分类不能为空', trigger: 'blur' }],
 })
-const formLoading = ref(false)
 const categoryList = ref([])
 
 function open(item) {
@@ -72,15 +69,6 @@ function handleGetCategoryList() {
     categoryList.value = store.categoryList
     return Promise.resolve()
   }
-
-  formLoading.value = true
-  getCategoryList()
-    .then((res) => {
-      categoryList.value = res.data.category_list
-    })
-    .finally(() => {
-      formLoading.value = false
-    })
 }
 
 const loading = ref(false)

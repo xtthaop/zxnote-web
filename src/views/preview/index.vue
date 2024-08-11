@@ -21,6 +21,9 @@
       <div class="md-result-wrapper" ref="mdResultRef" v-html="previewContent"></div>
     </div>
   </div>
+  <div class="logo-container" v-show="noteTitle === undefined">
+    <img class="logo" src="@/assets/images/logo.png" />
+  </div>
 </template>
 
 <script setup>
@@ -328,6 +331,19 @@ function destroySyncScroll() {
       line-height: 30px;
       color: #6d6d6d;
     }
+  }
+}
+
+.logo-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.3;
+
+  .logo {
+    width: 160px;
   }
 }
 </style>

@@ -1,52 +1,50 @@
 <template>
-  <div class="note-list-wrapper" v-if="categoryId" v-loading="listLoading">
+  <div class="note-list-wrapper" v-show="categoryId" v-loading="listLoading">
     <div class="add-btn" @click="handleAddNote">
       <svg-icon name="plus"></svg-icon>
       <span>新建笔记</span>
     </div>
-    <el-scrollbar style="height: calc(100% - 51px); margin-top: 51px">
-      <ul class="note-list">
-        <li
-          v-for="(item, index) in noteList"
-          :key="item.note_id"
-          :class="{ active: activeId === item.note_id }"
-          @click="handleNoteItemClick(item.note_id, index)"
-        >
-          <div class="note-info-wrapper">
-            <div class="note-info">
-              <div class="title">{{ item.note_title }}</div>
-              <div class="other-info">
-                <span
-                  class="publish-status"
-                  :style="{ color: publicStatusColor[item.status] || '#ccc' }"
-                >
-                  {{ publicStatusText[item.status] || '未知' }}
-                </span>
-                <span class="create-time">
-                  {{ dayjs(item.create_time).format('YYYY-MM-DD HH:mm:ss') }}
-                </span>
-              </div>
+    <ul class="note-list">
+      <li
+        v-for="(item, index) in noteList"
+        :key="item.note_id"
+        :class="{ active: activeId === item.note_id }"
+        @click="handleNoteItemClick(item.note_id, index)"
+      >
+        <div class="note-info-wrapper">
+          <div class="note-info">
+            <div class="title">{{ item.note_title }}</div>
+            <div class="other-info">
+              <span
+                class="publish-status"
+                :style="{ color: publicStatusColor[item.status] || '#ccc' }"
+              >
+                {{ publicStatusText[item.status] || '未知' }}
+              </span>
+              <span class="create-time">
+                {{ dayjs(item.create_time).format('YYYY-MM-DD HH:mm:ss') }}
+              </span>
             </div>
-
-            <el-dropdown trigger="click">
-              <span class="handle-btn"><svg-icon name="setting"></svg-icon></span>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item @click="handleMoveNote(item)">
-                    <svg-icon name="folder" style="margin-right: 10px"></svg-icon>
-                    <span>移动笔记</span>
-                  </el-dropdown-item>
-                  <el-dropdown-item @click="handleDeleteNote(item.note_id)">
-                    <svg-icon name="delete" style="margin-right: 10px"></svg-icon>
-                    <span>删除笔记</span>
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
           </div>
-        </li>
-      </ul>
-    </el-scrollbar>
+
+          <el-dropdown trigger="click">
+            <span class="handle-btn"><svg-icon name="setting"></svg-icon></span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="handleMoveNote(item)">
+                  <svg-icon name="folder" style="margin-right: 10px"></svg-icon>
+                  <span>移动笔记</span>
+                </el-dropdown-item>
+                <el-dropdown-item @click="handleDeleteNote(item.note_id)">
+                  <svg-icon name="delete" style="margin-right: 10px"></svg-icon>
+                  <span>删除笔记</span>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
+      </li>
+    </ul>
 
     <NoteForm ref="noteFormRef" @refresh="handleMoveNoteRefresh"></NoteForm>
   </div>
@@ -184,23 +182,36 @@ function handleDeleteNote(id) {
   ElMessageBox.confirm('确认删除笔记？', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
-    'show-close': false,
-    'close-on-click-modal': false,
+    showClose: false,
+    closeOnClickModal: false,
+    closeOnPressEscape: false,
+    closeOnHashChange: false,
+    draggable: true,
     type: 'warning',
+    beforeClose: (action, instance, done) => {
+      if (action === 'confirm') {
+        instance.cancelButtonClass = 'is-disabled'
+        instance.confirmButtonLoading = true
+        softDeleteNote({ note_id: id })
+          .then(() => {
+            noteList.value.splice(activeIndex.value, 1)
+            toFirstNote()
+            done()
+          })
+          .finally(() => {
+            instance.cancelButtonClass = ''
+            instance.confirmButtonLoading = false
+          })
+      } else {
+        if (instance.confirmButtonLoading === true) return
+        done()
+      }
+    },
   }).then(() => {
-    listLoading.value = true
-    softDeleteNote({ note_id: id })
-      .then(() => {
-        noteList.value.splice(activeIndex.value, 1)
-        toFirstNote()
-        ElMessage({
-          message: '删除成功',
-          type: 'success',
-        })
-      })
-      .finally(() => {
-        listLoading.value = false
-      })
+    ElMessage({
+      message: '删除成功',
+      type: 'success',
+    })
   })
 }
 
@@ -273,6 +284,9 @@ const publicStatusColor = {
 
   .note-list {
     width: 100%;
+    height: calc(100% - 51px);
+    margin-top: 51px;
+    overflow-y: auto;
 
     & > li {
       width: 100%;

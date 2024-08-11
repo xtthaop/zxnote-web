@@ -1,5 +1,5 @@
 <template>
-  <div class="editor-wrapper" v-if="noteId" v-loading="noteLoading">
+  <div class="editor-wrapper" v-show="noteId" v-loading="noteLoading">
     <div class="title-wrapper">
       <div className="save-status">
         {{ note.saveLoading ? (note.saveError ? '保存出错' : '保存中...') : '已保存' }}
@@ -175,7 +175,7 @@ watch(
   () => route.params.noteId,
   (val) => {
     noteId.value = Number(val) || undefined
-    if (noteId.value) {
+    if (noteId.value && categoryId.value) {
       handleGetNote()
         .then(() => {
           initStateStack()
@@ -193,9 +193,13 @@ watch(
             emits('sync-content', '')
           } else {
             // 非预览时如果后端报错比如记录不存在则重置路由地址达到隐藏笔记内容的目的
-            router.replace(`/category/${route.params.categoryId}`)
+            router.replace(`/category/${categoryId.value}`)
           }
         })
+    } else {
+      if (props.isPreviewMode) {
+        ElMessage.error('记录不存在')
+      }
     }
   },
   {

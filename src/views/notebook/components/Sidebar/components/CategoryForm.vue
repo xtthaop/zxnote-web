@@ -3,6 +3,7 @@
     :title="title"
     v-model="dialogVisible"
     :close-on-click-modal="false"
+    :close-on-press-escape="false"
     :draggable="true"
     :show-close="false"
     width="390px"

@@ -3,11 +3,19 @@
     title="修改密码"
     v-model="dialogVisible"
     :close-on-click-modal="false"
+    :close-on-press-escape="false"
     :draggable="true"
     :show-close="false"
     width="390px"
   >
-    <el-form ref="resetPwdFormRef" :model="form" :rules="rules" label-width="80px">
+    <el-form
+      ref="resetPwdFormRef"
+      :model="form"
+      :rules="rules"
+      :disabled="loading"
+      label-width="80px"
+      @submit.prevent
+    >
       <el-form-item label="旧密码" prop="old_password">
         <el-input
           v-model="form.old_password"
