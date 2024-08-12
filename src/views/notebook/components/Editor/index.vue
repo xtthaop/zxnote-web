@@ -7,7 +7,7 @@
       <input
         ref="titleRef"
         v-model="note.note_title"
-        maxlength="50"
+        maxlength="280"
         className="custom-input"
         placeholder="请输入标题"
         @keydown="handleKeyCtrl"
@@ -193,7 +193,9 @@ watch(
             emits('sync-content', '')
           } else {
             // 非预览时如果后端报错比如记录不存在则重置路由地址达到隐藏笔记内容的目的
-            router.replace(`/category/${categoryId.value}`)
+            if (categoryId.value) {
+              router.replace(`/category/${categoryId.value}`)
+            }
           }
         })
     } else {

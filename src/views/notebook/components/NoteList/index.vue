@@ -10,6 +10,7 @@
         :key="item.note_id"
         :class="{ active: activeId === item.note_id }"
         @click="handleNoteItemClick(item.note_id, index)"
+        :title="item.note_title"
       >
         <div class="note-info-wrapper">
           <div class="note-info">

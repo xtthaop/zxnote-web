@@ -13,6 +13,7 @@
             :key="item.category_id"
             :class="[activeId === item.category_id ? 'active' : '']"
             @click="handleItemClick(item.category_id, index)"
+            :title="item.category_name"
           >
             <span class="title">{{ item.category_name }}</span>
             <el-dropdown trigger="click">
