@@ -334,7 +334,7 @@ function handleRedo() {
 function applyState(state) {
   note.value.note_title = state.note_title
   note.value.note_content = state.note_content
-  handleSaveNote(false, false)
+  handleNoteChange()
 }
 
 function handleKeyCtrl(e) {
@@ -359,22 +359,17 @@ function handleImgFileChange(e) {
   const start = sourceRef.value.selectionStart
   const end = sourceRef.value.selectionEnd
   let uploadingStr = ''
-  const filePromiseArr = []
 
   for (let i = 0; i < e.target.files.length; i++) {
     const timestamp = +new Date()
     const tmpStr = `[图片正在上传...(${e.target.files[i].name}-${timestamp})]\n`
     uploadingStr += tmpStr
-    filePromiseArr.push(handleUploadImg(e.target.files[i], tmpStr, timestamp))
+    handleUploadImg(e.target.files[i], tmpStr, timestamp)
   }
 
+  imgFileInputRef.value.value = ''
   const content = note.value.note_content
   note.value.note_content = content.slice(0, start) + uploadingStr + content.slice(end)
-
-  Promise.allSettled(filePromiseArr).then(() => {
-    imgFileInputRef.value.value = ''
-    handleSaveNote()
-  })
 }
 
 function handleUploadImg(file, uploadingStr, timestamp) {
@@ -386,7 +381,7 @@ function handleUploadImg(file, uploadingStr, timestamp) {
   data.append('key', `images/${newFileName}`)
   data.append('file', file)
 
-  return uploadFile(data)
+  uploadFile(data)
     .then((res) => {
       const imgUrl = res.data.url
       const content = note.value.note_content
@@ -394,6 +389,7 @@ function handleUploadImg(file, uploadingStr, timestamp) {
       const end = start + uploadingStr.length
       note.value.note_content =
         content.slice(0, start) + `![${file.name}](${imgUrl})\n` + content.slice(end)
+      handleNoteChange()
     })
     .catch(() => {
       const content = note.value.note_content
