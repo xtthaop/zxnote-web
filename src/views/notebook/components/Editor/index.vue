@@ -83,7 +83,7 @@
           <svg-icon name="time-history"></svg-icon>
         </li>
       </el-tooltip>
-      <el-tooltip effect="dark" content="Markdown语法参考" placement="top" :hide-after="0">
+      <el-tooltip effect="dark" content="Markdown 语法参考" placement="top" :hide-after="0">
         <li class="tool" @click="fileMarkdownRef.open">
           <svg-icon name="file-markdown"></svg-icon>
         </li>

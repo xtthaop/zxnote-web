@@ -1,12 +1,8 @@
 <template>
   <div class="note-container">
     <div class="handle-wrapper" v-if="currentNote.note_title !== undefined">
-      <el-button type="primary" @click="handleRestoreNote" :disabled="currentNote.deleteLoading">
-        恢复笔记
-      </el-button>
-      <el-button type="danger" @click="handleDeleteNote" :loading="currentNote.deleteLoading">
-        彻底删除
-      </el-button>
+      <el-button type="primary" @click="handleRestoreNote">恢复笔记</el-button>
+      <el-button type="danger" @click="handleDeleteNote">彻底删除</el-button>
     </div>
     <div class="sidebar-wrapper" v-loading="listLoading">
       <header>
@@ -49,7 +45,7 @@ import { useRoute, useRouter } from 'vue-router'
 import useMarkdown from '../preview/useMarkdown'
 import useImgLazyLoad from '../preview/useImgLazyLoad'
 import { useNoteStore } from '@/stores/note'
-import { ElMessageBox, ElLoading } from 'element-plus'
+import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
 
 defineOptions({
   name: 'NoteRecycleBin',
@@ -124,6 +120,7 @@ function handleGetDeletedNote(id) {
   }
 
   if (store.noteContentMap.has(id)) {
+    noteLoading.value = false
     currentNote.value = store.noteContentMap.get(id)
     return Promise.resolve()
   }
@@ -166,6 +163,11 @@ function handleRestoreNote() {
       if (res.data.restore_category && store.categoryList) {
         store.categoryList.unshift(res.data.restore_category)
       }
+      currentNote.value.publishLoading = false
+      currentNote.value.publishError = false
+      currentNote.value.saveLoading = false
+      currentNote.value.saveError = false
+      currentNote.value.status = 0
       router.push(`/category/${noteItem.category_id}/note/${activeId.value}`)
     })
     .finally(() => {
@@ -177,23 +179,37 @@ function handleDeleteNote() {
   ElMessageBox.confirm('确认彻底删除笔记？', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
-    'show-close': false,
-    'close-on-click-modal': false,
+    showClose: false,
+    closeOnClickModal: false,
+    closeOnPressEscape: false,
+    closeOnHashChange: false,
+    draggable: true,
     type: 'warning',
+    beforeClose: (action, instance, done) => {
+      if (action === 'confirm') {
+        instance.cancelButtonClass = 'is-disabled'
+        instance.confirmButtonLoading = true
+        completelyDeleteNote({ note_id: activeId.value })
+          .then(() => {
+            noteList.value.splice(activeIndex, 1)
+            store.noteContentMap.delete(activeId.value)
+            toFirstNote()
+            done()
+          })
+          .finally(() => {
+            instance.cancelButtonClass = ''
+            instance.confirmButtonLoading = false
+          })
+      } else {
+        if (instance.confirmButtonLoading === true) return
+        done()
+      }
+    },
   }).then(() => {
-    const storeNote = store.noteContentMap.get(activeId.value)
-    storeNote.deleteLoading = true
-    const deleteIndex = activeIndex
-    completelyDeleteNote({ note_id: activeId.value })
-      .then(() => {
-        noteList.value.splice(deleteIndex, 1)
-        if (activeIndex === deleteIndex) {
-          toFirstNote()
-        }
-      })
-      .finally(() => {
-        storeNote.deleteLoading = false
-      })
+    ElMessage({
+      message: '笔记已彻底删除',
+      type: 'success',
+    })
   })
 }
 </script>

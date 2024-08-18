@@ -3,6 +3,7 @@
     <el-button
       type="primary"
       @click="handleRecoveryNote"
+      :disabled="versionLoading"
       v-show="currentVersion.note_content !== undefined"
     >
       恢复到这个版本
@@ -123,6 +124,7 @@ function handleGetCurrentVersion(id) {
   }
 
   if (historyVersionMap.get(id)) {
+    versionLoading.value = false
     currentVersion.value = historyVersionMap.get(id)
     return Promise.resolve()
   }
@@ -160,8 +162,15 @@ function handleRecoveryNote() {
     .then((res) => {
       const currentNote = store.noteContentMap.get(res.data.note_id)
       if (currentNote) {
+        currentNote.publishLoading = false
+        currentNote.publishError = false
+        currentNote.saveLoading = false
+        currentNote.saveError = false
         currentNote.note_title = currentVersion.value.note_title
         currentNote.note_content = currentVersion.value.note_content
+        if (currentNote.status === 1) {
+          currentNote.status = 2
+        }
       }
       handleBack()
     })
@@ -181,7 +190,7 @@ function handleBack() {
   position: fixed;
   right: 20px;
   top: 20px;
-  z-index: 10;
+  z-index: 2008;
 }
 
 .note-history-wrapper {
