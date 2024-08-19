@@ -14,8 +14,11 @@
           :key="item"
         >
           <img
-            :src="`${item.url.split('.')[0]}_low_ratio.${item.url.split('.')[1]}`"
+            :src="`${item.url.replace(item.url.match(/\.[^\.]*$/)[0], '')}_low_ratio${
+              item.url.match(/\.[^\.]*$/)[0]
+            }`"
             :data-src="item.url"
+            :alt="item.url.replace(/.*\//, '')"
           />
 
           <div class="handle-wrapper">
@@ -104,7 +107,10 @@ function handleRestoreImg(path, item) {
 }
 
 function handleCopy(item) {
-  const text = `![${item.update_time}.png](${item.url.replace('uploads_clear_backup', 'uploads')})`
+  const text = `![${item.url.replace(/.*\//, '')}](${item.url.replace(
+    'uploads_clear_backup',
+    'uploads'
+  )})`
   navigator.clipboard.writeText(text).then(() => {
     item.copied = true
   })
@@ -166,6 +172,7 @@ function handleDeleteImg(url, index, item) {
     border-radius: 5px;
     overflow: hidden;
     cursor: pointer;
+    word-break: break-all;
 
     &:not(.restored):hover .handle-wrapper {
       display: flex;

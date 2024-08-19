@@ -5,7 +5,7 @@
     :close-on-click-modal="false"
     :draggable="true"
     :show-close="false"
-    width="500px"
+    width="390px"
   >
     <el-checkbox-group v-model="checkList">
       <el-checkbox value="history">
@@ -29,7 +29,7 @@
       </el-checkbox>
       <el-checkbox value="img">
         <span>
-          <span>将已不在笔记或笔记历史版本中引用的图片</span>
+          <span>将已不在笔记中引用的图片</span>
           <span style="color: #e6a23c">放到回收站</span>
         </span>
       </el-checkbox>
