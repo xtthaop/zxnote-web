@@ -76,7 +76,6 @@ function handleSyncContent(content) {
 }
 
 onMounted(() => {
-  handleImgLazyLoad()
   if (syncScrollStatus.value) {
     syncScrollInit()
   }
