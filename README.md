@@ -6,7 +6,7 @@
   <span style="color: #42c02e">知行笔记</span> - 内容管理系统开源前端
 </p>
 
-系统预览：[ZXNOTE-WEB](https://zxctb.top:9090/notebook)  
+系统预览：[ZXNOTE](https://zxctb.top:9090/notebook)  
 详细文档：[DOCUMENT](./test.numbers)  
 
 ### 简介
@@ -55,4 +55,4 @@ ZXNOTE 的作者是一名前端小学生，水平不高，文档或者代码中�
 维护这个项目需要一定的服务器费用用作项目预览，还需要消耗我本人一定的精力，所以如果这个项目帮助到你的话，请多多予以支持！感谢！
 
 ### 许可证
-[MIT](https://github.com/xtthaop/comodo-admin-web/blob/main/LICENSE.md)
+[MIT](LICENSE.md)
