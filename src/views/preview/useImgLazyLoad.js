@@ -6,7 +6,7 @@ export default function useImgLazyLoad(previewerRef) {
     if (imgTimeoutId || !previewerRef?.value) return
 
     imgTimeoutId = setTimeout(() => {
-      previewerRef.value.addEventListener('scroll', loadImgFn)
+      previewerRef.value.addEventListener('scroll', loadImgFn, { once: true })
 
       const previewerRect = previewerRef.value.getBoundingClientRect()
       const imgs = previewerRef.value.getElementsByTagName('img')
