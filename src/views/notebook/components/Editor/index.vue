@@ -171,9 +171,16 @@ function syncToStoreNoteList(type, val, noteIndex) {
   }
 }
 
+const titleRef = ref()
+const sourceRef = ref()
+const titleFocus = defineModel('titleFocus')
+
 watch(
   () => route.params.noteId,
   (val) => {
+    if (sourceRef?.value) {
+      sourceRef.value.scrollTop = 0
+    }
     noteId.value = Number(val) || undefined
     if (noteId.value && categoryId.value) {
       handleGetNote()
@@ -208,10 +215,6 @@ watch(
     immediate: true,
   }
 )
-
-const titleRef = ref()
-const sourceRef = ref()
-const titleFocus = defineModel('titleFocus')
 
 function handleGetNote() {
   if (abortController) {

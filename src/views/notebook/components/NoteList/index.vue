@@ -4,7 +4,7 @@
       <svg-icon name="plus"></svg-icon>
       <span>新建笔记</span>
     </div>
-    <ul class="note-list">
+    <ul class="note-list" ref="noteListRef">
       <li
         v-for="(item, index) in noteList"
         :key="item.note_id"
@@ -70,6 +70,7 @@ let abortController
 const route = useRoute()
 const router = useRouter()
 
+const noteListRef = ref()
 const noteList = ref([])
 const listLoading = ref(false)
 
@@ -80,6 +81,9 @@ const activeId = ref()
 watch(
   () => route.params.categoryId,
   (val) => {
+    if (noteListRef?.value) {
+      noteListRef.value.scrollTop = 0
+    }
     categoryId.value = Number(val) || undefined
     if (categoryId.value) {
       const noteId = Number(route.params.noteId) || undefined
