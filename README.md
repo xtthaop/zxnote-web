@@ -6,6 +6,9 @@
   <span style="color: #42c02e">知行笔记</span> - 内容管理系统开源前端
 </p>
 
+# Note, Share, Possess
+记录，分享，拥有
+
 [系统预览](https://zxctb.top:8080/notebook)  
 [详细文档](./test.pdf)  
 
