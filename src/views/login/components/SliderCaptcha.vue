@@ -190,6 +190,7 @@ function up() {
 
 function handleVerifySuccess() {
   btnShow.value = false
+  verifying = false
   status.value.width = '100%'
 }
 
