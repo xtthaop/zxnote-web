@@ -32,25 +32,20 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response) => {
     const res = response.data
-    if (res.code !== 0) {
+    if (res?.code === 0) {
+      return res
+    } else {
       ElMessage({
         message: res.message || 'Error',
         type: 'error',
         duration: 5 * 1000,
       })
 
-      return Promise.reject(res || 'Error')
-    } else {
-      return res
+      return Promise.reject(res)
     }
   },
   (error) => {
-    if (!error.response) {
-      // 被取消的请求没有响应体
-      return Promise.reject(error)
-    }
-
-    if (error.response.status === 401) {
+    if (error.response?.status === 401) {
       if (messageBoxFlag === 0) {
         messageBoxFlag = 1
         ElMessageBox.confirm('您的登录状态已失效，请重新登录', '提示', {
@@ -70,12 +65,14 @@ service.interceptors.response.use(
           })
       }
     } else {
-      ElMessage({
-        message: error.response.data?.message || error.message || 'Error',
-        type: 'error',
-        duration: 5 * 1000,
-        showClose: true,
-      })
+      if (error.code !== 'ERR_CANCELED') {
+        ElMessage({
+          message: error.response?.data?.message || error.message || 'Error',
+          type: 'error',
+          duration: 5 * 1000,
+          showClose: true,
+        })
+      }
     }
 
     return Promise.reject(error)

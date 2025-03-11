@@ -108,7 +108,6 @@ function verify(x) {
       captchaRef.value.handleVerifySuccess()
       setToken(res.data.token)
       setTimeout(() => {
-        captchaVisible.value = false
         router.push('/')
       }, 300)
     })
